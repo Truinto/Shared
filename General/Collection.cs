@@ -116,6 +116,64 @@ namespace Shared.CollectionNS
             return false;
         }
 
+        /// <summary>
+        /// Search a sequence of elements in <paramref name="array"/>.
+        /// </summary>
+        public static bool ContainsSequence(this IList array, IList search, int offsetArray = 0, int offsetSearch = 0, int lengthArray = -1, int lengthSearch = -1)
+        {
+            if (lengthArray < 0)
+                lengthArray = array.Count;
+            if (lengthSearch < 0)
+                lengthSearch = search.Count;
+            else if (lengthSearch == 0)
+                return true;
+
+            int i = offsetArray;
+            int j = offsetSearch;
+            while (true)
+            {
+                if (array.Count >= i || search.Count >= j) // failed if either array out of entities
+                    return false;
+
+                if (i - offsetArray >= lengthArray) // failed if array length is shortened
+                    return false;
+
+                if (!Equals(array[i++], search[j++])) // restart search if mismatch                
+                    j = offsetSearch;
+
+                if (j - offsetSearch >= lengthSearch) // success if enough entities match
+                    return true;
+            }
+        }
+
+        /// <inheritdoc cref="ContainsSequence(IList, IList, int, int, int, int)"/>
+        public static bool ContainsSequence(this byte[] array, byte[] search, int offsetArray = 0, int offsetSearch = 0, int lengthArray = -1, int lengthSearch = -1)
+        {
+            if (lengthArray < 0)
+                lengthArray = array.Length;
+            if (lengthSearch < 0)
+                lengthSearch = search.Length;
+            else if (lengthSearch == 0)
+                return true;
+
+            int i = offsetArray;
+            int j = offsetSearch;
+            while (true)
+            {
+                if (array.Length <= i || search.Length <= j) // failed if either array out of entities
+                    return false;
+
+                if (i - offsetArray >= lengthArray) // failed if array length is shortened
+                    return false;
+
+                if (array[i++] != search[j++]) // restart search if mismatch                
+                    j = offsetSearch;
+
+                if (j - offsetSearch >= lengthSearch) // success if enough entities match
+                    return true;
+            }
+        }
+
         #endregion
 
         #region AddUnique
@@ -402,14 +460,6 @@ namespace Shared.CollectionNS
             if (dic.TryGetValue(key, out value))
                 return false;
             dic[key] = value = new();
-            return true;
-        }
-
-        public static bool Ensure<TKey, TValue>(this Dictionary<TKey, TValue> dic, TKey key, out TValue? value, Type type) where TKey : notnull
-        {
-            if (dic.TryGetValue(key, out value))
-                return false;
-            dic[key] = value = (TValue)Activator.CreateInstance(type)!;
             return true;
         }
 

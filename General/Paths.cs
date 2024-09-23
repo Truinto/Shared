@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
@@ -21,20 +22,6 @@ namespace Shared.PathsNS
     public class PathInfo
     {
         public static char PathSeparator => System.IO.Path.DirectorySeparatorChar;
-
-        public static bool IsValidPath(string path)
-        {
-            try
-            {
-                System.IO.Path.GetFullPath(path);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-            //return name.IndexOfAny(Path.GetInvalidPathChars()) == -1;
-        }
 
         //private bool isDirty;
 
@@ -164,6 +151,43 @@ namespace Shared.PathsNS
         public static bool AreEqual(this FileInfo path1, FileInfo path2)
         {
             return AreEqual(path1.FullName, path2.FullName);
+        }
+
+        /// <summary>
+        /// True if path is valid.
+        /// </summary>
+        public static bool IsValidPath(string path)
+        {
+            if (path is null)
+                return false;
+
+            int i = 0;
+
+            if (OperatingSystem.IsWindows())
+            {
+                if (path.StartsWith("\\\\?\\")) // extended-length path
+                {
+                    i = 4;
+                    if (path.Contains('/') || path.Contains(".\\") || path.Contains("..\\"))
+                        return false;
+                }
+
+                if (path.Length > i + 1 && path[i + 1] == ':' && path[i] is (> 'A' and < 'Z' or > 'a' and < 'z'))
+                    i += 2;
+            }
+
+            if (path.Length <= i) // must have at least one character
+                return false;
+
+            for (; i < path.Length; i++)
+            {
+                char c = path[i];
+                if (c is '/' or '\\')
+                { }
+                else if (Path.GetInvalidFileNameChars().Contains(c))
+                    return false;
+            }
+            return true;
         }
 
         /// <summary>True if paths are equal. Resolves relative paths. Ignores closing path separator.</summary>

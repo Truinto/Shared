@@ -9,7 +9,7 @@ using Shared.StringsNS;
 namespace UnitTest
 {
     [TestClass]
-    public partial class UnitTests
+    public class UnitTests_Strings
     {
         [TestMethod]
         public void Test_Strings_SplitArgs()

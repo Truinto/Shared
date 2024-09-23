@@ -136,8 +136,7 @@ namespace Shared.StringsNS
                 var dir = new DirectoryInfo(path);
                 //Console.WriteLine($"{dir.FullName}, {dir.Name}, {dir.Parent}");
                 return dir.FullName;
-            }
-            catch (Exception) { return default; }
+            } catch (Exception) { return default; }
         }
 
         public static void GetDirCompletion(this string path, List<string> dirs)
@@ -158,8 +157,7 @@ namespace Shared.StringsNS
                 var subs = parent.GetDirectories(search, SearchOption.TopDirectoryOnly);
                 dirs.AddRange(subs.Where(w => !w.Attributes.HasFlag(FileAttributes.Hidden)).Select(s => s.FullName));
                 //Debug.WriteLine($"list={dirs.Join()}");
-            }
-            catch (Exception) { }
+            } catch (Exception) { }
         }
 
         /// <summary>
@@ -315,7 +313,15 @@ namespace Shared.StringsNS
         public static string Join<T>(this IEnumerable<T> enumeration, Func<T, string>? converter = null, string delimiter = ", ")
         {
             converter ??= t => t?.ToString() ?? "";
-            return enumeration.Aggregate("", (prev, curr) => prev + (prev.Length > 0 ? delimiter : "") + converter(curr)); // TODO: could use Stringbuilder
+            var sb = GetSb();
+            foreach (var obj in enumeration)
+            {
+                if (sb.Length > 0)
+                    sb.Append(delimiter);
+
+                sb.Append(converter(obj));
+            }
+            return FlushSb();
         }
 
         /// <summary>Returns substring. Always excludes char 'c'. Returns null, if index is out of range or char not found.</summary>
@@ -337,8 +343,7 @@ namespace Shared.StringsNS
                 if (start < 0)
                     return str.Substring(0, str.LastIndexOf(c));
                 return str.Substring(start, str.IndexOf(c, start));
-            }
-            catch (Exception)
+            } catch (Exception)
             {
                 return null;
             }

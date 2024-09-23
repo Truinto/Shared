@@ -10,7 +10,7 @@ using System.Reflection.Emit;
 namespace UnitTest
 {
     [TestClass]
-    public class UnitTest_Paths
+    public class UnitTests_Path
     {
         [TestMethod]
         public void Test_Paths_AreEqual()
@@ -29,6 +29,23 @@ namespace UnitTest
 
             Assert.IsFalse(Paths.AreEqual("C:/Temps", "C:/Temp/"));
             Assert.IsFalse(Paths.AreEqual("C:/Temp/", "C:/Temps"));
+        }
+
+        [TestMethod]
+        public void Test_Paths_IsValidPath()
+        {
+            Assert.IsFalse(Paths.IsValidPath(""));
+            Assert.IsFalse(Paths.IsValidPath("?"));
+            Assert.IsFalse(Paths.IsValidPath(":"));
+            Assert.IsFalse(Paths.IsValidPath(".:"));
+            Assert.IsFalse(Paths.IsValidPath("\\\\?\\"));
+            Assert.IsFalse(Paths.IsValidPath("\\\\?\\/"));
+            Assert.IsFalse(Paths.IsValidPath("\\\\?\\C:"));
+            Assert.IsFalse(Paths.IsValidPath("\\\\?\\path.\\"));
+
+            Assert.IsTrue(Paths.IsValidPath("\\\\?\\C:\\"));
+            Assert.IsTrue(Paths.IsValidPath("C:/"));
+            Assert.IsTrue(Paths.IsValidPath("."));
         }
 
         [TestMethod]
