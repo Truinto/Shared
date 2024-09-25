@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace Shared.CollectionNS
 {
@@ -55,7 +57,7 @@ namespace Shared.CollectionNS
         /// <summary>
         /// Find index in a collection by a predicate.
         /// </summary>
-        public static int FindIndex<T>(this IEnumerable<T> enumerable, Func<T, bool> pred) where T : class
+        public static int GetIndex<T>(this IEnumerable<T> enumerable, Func<T, bool> pred)
         {
             int num = 0;
             foreach (T item in enumerable)
@@ -70,7 +72,7 @@ namespace Shared.CollectionNS
         /// <summary>
         /// Find index in a collection by object.Equals.
         /// </summary>
-        public static int IndexOf<T>(this IEnumerable<T> enumerable, T element)
+        public static int GetIndex<T>(this IEnumerable<T> enumerable, T element)
         {
             int i = 0;
             foreach (T item in enumerable)
@@ -85,7 +87,7 @@ namespace Shared.CollectionNS
         /// <summary>
         /// Find index in a collection by object.Equals. Returns notFound, if no element matches.
         /// </summary>
-        public static int IndexOf<T>(this IEnumerable<T> enumerable, T element, int notFound)
+        public static int GetIndex<T>(this IEnumerable<T> enumerable, T element, int notFound)
         {
             int i = 0;
             foreach (T item in enumerable)
@@ -171,6 +173,52 @@ namespace Shared.CollectionNS
 
                 if (j - offsetSearch >= lengthSearch) // success if enough entities match
                     return true;
+            }
+        }
+
+        /// <summary>
+        /// Check a text file starts with a specific ASCII string. File can have ASCII or Unicode (UTF-16) encoding.
+        /// </summary>
+        public static bool StartsWith(this FileInfo filePath, string text, bool throwOnError = false)
+        {
+            try
+            {
+                using var stream = new FileStream(filePath.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                stream.Position = 0;
+                int bLength = stream.Read(Buffer, 0, Math.Min(Buffer.Length, text.Length * 2 + 2));
+
+                bool unicode = false;
+                int ib = 0;
+                if (bLength >= 2)
+                {
+                    if (Buffer[0] == 0xFF && Buffer[1] == 0xFE)
+                    {
+                        unicode = true; //little-endian
+                        ib = 2;
+                    }
+                    else if (Buffer[1] == 0xFF && Buffer[0] == 0xFE)
+                    {
+                        unicode = true; //big-endian
+                        ib = 3;
+                    }
+                }
+
+                for (int i = 0; i < text.Length;)
+                {
+                    if (ib >= bLength)
+                        return false;
+                    if (text[i++] != Buffer[ib++])
+                        return false;
+                    if (unicode)
+                        ib++;
+                }
+                return true;
+            }
+            catch (Exception)
+            {
+                if (!throwOnError)
+                    return false;
+                throw;
             }
         }
 
@@ -298,26 +346,6 @@ namespace Shared.CollectionNS
         #endregion
 
         #region Append
-
-        /// <summary>
-        /// Returns numerable with element at the first position.
-        /// </summary>
-        public static IEnumerable<T> AddBefore<T>(this T element, IEnumerable<T> collection)
-        {
-            yield return element;
-            foreach (var item in collection)
-                yield return item;
-        }
-
-        /// <summary>
-        /// Returns numerable with element at the last position.
-        /// </summary>
-        public static IEnumerable<T> AddAfter<T>(this T element, IEnumerable<T> collection)
-        {
-            foreach (var item in collection)
-                yield return item;
-            yield return element;
-        }
 
         /// <summary>
         /// Returns numerable with element at the first position.
@@ -472,6 +500,137 @@ namespace Shared.CollectionNS
         }
 
         #endregion
+
+        #region Sort
+
+        /// <summary>
+        /// Sorts the elements in a list using the IComparable&lt;<typeparamref name="T2"/>&gt; implementation.
+        /// </summary>
+        public static void QuickSort<T>(IList<T> list, int leftBound, int rightBound) where T : IComparable<T>
+        {
+            int i = leftBound;
+            int j = rightBound;
+            T pivot = list[leftBound];
+            while (i <= j)
+            {
+                while (list[i].CompareTo(pivot) < 0)
+                    i++;
+                while (list[j].CompareTo(pivot) > 0)
+                    j--;
+                if (i <= j)
+                {
+                    T value = list[i];
+                    list[i++] = list[j];
+                    list[j--] = value;
+                }
+            }
+
+            if (leftBound < j)
+                QuickSort(list, leftBound, j);
+            if (i < rightBound)
+                QuickSort(list, i, rightBound);
+        }
+
+        /// <summary>
+        /// Sorts the elements in a list using the IComparable&lt;<typeparamref name="T2"/>&gt; implementation of a specified member.
+        /// </summary>
+        public static void QuickSort<T1, T2>(IList<T1> list, Func<T1, T2> keySelector, int leftBound, int rightBound) where T2 : IComparable<T2>
+        {
+            int i = leftBound;
+            int j = rightBound;
+            T2 pivot = keySelector(list[leftBound]);
+            while (i <= j)
+            {
+                while (keySelector(list[i]).CompareTo(pivot) < 0)
+                    i++;
+                while (keySelector(list[j]).CompareTo(pivot) > 0)
+                    j--;
+                if (i <= j)
+                {
+                    T1 value = list[i];
+                    list[i++] = list[j];
+                    list[j--] = value;
+                }
+            }
+
+            if (leftBound < j)
+                QuickSort(list, keySelector, leftBound, j);
+            if (i < rightBound)
+                QuickSort(list, keySelector, i, rightBound);
+        }
+
+        /// <summary>
+        /// Sorts the elements in a list using the IComparable&lt;<typeparamref name="T2"/>&gt; implementation.
+        /// </summary>
+        public static void Sort<T>(this IList<T> collection) where T : IComparable<T>
+        {
+            if (collection is Array array)
+                Array.Sort(array);
+            else
+                QuickSort(collection, 0, collection.Count - 1);
+        }
+
+        /// <summary>
+        /// Sorts the elements in a list using the IComparable&lt;<typeparamref name="T2"/>&gt; implementation of a specified member.
+        /// </summary>
+        public static void Sort<T1, T2>(this IList<T1> collection, Func<T1, T2> keySelector) where T2 : IComparable<T2>
+        {
+            QuickSort(collection, keySelector, 0, collection.Count - 1);
+        }
+
+        /// <summary>
+        /// Sorts the elements in an <see cref="Array"/> using the IComparable&lt;<typeparamref name="T2"/>&gt; implementation of a specified member.
+        /// </summary>
+        public static void Sort<T1, T2>(this T1[] array, Func<T1, T2> keySelector) where T2 : IComparable<T2>
+        {
+            Array.Sort(array, (T1 t1, T1 t2) => keySelector(t1).CompareTo(keySelector(t2)));
+        }
+
+        /// <summary>
+        /// Swap position of two elements by index.
+        /// </summary>
+        public static void Swap<T>(this IList<T> array, Index index1, Index index2, bool throwOnOutOfBounds = false)
+        {
+            ArgumentNullException.ThrowIfNull(array);
+
+            if (!throwOnOutOfBounds && (index1.Value >= array.Count || index2.Value >= array.Count))
+                return;
+
+            (array[index1], array[index2]) = (array[index2], array[index1]);
+        }
+
+        /// <summary>
+        /// Swap position of an element with an element at an index.
+        /// </summary>
+        public static void Swap<T>(this IList<T> array, T obj, Index index2, bool throwOnOutOfBounds = false)
+        {
+            ArgumentNullException.ThrowIfNull(array);
+
+            int index1 = array.GetIndex(obj);
+            if (!throwOnOutOfBounds && index1 < 0)
+                return;
+
+            Swap(array, index1, index2, throwOnOutOfBounds);
+        }
+
+        /// <summary>
+        /// Swap position of an element with an element at an index.
+        /// </summary>
+        public static void Swap<T>(this IList<T> array, Func<T, bool> pred, Index index2, bool throwOnOutOfBounds = false)
+        {
+            ArgumentNullException.ThrowIfNull(array);
+            ArgumentNullException.ThrowIfNull(pred);
+
+            int index1 = array.GetIndex(pred);
+            if (!throwOnOutOfBounds && index1 < 0)
+                return;
+
+            Swap(array, index1, index2, throwOnOutOfBounds);
+        }
+
+        #endregion
+
+        public static readonly byte[] Buffer = new byte[2048];
 
         private static readonly List<object> _list = [];
 
