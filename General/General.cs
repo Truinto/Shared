@@ -23,7 +23,7 @@ namespace Shared.GeneralNS
             Debug.WriteLine($"Print of {type.FullName}");
             foreach (var fi in type.GetFields(BindingInstance))
             {
-                object value = fi.GetValue(obj);
+                object? value = fi.GetValue(obj);
                 Debug.WriteLine($"  field={fi.Name} f-type={fi.FieldType} o-type={value?.GetType()} tostring={value}");
             }
 
@@ -31,7 +31,7 @@ namespace Shared.GeneralNS
             {
                 try
                 {
-                    object value = pi.GetValue(obj);
+                    object? value = pi.GetValue(obj);
                     Debug.WriteLine($"  property={pi.Name} f-type={pi.PropertyType} o-type={value?.GetType()} tostring={value}");
                 }
                 catch (Exception)

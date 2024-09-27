@@ -1,44 +1,45 @@
-﻿using System;
+﻿using Shared.StringsNS;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 
-namespace AutoCompress // TODO: update
+namespace AutoCompress
 {
-    public class CommandTool
+    public partial class CommandTool
     {
         public delegate void OnKeyPressDelegate(object sender, ConsoleKeyInfo key, out bool consumed);
 
         public string FilePath;
-        public string Args;
-        public IEnumerable<string> ArgsList;
-        public Action<string> OnStandard;
-        public Action<string> OnError;
-        public OnKeyPressDelegate OnKeyPress;
+        public string? Args;
+        public IEnumerable<string>? ArgsList;
+        public Action<string>? OnStandard;
+        public Action<string>? OnError;
+        public OnKeyPressDelegate? OnKeyPress;
         public readonly StringBuilder Sb_Output = new();
         public readonly StringBuilder Sb_Error = new();
         public int ExitCode;
-        public Process Process;
+        public Process? Process;
         public bool EatCancel;
 
         public CommandTool()
         {
+            this.FilePath ??= "";
             _handler = new EventHandler(Handler);
         }
 
-        public CommandTool(string filePath, string args, Action<string> onStandard = null, Action<string> onError = null, OnKeyPressDelegate onKeyPress = null) : this()
+        public CommandTool(string filePath, string args, Action<string>? onStandard = null, Action<string>? onError = null, OnKeyPressDelegate? onKeyPress = null) : this()
         {
             this.FilePath = filePath;
-            this.Args = Regex.Replace(args, @"[\\^]\n", "");
+            this.Args = Rx_CmdEOL().Replace(args, "");
             this.OnStandard = onStandard;
             this.OnError = onError;
             this.OnKeyPress = onKeyPress;
         }
 
-        public CommandTool(string filePath, IEnumerable<string> argsList, Action<string> onStandard = null, Action<string> onError = null, OnKeyPressDelegate onKeyPress = null) : this()
+        public CommandTool(string filePath, IEnumerable<string> argsList, Action<string>? onStandard = null, Action<string>? onError = null, OnKeyPressDelegate? onKeyPress = null) : this()
         {
             this.FilePath = filePath;
             this.ArgsList = argsList;
@@ -68,7 +69,10 @@ namespace AutoCompress // TODO: update
         /// </summary>
         public int Execute()
         {
-            Debug.WriteLine($"run-command {this.FilePath} {this.Args}");
+            if (this.ArgsList is null)
+                Trace.WriteLine($"run-command {this.FilePath} {this.Args}");
+            else
+                Trace.WriteLine($"run-command {this.FilePath} {this.ArgsList.JoinArgs()}");
 
             SetConsoleCtrlHandler(_handler, true);
 
@@ -99,6 +103,8 @@ namespace AutoCompress // TODO: update
                 Process.EnableRaisingEvents = true;
                 Process.OutputDataReceived += (sender, args) =>
                 {
+                    if (args?.Data is null)
+                        return;
                     lock (this)
                     {
                         OnStandard?.Invoke(args.Data);
@@ -108,6 +114,8 @@ namespace AutoCompress // TODO: update
                 };
                 Process.ErrorDataReceived += (sender, args) =>
                 {
+                    if (args?.Data is null)
+                        return;
                     lock (this)
                     {
                         OnError?.Invoke(args.Data);
@@ -126,7 +134,7 @@ namespace AutoCompress // TODO: update
                     if (OnKeyPress != null && Console.KeyAvailable)
                     {
                         var key = Console.ReadKey(true);
-                        Debug.WriteLine($"key-press {key.Modifiers} {key.Key}");
+                        Trace.WriteLine($"key-press {key.Modifiers} {key.Key}");
                         OnKeyPress(this, key, out bool consumed);
                         if (!consumed)
                             Process?.StandardInput.Write(key.KeyChar);
@@ -162,7 +170,10 @@ namespace AutoCompress // TODO: update
         /// </summary>
         public void Start()
         {
-            Debug.WriteLine($"run-command {this.FilePath} {this.Args}");
+            if (this.ArgsList is null)
+                Trace.WriteLine($"run-command {this.FilePath} {this.Args}");
+            else
+                Trace.WriteLine($"run-command {this.FilePath} {this.ArgsList.JoinArgs()}");
 
             SetConsoleCtrlHandler(_handler, true);
 
@@ -190,6 +201,8 @@ namespace AutoCompress // TODO: update
                 Process.EnableRaisingEvents = true;
                 Process.OutputDataReceived += (sender, args) =>
                 {
+                    if (args?.Data is null)
+                        return;
                     lock (this)
                     {
                         OnStandard?.Invoke(args.Data);
@@ -199,6 +212,8 @@ namespace AutoCompress // TODO: update
                 };
                 Process.ErrorDataReceived += (sender, args) =>
                 {
+                    if (args?.Data is null)
+                        return;
                     lock (this)
                     {
                         OnError?.Invoke(args.Data);
@@ -245,25 +260,10 @@ namespace AutoCompress // TODO: update
             SetConsoleCtrlHandler(_handler, false);
         }
 
-        /// <summary>
-        /// Synchronous process execution.
-        /// </summary>
-        public static int RunNow(string filePath, string args, Action<string> onStandard = null, Action<string> onError = null, OnKeyPressDelegate onKeyPress = null)
-        {
-            return new CommandTool(filePath, args, onStandard, onError, onKeyPress).Execute();
-        }
-
-        /// <summary>
-        /// Synchronous process execution.
-        /// </summary>
-        public static int RunNow(string filePath, string args, out string output, out string error, Action<string> onStandard = null, Action<string> onError = null, OnKeyPressDelegate onKeyPress = null)
-        {
-            return new CommandTool(filePath, args, onStandard, onError, onKeyPress).Execute(out output, out error);
-        }
-
         #region Kernel32
-        [DllImport("Kernel32")]
-        private static extern bool SetConsoleCtrlHandler(EventHandler handler, bool add);
+        [LibraryImport("Kernel32")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool SetConsoleCtrlHandler(EventHandler handler, [MarshalAs(UnmanagedType.Bool)] bool add);
 
         private delegate bool EventHandler(CtrlType sig);
         private EventHandler _handler;
@@ -281,12 +281,15 @@ namespace AutoCompress // TODO: update
         {
             try
             {
-                Debug.WriteLine("trigger command exit handle");
+                Trace.WriteLine("trigger command exit handle");
                 Process?.Kill();
             }
             catch (Exception) { }
             return EatCancel;
         }
         #endregion
+
+        [GeneratedRegex(@"[\\^]\n")]
+        private static partial Regex Rx_CmdEOL();
     }
 }

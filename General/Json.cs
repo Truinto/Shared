@@ -1,3 +1,4 @@
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -22,6 +23,7 @@ namespace Shared.JsonNS
             IncludeFields = false,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             Converters = { new JsonStringEnumConverter() },
         };
 
@@ -32,6 +34,22 @@ namespace Shared.JsonNS
         {
             ReferenceHandler = ReferenceHandler.IgnoreCycles,
             WriteIndented = true,
+            AllowTrailingCommas = true,
+            ReadCommentHandling = JsonCommentHandling.Skip,
+            IncludeFields = false,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            Converters = { new JsonStringEnumConverter() },
+        };
+
+        /// <summary>
+        /// Serialization settings with $ref and no indenting.
+        /// </summary>
+        public static JsonSerializerOptions JsonOptionsCompact = new()
+        {
+            ReferenceHandler = ReferenceHandler.IgnoreCycles,
+            WriteIndented = false,
             AllowTrailingCommas = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
             IncludeFields = false,

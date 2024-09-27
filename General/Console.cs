@@ -123,7 +123,7 @@ namespace Shared.ConsoleNS
         /// <param name="onData">Data receive action.</param>
         /// <param name="priority">Process prioirty.</param>
         /// <returns>Process exit code</returns>
-        public static int RunCommand(string command, string args, out string output, Action<string> onData = null, ProcessPriorityClass priority = ProcessPriorityClass.BelowNormal)
+        public static int RunCommand(string command, string args, out string output, Action<string>? onData = null, ProcessPriorityClass priority = ProcessPriorityClass.BelowNormal)
         {
             var sb = new StringBuilder();
             if (onData == null)
@@ -147,7 +147,7 @@ namespace Shared.ConsoleNS
         /// <param name="startNow">Whenever to start the process immediately.</param>
         /// <param name="priority">Process prioirty, only if startNow is true.</param>
         /// <returns>Process thread</returns>
-        public static Process RunCommandAsync(string command, string args = "", Action<string> onData = null, bool startNow = true, ProcessPriorityClass priority = ProcessPriorityClass.BelowNormal)
+        public static Process RunCommandAsync(string command, string args = "", Action<string>? onData = null, bool startNow = true, ProcessPriorityClass priority = ProcessPriorityClass.BelowNormal)
         {
             onData ??= System.Console.WriteLine;
 
@@ -163,8 +163,8 @@ namespace Shared.ConsoleNS
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.RedirectStandardError = true;
             p.EnableRaisingEvents = true;
-            p.OutputDataReceived += (sender, args) => onData(args.Data);
-            p.ErrorDataReceived += (sender, args) => onData(args.Data);
+            p.OutputDataReceived += (sender, args) => onData(args.Data ?? "");
+            p.ErrorDataReceived += (sender, args) => onData(args.Data ?? "");
             if (startNow)
             {
                 p.Start();
@@ -193,7 +193,7 @@ namespace Shared.ConsoleNS
                 Arguments = args,
                 UseShellExecute = true,
                 WorkingDirectory = Environment.CurrentDirectory,
-                FileName = Assembly.GetEntryAssembly().Location, //Assembly.GetEntryAssembly().CodeBase
+                FileName = Assembly.GetEntryAssembly()?.Location, //Assembly.GetEntryAssembly().CodeBase
                 Verb = "runas"
             };
             Process.Start(proc);
@@ -307,7 +307,7 @@ namespace Shared.ConsoleNS
             return GetText(startL, startT, -1);
         }
 
-        private static List<string> _dirs;
+        private static List<string>? _dirs;
         private static int _dirsI;
         public static string ReadLineTabComplete()
         {
@@ -350,7 +350,7 @@ namespace Shared.ConsoleNS
                     var vol = buffer.ExpandWindowsVolume();
                     if (vol != buffer)
                     {
-                        PutText(startL, startT, vol);
+                        PutText(startL, startT, vol ?? "");
                         continue;
                     }
 
@@ -439,7 +439,7 @@ namespace Shared.ConsoleNS
 
             IntPtr str = Marshal.AllocCoTaskMem(bufferlength);
             _ = FormatMessageW(0x00000200 | 0x00001000, default, errorId, 0, str, bufferlength, default);
-            string error = Marshal.PtrToStringUni(str);
+            string? error = Marshal.PtrToStringUni(str);
             Marshal.FreeCoTaskMem(str);
 
             SetLastError(errorId); // this doesn't work
@@ -664,7 +664,7 @@ namespace Shared.ConsoleNS
             public SMALL_RECT srWindow;
             public COORD dwMaximumWindowSize;
 
-            public override readonly string ToString()
+            public readonly override string ToString()
             {
                 return $"size=[{this.dwSize}] cursor=[{this.dwCursorPosition}] attribute=[{this.wAttributes}] window=[{this.srWindow}] max=[{this.dwMaximumWindowSize}]";
             }
@@ -702,7 +702,7 @@ namespace Shared.ConsoleNS
             public short Right;
             public short Bottom;
 
-            public override readonly string ToString()
+            public readonly override string ToString()
             {
                 return $"x1={this.Left},y1={this.Top},x2={this.Right},y2={this.Bottom}";
             }
