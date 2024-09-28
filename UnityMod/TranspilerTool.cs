@@ -521,7 +521,7 @@ namespace Shared
             else
             {
                 var parametersOriginal = this.Original.GetParameters();
-                index = parametersOriginal.FindIndex(f => f.Name == name);
+                index = parametersOriginal.GetIndex(f => f.Name == name);
                 if (index < 0)
                     if (original == null)
                         return false;

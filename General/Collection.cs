@@ -585,7 +585,7 @@ namespace Shared.CollectionNS
         {
             Array.Sort(array, (T1 t1, T1 t2) => keySelector(t1).CompareTo(keySelector(t2)));
         }
-
+#if NET5_0_OR_GREATER
         /// <summary>
         /// Swap position of two elements by index.
         /// </summary>
@@ -627,8 +627,8 @@ namespace Shared.CollectionNS
 
             Swap(array, index1, index2, throwOnOutOfBounds);
         }
-
-        #endregion
+#endif
+#endregion
 
         public static readonly byte[] Buffer = new byte[2048];
 
