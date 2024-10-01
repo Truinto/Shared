@@ -504,7 +504,7 @@ namespace Shared.CollectionNS
         #region Sort
 
         /// <summary>
-        /// Sorts the elements in a list using the IComparable&lt;<typeparamref name="T2"/>&gt; implementation.
+        /// Sorts the elements in a list using the IComparable&lt;<typeparamref name="T"/>&gt; implementation.
         /// </summary>
         public static void QuickSort<T>(IList<T> list, int leftBound, int rightBound) where T : IComparable<T>
         {
@@ -560,7 +560,7 @@ namespace Shared.CollectionNS
         }
 
         /// <summary>
-        /// Sorts the elements in a list using the IComparable&lt;<typeparamref name="T2"/>&gt; implementation.
+        /// Sorts the elements in a list using the IComparable&lt;<typeparamref name="T"/>&gt; implementation.
         /// </summary>
         public static void Sort<T>(this IList<T> collection) where T : IComparable<T>
         {

@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace AutoCompress
+namespace Shared
 {
     public partial class CommandTool
     {
@@ -153,8 +153,9 @@ namespace AutoCompress
                 ExitCode = Process?.ExitCode ?? -1;
                 Process = null;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Debug.WriteLine($"Process error: {e}");
 #if DEBUG
                 throw;
 #endif
@@ -227,8 +228,9 @@ namespace AutoCompress
                 Process.BeginErrorReadLine();
                 Process.PriorityClass = ProcessPriorityClass.BelowNormal;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Debug.WriteLine($"Process error: {e}");
 #if DEBUG
                 throw;
 #endif
