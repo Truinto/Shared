@@ -56,8 +56,8 @@ indent_style = space
 tab_width = 4
 
 # Einstellungen für neue Zeilen
-end_of_line = crlf
-insert_final_newline = false
+end_of_line = lf
+insert_final_newline = true
 
 #### .NET-Codierungskonventionen ####
 

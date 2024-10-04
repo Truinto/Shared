@@ -50,10 +50,17 @@
 		<VersioningTask_Out DropRevision="never" Include="$(MSBuildThisFileFullPath)" />
 		<VersioningTask_Out DropRevision="keep" Include="info.json" />
 		<VersioningTask_Out DropRevision="keep" Include="Settings/Repository.json" Max="2" />
+		
 		<TargetPublicizeItems Include="$(GameManaged)/Assembly-CSharp.dll" />
+		
 		<TargetMergeItems Include="$(SolutionDir)/@Shared/UnityMod.dll" />
+		
 		<TargetCopyTarget Include="$(ModFolder)/$(TargetName)/" />
-		<!--<TargetZipItems Include="false" />-->
+		<TargetCopyDelete Include="$(ModFolder)/$(TargetName)/$(TargetName).pdb" Condition="$(Configuration.Contains('Release'))" />
+		<TargetCopyDelete Include="$(ModFolder)/$(TargetName)/$(TargetName).xml" Condition="$(Configuration.Contains('Release'))" />
+		
+		<TargetZipItems Include="$(ModFolder)/$(TargetName)/$(TargetName).dll" />
+		<TargetZipTarget Include="$(ModFolder)/$(TargetName)/$(TargetName).zip" />
 	</ItemGroup>
 
 	<!-- Target to generate publicized assemblies.
@@ -64,7 +71,7 @@
 			<TargetPublicizeItemsA Include="@(TargetPublicizeItems->Reverse())" />
 		</ItemGroup>
 		<PropertyGroup>
-			<TargetPublicizeDir>$([MSBuild]::NormalizePath('%(TargetPublicizeItemsA.Identity)/../'))</TargetPublicizeDir>
+			<TargetPublicizeDir Condition="'$(TargetPublicizeDir)'==''">$([MSBuild]::NormalizePath('%(TargetPublicizeItemsA.Identity)/../'))</TargetPublicizeDir>
 		</PropertyGroup>
 		<PublicizeTask InputAssemblies="@(TargetPublicizeItems)" OutputDir="$(TargetPublicizeDir)" />
 	</Target>
@@ -98,7 +105,7 @@
 
 	<!-- Generates mono debug binary. -->
 	<Target Name="TargetMDB" AfterTargets="TargetMerge" DependsOnTargets="TargetMerge">
-		<CallTarget Targets="TargetMDBA" Condition="Exists('$(Tools)pdb2mdb.exe') And '%(Reference.Identity)'=='UnityEngine'" />
+		<CallTarget Targets="TargetMDBA" Condition="$(DebugSymbols) And '$(DebugType)'=='full' And Exists('$(Tools)pdb2mdb.exe') And '%(Reference.Identity)'=='UnityEngine'" />
 	</Target>
 
 	<Target Name="TargetMDBA">
@@ -108,7 +115,8 @@
 
 	<!-- Copies files to target folder.
 		 required: @TargetCopyTarget: where to copy files
-		 optional: @TargetCopyItems: files to copy; if empty read all build files -->
+		 optional: @TargetCopyItems: files to copy; if empty read all build files
+		 optional: @TargetCopyDelete: files to delete after copy -->
 	<Target Name="TargetCopy" AfterTargets="TargetMDB" DependsOnTargets="TargetMDB">
 		<CallTarget Targets="TargetCopyA" Condition="'$(TargetCopyTarget)'!='' Or '@(TargetCopyTarget)'!=''" />
 	</Target>
@@ -119,34 +127,37 @@
 		</ItemGroup>
 		<PropertyGroup>
 			<TargetCopyTarget Condition="'@(TargetCopyTarget)'!=''">%(TargetCopyTarget.Identity)</TargetCopyTarget>
+			<TargetCopyTarget>$([MSBuild]::NormalizePath('$(TargetCopyTarget)'))</TargetCopyTarget>
 		</PropertyGroup>
 		<Message Text="Copy @(TargetCopyItems) -> $(TargetCopyTarget)" Importance="High" />
 		<Copy SourceFiles="@(TargetCopyItems)" DestinationFolder="$(TargetCopyTarget)/%(RecursiveDir)" UseHardlinksIfPossible="true" />
+		<Delete Files="@(TargetCopyDelete)" TreatErrorsAsWarnings="true" />
 	</Target>
 
-	<!-- Zips files. Force skipped if TargetZipItems is set to false.
-		 required: @TargetZipItems: file to zip; if empty reads $TargetCopyTarget instead
+	<!-- Zips files. Set either @TargetZipItems or @TargetZipTarget.
+		 optional: @TargetZipItems: files to zip; if empty reads TargetCopyTarget/* or TargetZipTarget/* instead
 		 optional: @TargetZipTarget: zip save path; if empty save next to first @TargetZipItems
 		 optional: $TargetZipWorkDir: working directory; if empty goes one folders up from first @TargetZipItems -->
 	<Target Name="TargetZip" AfterTargets="TargetCopy" DependsOnTargets="TargetCopy">
-		<CallTarget Targets="TargetZipA" Condition="$(Configuration.Contains('Release')) And '@(TargetZipItems)'!='false' And '$(TargetCopyTarget)'!='false' And ('@(TargetZipItems)'!='' Or '$(TargetCopyTarget)'!='')" />
+		<CallTarget Targets="TargetZipA" Condition="$(Configuration.Contains('Release')) And ('@(TargetZipItems)'!='' Or '@(TargetZipTarget)'!='' Or '$(TargetZipTarget)'!='')" />
 	</Target>
 
 	<Target Name="TargetZipA">
 		<PropertyGroup>
-			<TargetZipWorkDirA Condition="'@(TargetZipItems)'==''">$(TargetCopyTarget)</TargetZipWorkDirA>
+			<TargetZipTarget Condition="'@(TargetZipTarget)'!=''">%(TargetZipTarget.Identity)</TargetZipTarget>
+			<TargetZipWorkDir Condition="'@(TargetZipWorkDir)'!=''">%(TargetZipWorkDir.Identity)</TargetZipWorkDir>
 		</PropertyGroup>
 		<ItemGroup>
-			<TargetZipItems Condition="'@(TargetZipItems)'==''" Include="$(TargetCopyTarget)/**" />
+			<TargetZipItems Condition="'@(TargetZipItems)'=='' And '$(TargetCopyTarget)'!=''" Include="$(TargetCopyTarget)/**" />
+			<TargetZipItems Condition="'@(TargetZipItems)'=='' And '$(TargetZipTarget)'!=''" Include="$(TargetZipTarget)/**" />
 			<TargetZipItems Condition="'%(Extension)'=='.zip'" Remove="%(TargetZipItems.Identity)" />
 			<TargetZipItemsB Include="@(TargetZipItems->Reverse())" />
 		</ItemGroup>
 		<PropertyGroup>
-			<TargetZipWorkDirA Condition="'$(TargetZipWorkDirA)'==''">%(TargetZipItemsB.Identity)/..</TargetZipWorkDirA>
-			<TargetZipWorkDir Condition="'$(TargetZipWorkDir)'==''">$([MSBuild]::NormalizePath('$(TargetZipWorkDirA)/../'))</TargetZipWorkDir>
-			<TargetZipTarget Condition="'@(TargetZipTarget)'!=''">%(TargetZipTarget.Identity)</TargetZipTarget>
-			<TargetZipTarget Condition="'$(TargetZipTarget)'==''">$(TargetZipWorkDirA)/$(TargetName).zip</TargetZipTarget>
-			<TargetZipTarget>$([MSBuild]::NormalizePath('$(TargetZipTarget)'))</TargetZipTarget>
+			<TargetZipTarget Condition="'$(TargetZipTarget)'==''">%(TargetZipItemsB.Identity)/../$(TargetName).zip</TargetZipTarget>
+			<TargetZipTarget>$([MSBuild]::NormalizePath('$(TargetZipTarget)'))</TargetZipTarget>			
+			<TargetZipWorkDir Condition="'$(TargetZipWorkDir)'==''">%(TargetZipItemsB.Identity)/../</TargetZipWorkDir>
+			<TargetZipWorkDir>$([MSBuild]::NormalizePath('$(TargetZipWorkDir)'))</TargetZipWorkDir>
 		</PropertyGroup>
 		<Message Text="Zip w=$(TargetZipWorkDir) -> @(TargetZipItems) -> $(TargetZipTarget)" Importance="Low" />
 		<ZipTask ZipFileName="$(TargetZipTarget)" WorkingDirectory="$(TargetZipWorkDir)" Files="@(TargetZipItems)" />

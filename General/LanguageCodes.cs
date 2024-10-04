@@ -417,7 +417,7 @@ namespace Shared
             {
                 result = this.Int switch
                 {
-                    none => "none",
+                    none => "",
                     und => "und",
                     Abkhazian => "Abkhazian",
                     Afar => "Afar",

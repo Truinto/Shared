@@ -16,31 +16,31 @@ namespace Shared.StringsNS
     /// </summary>
     public static class Strings
     {
-		/// <summary>
-		/// Regular expression for matching an email address.<br/>
-		/// General Email Regex (RFC 5322 Official Standard) from https://emailregex.com.
-		/// </summary>
-		public const string EmailRegex = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])";
+        /// <summary>
+        /// Regular expression for matching an email address.<br/>
+        /// General Email Regex (RFC 5322 Official Standard) from https://emailregex.com.
+        /// </summary>
+        public const string EmailRegex = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])";
 
-		/// <summary>
-		/// Regular expression of HTML tags to remove.
-		/// </summary>
-		public const string RemoveHtmlTagsRegex = @"(?></?\w+)(?>(?:[^>'""]+|'[^']*'|""[^""]*"")*)>";
+        /// <summary>
+        /// Regular expression of HTML tags to remove.
+        /// </summary>
+        public const string RemoveHtmlTagsRegex = @"(?></?\w+)(?>(?:[^>'""]+|'[^']*'|""[^""]*"")*)>";
 
-		/// <summary>
-		/// Regular expression for removing comments from HTML.
-		/// </summary>
-		public const string RemoveHtmlCommentsRegex = "<!--.*?-->";
+        /// <summary>
+        /// Regular expression for removing comments from HTML.
+        /// </summary>
+        public const string RemoveHtmlCommentsRegex = "<!--.*?-->";
 
-		/// <summary>
-		/// Regular expression for removing scripts from HTML.
-		/// </summary>
-		public const string RemoveHtmlScriptsRegex = @"(?s)<script.*?(/>|</script>)";
+        /// <summary>
+        /// Regular expression for removing scripts from HTML.
+        /// </summary>
+        public const string RemoveHtmlScriptsRegex = @"(?s)<script.*?(/>|</script>)";
 
-		/// <summary>
-		/// Regular expression for removing styles from HTML.
-		/// </summary>
-		public const string RemoveHtmlStylesRegex = @"(?s)<style.*?(/>|</style>)";
+        /// <summary>
+        /// Regular expression for removing styles from HTML.
+        /// </summary>
+        public const string RemoveHtmlStylesRegex = @"(?s)<style.*?(/>|</style>)";
 
         #region Args
 
@@ -137,8 +137,6 @@ namespace Shared.StringsNS
             if (!isEnd)
                 result.Add(sb.ToString());
 
-            //-metadata""":s:s:1 "artist=John Wick"
-
             return result;
         }
 
@@ -162,7 +160,8 @@ namespace Shared.StringsNS
                 var dir = new DirectoryInfo(path);
                 //Console.WriteLine($"{dir.FullName}, {dir.Name}, {dir.Parent}");
                 return dir.FullName;
-            } catch (Exception) { return default; }
+            }
+            catch (Exception) { return default; }
         }
 
         public static void GetDirCompletion(this string path, List<string> dirs)
@@ -183,7 +182,8 @@ namespace Shared.StringsNS
                 var subs = parent.GetDirectories(search, SearchOption.TopDirectoryOnly);
                 dirs.AddRange(subs.Where(w => !w.Attributes.HasFlag(FileAttributes.Hidden)).Select(s => s.FullName));
                 //Debug.WriteLine($"list={dirs.Join()}");
-            } catch (Exception) { }
+            }
+            catch (Exception) { }
         }
 
         /// <summary>
@@ -313,16 +313,14 @@ namespace Shared.StringsNS
                     case '\v': sb.Append(@"\u000B"); break;
                     case '´': sb.Append(@"\u00B4"); break;
                     case '`': sb.Append(@"\u0060"); break;
+                    case >= (char)0x20 and <= (char)0x7e:
+                        sb.Append(c);
+                        break;
                     default:
-                        if (c is >= (char)0x20 and <= (char)0x7e)
-                        {
-                            sb.Append(c);
-                        }
-                        else
-                        {
-                            sb.Append(@"\u");
-                            sb.Append(((int)c).ToString("x4"));
-                        }
+                        if (c > 0xFFFF)
+                            throw new InvalidDataException();
+                        sb.Append(@"\u");
+                        sb.Append(((int)c).ToString("X4"));
                         break;
                 }
             }
@@ -369,7 +367,8 @@ namespace Shared.StringsNS
                 if (start < 0)
                     return str.Substring(0, str.LastIndexOf(c));
                 return str.Substring(start, str.IndexOf(c, start));
-            } catch (Exception)
+            }
+            catch (Exception)
             {
                 return null;
             }
