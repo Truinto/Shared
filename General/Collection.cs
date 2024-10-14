@@ -222,6 +222,14 @@ namespace Shared.CollectionNS
             }
         }
 
+        /// <summary>
+        /// Filters a sequence and projects each element into a new form.
+        /// </summary>
+        public static IEnumerable<TResult> SelectWhere<T, TResult>(this IEnumerable<T> enumerable, Func<T, bool> predicate, Func<T, TResult> selector)
+        {
+            return enumerable.Where(predicate).Select(selector);
+        }
+
         #endregion
 
         #region AddUnique
@@ -483,17 +491,17 @@ namespace Shared.CollectionNS
         /// Get dictionary by key and create new value with standard constructor, if it did not exist.
         /// </summary>
         /// <returns>true if new value was created</returns>
-        public static bool Ensure<TKey, TValue>(this Dictionary<TKey, TValue> dic, TKey key, out TValue? value) where TValue : new() where TKey : notnull
+        public static bool Ensure<TKey, TValue>(this Dictionary<TKey, TValue> dic, TKey key, out TValue value) where TValue : new() where TKey : notnull
         {
-            if (dic.TryGetValue(key, out value))
+            if (dic.TryGetValue(key, out value!))
                 return false;
             dic[key] = value = new();
             return true;
         }
 
-        public static bool Ensure<TKey, TValue>(this Dictionary<TKey, TValue> dic, TKey key, out TValue? value, Func<TValue> getter) where TKey : notnull
+        public static bool Ensure<TKey, TValue>(this Dictionary<TKey, TValue> dic, TKey key, out TValue value, Func<TValue> getter) where TKey : notnull
         {
-            if (dic.TryGetValue(key, out value))
+            if (dic.TryGetValue(key, out value!))
                 return false;
             dic[key] = value = getter();
             return true;
@@ -508,6 +516,9 @@ namespace Shared.CollectionNS
         /// </summary>
         public static void QuickSort<T>(IList<T> list, int leftBound, int rightBound) where T : IComparable<T>
         {
+            if (rightBound <= leftBound)
+                return;
+
             int i = leftBound;
             int j = rightBound;
             T pivot = list[leftBound];
@@ -575,7 +586,7 @@ namespace Shared.CollectionNS
         /// </summary>
         public static void Sort<T1, T2>(this IList<T1> collection, Func<T1, T2> keySelector) where T2 : IComparable<T2>
         {
-            QuickSort(collection, keySelector, 0, collection.Count - 1);
+                QuickSort(collection, keySelector, 0, collection.Count - 1);
         }
 
         /// <summary>
@@ -585,20 +596,44 @@ namespace Shared.CollectionNS
         {
             Array.Sort(array, (T1 t1, T1 t2) => keySelector(t1).CompareTo(keySelector(t2)));
         }
-#if NET5_0_OR_GREATER
+
         /// <summary>
-        /// Swap position of two elements by index.
+        /// Move item to index, shifting all elements inbetween by one.
         /// </summary>
-        public static void Swap<T>(this IList<T> array, Index index1, Index index2, bool throwOnOutOfBounds = false)
+        public static void MoveTo<T>(this IList<T> array, int index1, int index2, bool throwOnOutOfBounds = false)
         {
             ArgumentNullException.ThrowIfNull(array);
 
-            if (!throwOnOutOfBounds && (index1.Value >= array.Count || index2.Value >= array.Count))
+            if (!throwOnOutOfBounds && (index1 >= array.Count || index2 >= array.Count))
+                return;
+
+            bool forward = index1 < index2;
+            int index = index1;
+
+            T buff = array[index1];
+            while (index != index2)
+            {
+                if (forward)
+                    array[index] = array[++index];
+                else
+                    array[index] = array[--index];
+            }
+            array[index] = buff;
+        }
+
+        /// <summary>
+        /// Swap position of two elements by index.
+        /// </summary>
+        public static void Swap<T>(this IList<T> array, int index1, int index2, bool throwOnOutOfBounds = false)
+        {
+            ArgumentNullException.ThrowIfNull(array);
+
+            if (!throwOnOutOfBounds && (index1 >= array.Count || index2 >= array.Count))
                 return;
 
             (array[index1], array[index2]) = (array[index2], array[index1]);
         }
-
+#if NET5_0_OR_GREATER
         /// <summary>
         /// Swap position of an element with an element at an index.
         /// </summary>
@@ -610,7 +645,7 @@ namespace Shared.CollectionNS
             if (!throwOnOutOfBounds && index1 < 0)
                 return;
 
-            Swap(array, index1, index2, throwOnOutOfBounds);
+            Swap(array, index1, index2.GetOffset(array.Count), throwOnOutOfBounds);
         }
 
         /// <summary>
@@ -625,10 +660,10 @@ namespace Shared.CollectionNS
             if (!throwOnOutOfBounds && index1 < 0)
                 return;
 
-            Swap(array, index1, index2, throwOnOutOfBounds);
+            Swap(array, index1, index2.GetOffset(array.Count), throwOnOutOfBounds);
         }
 #endif
-#endregion
+        #endregion
 
         public static readonly byte[] Buffer = new byte[2048];
 

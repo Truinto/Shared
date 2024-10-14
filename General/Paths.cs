@@ -25,7 +25,7 @@ namespace Shared.PathsNS
 
         //private bool isDirty;
 
-        public PathInfo(string? path)
+        public PathInfo(string? path) //WIP this could use Regex function instead
         {
             if (string.IsNullOrEmpty(path))
                 path = ".";
@@ -136,16 +136,25 @@ namespace Shared.PathsNS
     /// <summary>
     /// Collection of special folders.
     /// </summary>
-    public static class Paths
+    public static partial class Paths
     {
         /// <summary>
-        /// Splits a path into dir, file, and ext.
+        /// Capture groups are<br/>
+        /// dir: directory full name<br/>
+        /// vol: volume (C:/ or /)<br/>
+        /// folder: all folder name captures (Value has last entry only)<br/>
+        /// file: filename including extension<br/>
+        /// name: filename excluding extension<br/>
+        /// ext: extension including period<br/>
         /// </summary>
-        /// <remarks>
-        /// @"(?&lt;dir&gt;.*)(?&lt;file&gt;[^\\\/]*)(?&lt;ext&gt;\.[^\\\/]+?)?$"
-        /// </remarks>
-        public static Regex Rx_Path => _Rx_Path;
-        private static readonly Regex _Rx_Path = new(@"^(?<dir>.*)(?<file>[^\\\/]*)(?<ext>\.[^\\\/]+?)?$", RegexOptions.Compiled | RegexOptions.RightToLeft);
+#if NET7_0_OR_GREATER
+        [GeneratedRegex(@"^(?<dir>(?<vol>(?:[A-Za-z]:)?[\\/])?(?:(?<folder>[^\\/]+)[\\/])*)(?<file>(?<name>[^\\/]*?)?(?<ext>\.[^\\/\.]+)?)$")]
+        public static partial Regex Rx_Path();
+#else
+        /// <summary> Splits path into segments. </summary>
+        public static Regex Rx_Path() => _Rx_Path ??= new(@"^(?<dir>(?<vol>(?:[A-Za-z]:)?[\\/])?(?:(?<folder>[^\\/]+)[\\/])*)(?<file>(?<name>[^\\/]*?)?(?<ext>\.[^\\/\.]+)?)$", RegexOptions.Compiled);
+        private static Regex? _Rx_Path;
+#endif
 
         /// <summary>True if paths are equal. Resolves relative paths. Ignores closing path separator.</summary>
         public static bool AreEqual(this FileInfo path1, FileInfo path2)

@@ -65,6 +65,26 @@ namespace UnitTest
         }
 
         [TestMethod]
+        public void Test_Collection_MoveTo()
+        {
+            int[] array = [];
+            CollectionTool.MoveTo(array, 0, 0, false);
+            CollectionAssert.AreEqual(array, (int[])[]);
+
+            array = [1, 3, 5, 7];
+            CollectionTool.MoveTo(array, 0, 3, true);
+            CollectionAssert.AreEqual(array, (int[])[3, 5, 7, 1]);
+
+            array = [1, 3, 5, 7];
+            CollectionTool.MoveTo(array, 3, 0, true);
+            CollectionAssert.AreEqual(array, (int[])[7, 1, 3, 5]);
+
+            array = [1, 3, 5, 7];
+            CollectionTool.MoveTo(array, 1, 2, true);
+            CollectionAssert.AreEqual(array, (int[])[1, 5, 3, 7]);
+        }
+
+        [TestMethod]
         public void Test_Collection_QuickSort()
         {
             int[] array = [];

@@ -19,6 +19,7 @@ namespace Shared
             return this.Int switch
             {
                 none => "",
+                any => "any",
                 und => "und",
                 abk => "abk",
                 aar => "aar",
@@ -203,7 +204,6 @@ namespace Shared
                 yor => "yor",
                 zha => "zha",
                 zul => "zul",
-                any => "any",
                 _ => ""
             };
         }
@@ -223,6 +223,7 @@ namespace Shared
                 result = this.Int switch
                 {
                     none => "",
+                    any => "any",
                     und => "und",
                     ab => "ab",
                     aa => "aa",
@@ -407,7 +408,6 @@ namespace Shared
                     yo => "yo",
                     za => "za",
                     zu => "zu",
-                    any => "any",
                     _ => ""
                 };
             }
@@ -418,6 +418,7 @@ namespace Shared
                 result = this.Int switch
                 {
                     none => "",
+                    any => "any",
                     und => "und",
                     Abkhazian => "Abkhazian",
                     Afar => "Afar",
@@ -602,7 +603,6 @@ namespace Shared
                     Yoruba => "Yoruba",
                     Zhuang => "Zhuang",
                     Zulu => "Zulu",
-                    any => "any",
                     _ => ""
                 };
             }
@@ -618,6 +618,7 @@ namespace Shared
             return name switch
             {
                 "" => new(none),
+                "any" => new(any),
                 "und" => new(und),
 
                 "abk" => new(abk),
@@ -1372,7 +1373,6 @@ namespace Shared
                 "zu" => new(zu),
                 "Zulu" => new(Zulu),
 
-                "any" => new(any),
                 _ => new(none),
             };
         }

@@ -90,5 +90,38 @@ namespace UnitTest
                 Assert.IsTrue(p.Extension == extension.Replace(c1, c2));
             }
         }
+
+        [TestMethod]
+        public void Test_Paths_Rx_Path()
+        {
+            (string path, string dir, string vol, string? folder1, string? folder2, string file, string name, string ext)[] test_strings = [
+                /* 0*/ ("", "", "", null, null, "", "", ""),
+
+                /* 1*/ ("C:/", "C:/", "C:/", null, null, "", "", ""),
+                /* 2*/ ("C:/File", "C:/", "C:/", null, null, "File", "File", ""),
+                /* 3*/ ("C:/.ext", "C:/", "C:/", null, null, ".ext", "", ".ext"),
+                /* 4*/ ("C:/.File.ext", "C:/", "C:/", null, null, ".File.ext", ".File", ".ext"),
+                /* 5*/ ("C:/Folder1/.Folder2/.File.ext", "C:/Folder1/.Folder2/", "C:/", "Folder1", ".Folder2", ".File.ext", ".File", ".ext"),
+                /* 6*/ ("Folder1/.Folder2/.File.ext", "Folder1/.Folder2/", "", "Folder1", ".Folder2", ".File.ext", ".File", ".ext"),
+                /* 7*/ ("/Folder1/.Folder2/.File.ext", "/Folder1/.Folder2/", "/", "Folder1", ".Folder2", ".File.ext", ".File", ".ext"),
+                /* 8*/ ("../.Folder2/.File.ext", "../.Folder2/", "", "..", ".Folder2", ".File.ext", ".File", ".ext"),
+            ];
+
+            int i = 0;
+            foreach (var (path, dir, vol, folder1, folder2, file, name, ext) in test_strings)
+            {
+                var match = Paths.Rx_Path().Match(path);
+                Assert.AreEqual(dir, match.Groups["dir"].Value, $"dir mismatch {i}");
+                Assert.AreEqual(vol, match.Groups["vol"].Value, $"vol mismatch {i}");
+                Assert.AreEqual(file, match.Groups["file"].Value, $"file mismatch {i}");
+                Assert.AreEqual(name, match.Groups["name"].Value, $"name mismatch {i}");
+                Assert.AreEqual(ext, match.Groups["ext"].Value, $"ext mismatch {i}");
+
+                var cap = match.Groups["folder"].Captures;
+                Assert.AreEqual(cap.Count > 0 ? cap[0].Value : null, folder1, $"folder1 mismatch {i}");
+                Assert.AreEqual(cap.Count > 1 ? cap[1].Value : null, folder2, $"folder2 mismatch {i}");
+                i++;
+            }
+        }
     }
 }

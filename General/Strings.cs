@@ -146,6 +146,10 @@ namespace Shared.StringsNS
 
         #endregion
 
+        #region Enum
+
+        #endregion
+
         #region Path
 
         /// <summary>
@@ -223,12 +227,6 @@ namespace Shared.StringsNS
             return FlushSb();
         }
 
-        #endregion
-
-        #region Enum
-
-        #endregion
-
         private static readonly char[] InvalidFileNameChars =
         [
             '"', '<', '>', '|', '\0', '\u0001', '\u0002', '\u0003', '\u0004', '\u0005',
@@ -287,6 +285,8 @@ namespace Shared.StringsNS
             }
             return FlushSb();
         }
+
+        #endregion
 
         /// <summary>
         /// Escapes Unicode and ASCII non printable characters
@@ -374,6 +374,8 @@ namespace Shared.StringsNS
             }
         }
 
+        #region Search and Compare
+
         public static bool IsNumber(this char c)
         {
             return c is >= (char)48 and <= (char)57;
@@ -416,6 +418,9 @@ namespace Shared.StringsNS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool EndsWithO(this string source, string value) => source.EndsWith(value, StringComparison.Ordinal);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool EqualsOI(this string source, string value) => source.Equals(value, StringComparison.OrdinalIgnoreCase);
+
         public static bool ContainsOI(this IEnumerable<string> collection, string value)
         {
             foreach (var item in collection)
@@ -428,6 +433,8 @@ namespace Shared.StringsNS
         {
             return str is null or "";
         }
+
+        #endregion
 
         /// <summary>
         /// Evaluator for Regex.Replace extension.

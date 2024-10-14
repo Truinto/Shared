@@ -17,8 +17,12 @@
 		<PackageReference Include="MSTest.TestFramework" Version="*" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<GlobalAnalyzerConfigFiles Include="..\.globalconfiguration" Link=".globalconfiguration" />
+	<ItemGroup>		
+		<Compile Include="../General/Strings.cs" Link="Shared/Strings.cs" />
+		<Compile Include="../General/Collection.cs" Link="Shared/Collection.cs" />
+		<Compile Include="../General/Paths.cs" Link="Shared/Paths.cs" />
+		<Compile Include="../General/Json.cs" Link="Shared/Json.cs" />
+		<Compile Include="../General/LanguageCodes.cs" Link="Shared/LanguageCodes.cs" />
 	</ItemGroup>
 
 </Project>
