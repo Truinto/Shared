@@ -1,6 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace Shared
 {
@@ -16,196 +22,12 @@ namespace Shared
 
         public readonly override string ToString()
         {
-            return this.Int switch
+            foreach (var m in Map)
             {
-                none => "",
-                any => "any",
-                und => "und",
-                abk => "abk",
-                aar => "aar",
-                afr => "afr",
-                aka => "aka",
-                sqi => "sqi",
-                amh => "amh",
-                ara => "ara",
-                arg => "arg",
-                hye => "hye",
-                asm => "asm",
-                ava => "ava",
-                ave => "ave",
-                aym => "aym",
-                aze => "aze",
-                bam => "bam",
-                bak => "bak",
-                eus => "eus",
-                bel => "bel",
-                ben => "ben",
-                bis => "bis",
-                bos => "bos",
-                bre => "bre",
-                bul => "bul",
-                mya => "mya",
-                cat => "cat",
-                cha => "cha",
-                che => "che",
-                nya => "nya",
-                zho => "zho",
-                chu => "chu",
-                chv => "chv",
-                cor => "cor",
-                cos => "cos",
-                cre => "cre",
-                hrv => "hrv",
-                ces => "ces",
-                dan => "dan",
-                div => "div",
-                nld => "nld",
-                dzo => "dzo",
-                eng => "eng",
-                epo => "epo",
-                est => "est",
-                ewe => "ewe",
-                fao => "fao",
-                fij => "fij",
-                fin => "fin",
-                fra => "fra",
-                fry => "fry",
-                ful => "ful",
-                gla => "gla",
-                glg => "glg",
-                lug => "lug",
-                kat => "kat",
-                deu => "deu",
-                ell => "ell",
-                kal => "kal",
-                grn => "grn",
-                guj => "guj",
-                hat => "hat",
-                hau => "hau",
-                heb => "heb",
-                her => "her",
-                hin => "hin",
-                hmo => "hmo",
-                hun => "hun",
-                isl => "isl",
-                ido => "ido",
-                ibo => "ibo",
-                ind => "ind",
-                ina => "ina",
-                ile => "ile",
-                iku => "iku",
-                ipk => "ipk",
-                gle => "gle",
-                ita => "ita",
-                jpn => "jpn",
-                jav => "jav",
-                kan => "kan",
-                kau => "kau",
-                kas => "kas",
-                kaz => "kaz",
-                khm => "khm",
-                kik => "kik",
-                kin => "kin",
-                kir => "kir",
-                kom => "kom",
-                kon => "kon",
-                kor => "kor",
-                kua => "kua",
-                kur => "kur",
-                lao => "lao",
-                lat => "lat",
-                lav => "lav",
-                lim => "lim",
-                lin => "lin",
-                lit => "lit",
-                lub => "lub",
-                ltz => "ltz",
-                mkd => "mkd",
-                mlg => "mlg",
-                msa => "msa",
-                mal => "mal",
-                mlt => "mlt",
-                glv => "glv",
-                mri => "mri",
-                mar => "mar",
-                mah => "mah",
-                mon => "mon",
-                nau => "nau",
-                nav => "nav",
-                nde => "nde",
-                nbl => "nbl",
-                ndo => "ndo",
-                nep => "nep",
-                nor => "nor",
-                nob => "nob",
-                nno => "nno",
-                oci => "oci",
-                oji => "oji",
-                ori => "ori",
-                orm => "orm",
-                oss => "oss",
-                pli => "pli",
-                pus => "pus",
-                fas => "fas",
-                pol => "pol",
-                por => "por",
-                pan => "pan",
-                que => "que",
-                ron => "ron",
-                roh => "roh",
-                run => "run",
-                rus => "rus",
-                sme => "sme",
-                smo => "smo",
-                sag => "sag",
-                san => "san",
-                srd => "srd",
-                srp => "srp",
-                sna => "sna",
-                snd => "snd",
-                sin => "sin",
-                slk => "slk",
-                slv => "slv",
-                som => "som",
-                sot => "sot",
-                spa => "spa",
-                sun => "sun",
-                swa => "swa",
-                ssw => "ssw",
-                swe => "swe",
-                tgl => "tgl",
-                tah => "tah",
-                tgk => "tgk",
-                tam => "tam",
-                tat => "tat",
-                tel => "tel",
-                tha => "tha",
-                bod => "bod",
-                tir => "tir",
-                ton => "ton",
-                tso => "tso",
-                tsn => "tsn",
-                tur => "tur",
-                tuk => "tuk",
-                twi => "twi",
-                uig => "uig",
-                ukr => "ukr",
-                urd => "urd",
-                uzb => "uzb",
-                ven => "ven",
-                vie => "vie",
-                vol => "vol",
-                wln => "wln",
-                cym => "cym",
-                wol => "wol",
-                xho => "xho",
-                iii => "iii",
-                yid => "yid",
-                yor => "yor",
-                zha => "zha",
-                zul => "zul",
-                _ => ""
-            };
+                if (m.Value == this.Int && m.Key.Length == 3)
+                    return m.Key;
+            }
+            return "";
         }
 
         /// <summary>
@@ -217,1936 +39,45 @@ namespace Shared
         /// </summary>
         public readonly string ToString(string format)
         {
-            string result;
             if (format is "2")
             {
-                result = this.Int switch
+                foreach (var m in Map)
                 {
-                    none => "",
-                    any => "any",
-                    und => "und",
-                    ab => "ab",
-                    aa => "aa",
-                    af => "af",
-                    ak => "ak",
-                    sq => "sq",
-                    am => "am",
-                    ar => "ar",
-                    an => "an",
-                    hy => "hy",
-                    @as => "as",
-                    av => "av",
-                    ae => "ae",
-                    ay => "ay",
-                    az => "az",
-                    bm => "bm",
-                    ba => "ba",
-                    eu => "eu",
-                    be => "be",
-                    bn => "bn",
-                    bi => "bi",
-                    bs => "bs",
-                    br => "br",
-                    bg => "bg",
-                    my => "my",
-                    ca => "ca",
-                    ch => "ch",
-                    ce => "ce",
-                    ny => "ny",
-                    zh => "zh",
-                    cu => "cu",
-                    cv => "cv",
-                    kw => "kw",
-                    co => "co",
-                    cr => "cr",
-                    hr => "hr",
-                    cs => "cs",
-                    da => "da",
-                    dv => "dv",
-                    nl => "nl",
-                    dz => "dz",
-                    en => "en",
-                    eo => "eo",
-                    et => "et",
-                    ee => "ee",
-                    fo => "fo",
-                    fj => "fj",
-                    fi => "fi",
-                    fr => "fr",
-                    fy => "fy",
-                    ff => "ff",
-                    gd => "gd",
-                    gl => "gl",
-                    lg => "lg",
-                    ka => "ka",
-                    de => "de",
-                    el => "el",
-                    kl => "kl",
-                    gn => "gn",
-                    gu => "gu",
-                    ht => "ht",
-                    ha => "ha",
-                    he => "he",
-                    hz => "hz",
-                    hi => "hi",
-                    ho => "ho",
-                    hu => "hu",
-                    @is => "is",
-                    io => "io",
-                    ig => "ig",
-                    id => "id",
-                    ia => "ia",
-                    ie => "ie",
-                    iu => "iu",
-                    ik => "ik",
-                    ga => "ga",
-                    it => "it",
-                    ja => "ja",
-                    jv => "jv",
-                    kn => "kn",
-                    kr => "kr",
-                    ks => "ks",
-                    kk => "kk",
-                    km => "km",
-                    ki => "ki",
-                    rw => "rw",
-                    ky => "ky",
-                    kv => "kv",
-                    kg => "kg",
-                    ko => "ko",
-                    kj => "kj",
-                    ku => "ku",
-                    lo => "lo",
-                    la => "la",
-                    lv => "lv",
-                    li => "li",
-                    ln => "ln",
-                    lt => "lt",
-                    lu => "lu",
-                    lb => "lb",
-                    mk => "mk",
-                    mg => "mg",
-                    ms => "ms",
-                    ml => "ml",
-                    mt => "mt",
-                    gv => "gv",
-                    mi => "mi",
-                    mr => "mr",
-                    mh => "mh",
-                    mn => "mn",
-                    na => "na",
-                    nv => "nv",
-                    nd => "nd",
-                    nr => "nr",
-                    ng => "ng",
-                    ne => "ne",
-                    no => "no",
-                    nb => "nb",
-                    nn => "nn",
-                    oc => "oc",
-                    oj => "oj",
-                    or => "or",
-                    om => "om",
-                    os => "os",
-                    pi => "pi",
-                    ps => "ps",
-                    fa => "fa",
-                    pl => "pl",
-                    pt => "pt",
-                    pa => "pa",
-                    qu => "qu",
-                    ro => "ro",
-                    rm => "rm",
-                    rn => "rn",
-                    ru => "ru",
-                    se => "se",
-                    sm => "sm",
-                    sg => "sg",
-                    sa => "sa",
-                    sc => "sc",
-                    sr => "sr",
-                    sn => "sn",
-                    sd => "sd",
-                    si => "si",
-                    sk => "sk",
-                    sl => "sl",
-                    so => "so",
-                    st => "st",
-                    es => "es",
-                    su => "su",
-                    sw => "sw",
-                    ss => "ss",
-                    sv => "sv",
-                    tl => "tl",
-                    ty => "ty",
-                    tg => "tg",
-                    ta => "ta",
-                    tt => "tt",
-                    te => "te",
-                    th => "th",
-                    bo => "bo",
-                    ti => "ti",
-                    to => "to",
-                    ts => "ts",
-                    tn => "tn",
-                    tr => "tr",
-                    tk => "tk",
-                    tw => "tw",
-                    ug => "ug",
-                    uk => "uk",
-                    ur => "ur",
-                    uz => "uz",
-                    ve => "ve",
-                    vi => "vi",
-                    vo => "vo",
-                    wa => "wa",
-                    cy => "cy",
-                    wo => "wo",
-                    xh => "xh",
-                    ii => "ii",
-                    yi => "yi",
-                    yo => "yo",
-                    za => "za",
-                    zu => "zu",
-                    _ => ""
-                };
+                    if (m.Value == this.Int && m.Key.Length == 2)
+                        return m.Key;
+                }
             }
-            else if (format is "3")
-                result = ToString();
-            else
+            if (format is not "3")
             {
-                result = this.Int switch
+                foreach (var m in Map)
                 {
-                    none => "",
-                    any => "any",
-                    und => "und",
-                    Abkhazian => "Abkhazian",
-                    Afar => "Afar",
-                    Afrikaans => "Afrikaans",
-                    Akan => "Akan",
-                    Albanian => "Albanian",
-                    Amharic => "Amharic",
-                    Arabic => "Arabic",
-                    Aragonese => "Aragonese",
-                    Armenian => "Armenian",
-                    Assamese => "Assamese",
-                    Avaric => "Avaric",
-                    Avestan => "Avestan",
-                    Aymara => "Aymara",
-                    Azerbaijani => "Azerbaijani",
-                    Bambara => "Bambara",
-                    Bashkir => "Bashkir",
-                    Basque => "Basque",
-                    Belarusian => "Belarusian",
-                    Bengali => "Bengali",
-                    Bislama => "Bislama",
-                    Bosnian => "Bosnian",
-                    Breton => "Breton",
-                    Bulgarian => "Bulgarian",
-                    Burmese => "Burmese",
-                    Catalan => "Catalan",
-                    Chamorro => "Chamorro",
-                    Chechen => "Chechen",
-                    Chichewa => "Chichewa",
-                    Chinese => "Chinese",
-                    Old_Slavonic => "Old_Slavonic",
-                    Chuvash => "Chuvash",
-                    Cornish => "Cornish",
-                    Corsican => "Corsican",
-                    Cree => "Cree",
-                    Croatian => "Croatian",
-                    Czech => "Czech",
-                    Danish => "Danish",
-                    Divehi => "Divehi",
-                    Dutch => "Dutch",
-                    Dzongkha => "Dzongkha",
-                    English => "English",
-                    Esperanto => "Esperanto",
-                    Estonian => "Estonian",
-                    Ewe => "Ewe",
-                    Faroese => "Faroese",
-                    Fijian => "Fijian",
-                    Finnish => "Finnish",
-                    French => "French",
-                    Western_Frisian => "Western_Frisian",
-                    Fulah => "Fulah",
-                    Gaelic => "Gaelic",
-                    Galician => "Galician",
-                    Ganda => "Ganda",
-                    Georgian => "Georgian",
-                    German => "German",
-                    Greek => "Greek",
-                    Greenlandic => "Greenlandic",
-                    Guarani => "Guarani",
-                    Gujarati => "Gujarati",
-                    Haitian_Creole => "Haitian_Creole",
-                    Hausa => "Hausa",
-                    Hebrew => "Hebrew",
-                    Herero => "Herero",
-                    Hindi => "Hindi",
-                    Hiri_Motu => "Hiri_Motu",
-                    Hungarian => "Hungarian",
-                    Icelandic => "Icelandic",
-                    Ido => "Ido",
-                    Igbo => "Igbo",
-                    Indonesian => "Indonesian",
-                    Interlingua => "Interlingua",
-                    Interlingue_Occidental => "Interlingue_Occidental",
-                    Inuktitut => "Inuktitut",
-                    Inupiaq => "Inupiaq",
-                    Irish => "Irish",
-                    Italian => "Italian",
-                    Japanese => "Japanese",
-                    Javanese => "Javanese",
-                    Kannada => "Kannada",
-                    Kanuri => "Kanuri",
-                    Kashmiri => "Kashmiri",
-                    Kazakh => "Kazakh",
-                    Central_Khmer => "Central_Khmer",
-                    Kikuyu => "Kikuyu",
-                    Kinyarwanda => "Kinyarwanda",
-                    Kirghiz => "Kirghiz",
-                    Komi => "Komi",
-                    Kongo => "Kongo",
-                    Korean => "Korean",
-                    Kuanyama => "Kuanyama",
-                    Kurdish => "Kurdish",
-                    Lao => "Lao",
-                    Latin => "Latin",
-                    Latvian => "Latvian",
-                    Limburgan => "Limburgan",
-                    Lingala => "Lingala",
-                    Lithuanian => "Lithuanian",
-                    Luba_Katanga => "Luba_Katanga",
-                    Luxembourgish => "Luxembourgish",
-                    Macedonian => "Macedonian",
-                    Malagasy => "Malagasy",
-                    Malay => "Malay",
-                    Malayalam => "Malayalam",
-                    Maltese => "Maltese",
-                    Manx => "Manx",
-                    Maori => "Maori",
-                    Marathi => "Marathi",
-                    Marshallese => "Marshallese",
-                    Mongolian => "Mongolian",
-                    Nauru => "Nauru",
-                    Navajo => "Navajo",
-                    North_Ndebele => "North_Ndebele",
-                    South_Ndebele => "South_Ndebele",
-                    Ndonga => "Ndonga",
-                    Nepali => "Nepali",
-                    Norwegian => "Norwegian",
-                    Norwegian_Bokmal => "Norwegian_Bokmal",
-                    Norwegian_Nynorsk => "Norwegian_Nynorsk",
-                    Occitan => "Occitan",
-                    Ojibwa => "Ojibwa",
-                    Oriya => "Oriya",
-                    Oromo => "Oromo",
-                    Ossetian => "Ossetian",
-                    Pali => "Pali",
-                    Pashto => "Pashto",
-                    Persian => "Persian",
-                    Polish => "Polish",
-                    Portuguese => "Portuguese",
-                    Punjabi => "Punjabi",
-                    Quechua => "Quechua",
-                    Romanian => "Romanian",
-                    Romansh => "Romansh",
-                    Rundi => "Rundi",
-                    Russian => "Russian",
-                    Northern_Sami => "Northern_Sami",
-                    Samoan => "Samoan",
-                    Sango => "Sango",
-                    Sanskrit => "Sanskrit",
-                    Sardinian => "Sardinian",
-                    Serbian => "Serbian",
-                    Shona => "Shona",
-                    Sindhi => "Sindhi",
-                    Sinhala => "Sinhala",
-                    Slovak => "Slovak",
-                    Slovenian => "Slovenian",
-                    Somali => "Somali",
-                    Southern_Sotho => "Southern_Sotho",
-                    Spanish => "Spanish",
-                    Sundanese => "Sundanese",
-                    Swahili => "Swahili",
-                    Swati => "Swati",
-                    Swedish => "Swedish",
-                    Tagalog => "Tagalog",
-                    Tahitian => "Tahitian",
-                    Tajik => "Tajik",
-                    Tamil => "Tamil",
-                    Tatar => "Tatar",
-                    Telugu => "Telugu",
-                    Thai => "Thai",
-                    Tibetan => "Tibetan",
-                    Tigrinya => "Tigrinya",
-                    Tonga => "Tonga",
-                    Tsonga => "Tsonga",
-                    Tswana => "Tswana",
-                    Turkish => "Turkish",
-                    Turkmen => "Turkmen",
-                    Twi => "Twi",
-                    Uighur => "Uighur",
-                    Ukrainian => "Ukrainian",
-                    Urdu => "Urdu",
-                    Uzbek => "Uzbek",
-                    Venda => "Venda",
-                    Vietnamese => "Vietnamese",
-                    Volapük => "Volapük",
-                    Walloon => "Walloon",
-                    Welsh => "Welsh",
-                    Wolof => "Wolof",
-                    Xhosa => "Xhosa",
-                    Sichuan_Yi => "Sichuan_Yi",
-                    Yiddish => "Yiddish",
-                    Yoruba => "Yoruba",
-                    Zhuang => "Zhuang",
-                    Zulu => "Zulu",
-                    _ => ""
-                };
+                    if (m.Value == this.Int && m.Key[0] is > 'A' and < 'Z')
+                        if (format is "n")
+                            return m.Key.Replace('_', ' ');
+                        else
+                            return m.Key;
+                }
             }
-
-            if (format is "n")
-                result = result.Replace('_', ' ');
-
-            return result;
+            return ToString();
         }
 
         public static LanguageCodes Parse(string? name)
         {
-            return name switch
-            {
-                "" => new(none),
-                "any" => new(any),
-                "und" => new(und),
-
-                "abk" => new(abk),
-                "ab" => new(ab),
-                "Abkhazian" => new(Abkhazian),
-
-                "aar" => new(aar),
-                "aa" => new(aa),
-                "Afar" => new(Afar),
-
-                "afr" => new(afr),
-                "af" => new(af),
-                "Afrikaans" => new(Afrikaans),
-
-                "aka" => new(aka),
-                "ak" => new(ak),
-                "Akan" => new(Akan),
-
-                "sqi" => new(sqi),
-                "alb" => new(alb),
-                "sq" => new(sq),
-                "Albanian" => new(Albanian),
-
-                "amh" => new(amh),
-                "am" => new(am),
-                "Amharic" => new(Amharic),
-
-                "ara" => new(ara),
-                "ar" => new(ar),
-                "Arabic" => new(Arabic),
-
-                "arg" => new(arg),
-                "an" => new(an),
-                "Aragonese" => new(Aragonese),
-
-                "hye" => new(hye),
-                "arm" => new(arm),
-                "hy" => new(hy),
-                "Armenian" => new(Armenian),
-
-                "asm" => new(asm),
-                "as" => new(@as),
-                "Assamese" => new(Assamese),
-
-                "ava" => new(ava),
-                "av" => new(av),
-                "Avaric" => new(Avaric),
-
-                "ave" => new(ave),
-                "ae" => new(ae),
-                "Avestan" => new(Avestan),
-
-                "aym" => new(aym),
-                "ay" => new(ay),
-                "Aymara" => new(Aymara),
-
-                "aze" => new(aze),
-                "az" => new(az),
-                "Azerbaijani" => new(Azerbaijani),
-
-                "bam" => new(bam),
-                "bm" => new(bm),
-                "Bambara" => new(Bambara),
-
-                "bak" => new(bak),
-                "ba" => new(ba),
-                "Bashkir" => new(Bashkir),
-
-                "eus" => new(eus),
-                "baq" => new(baq),
-                "eu" => new(eu),
-                "Basque" => new(Basque),
-
-                "bel" => new(bel),
-                "be" => new(be),
-                "Belarusian" => new(Belarusian),
-
-                "ben" => new(ben),
-                "bn" => new(bn),
-                "Bengali" => new(Bengali),
-
-                "bis" => new(bis),
-                "bi" => new(bi),
-                "Bislama" => new(Bislama),
-
-                "bos" => new(bos),
-                "bs" => new(bs),
-                "Bosnian" => new(Bosnian),
-
-                "bre" => new(bre),
-                "br" => new(br),
-                "Breton" => new(Breton),
-
-                "bul" => new(bul),
-                "bg" => new(bg),
-                "Bulgarian" => new(Bulgarian),
-
-                "mya" => new(mya),
-                "bur" => new(bur),
-                "my" => new(my),
-                "Burmese" => new(Burmese),
-
-                "cat" => new(cat),
-                "ca" => new(ca),
-                "Catalan" => new(Catalan),
-
-                "cha" => new(cha),
-                "ch" => new(ch),
-                "Chamorro" => new(Chamorro),
-
-                "che" => new(che),
-                "ce" => new(ce),
-                "Chechen" => new(Chechen),
-
-                "nya" => new(nya),
-                "ny" => new(ny),
-                "Chichewa" => new(Chichewa),
-
-                "zho" => new(zho),
-                "chi" => new(chi),
-                "zh" => new(zh),
-                "Chinese" => new(Chinese),
-
-                "chu" => new(chu),
-                "cu" => new(cu),
-                "Old_Slavonic" => new(Old_Slavonic),
-
-                "chv" => new(chv),
-                "cv" => new(cv),
-                "Chuvash" => new(Chuvash),
-
-                "cor" => new(cor),
-                "kw" => new(kw),
-                "Cornish" => new(Cornish),
-
-                "cos" => new(cos),
-                "co" => new(co),
-                "Corsican" => new(Corsican),
-
-                "cre" => new(cre),
-                "cr" => new(cr),
-                "Cree" => new(Cree),
-
-                "hrv" => new(hrv),
-                "hr" => new(hr),
-                "Croatian" => new(Croatian),
-
-                "ces" => new(ces),
-                "cze" => new(cze),
-                "cs" => new(cs),
-                "Czech" => new(Czech),
-
-                "dan" => new(dan),
-                "da" => new(da),
-                "Danish" => new(Danish),
-
-                "div" => new(div),
-                "dv" => new(dv),
-                "Divehi" => new(Divehi),
-
-                "nld" => new(nld),
-                "dut" => new(dut),
-                "nl" => new(nl),
-                "Dutch" => new(Dutch),
-
-                "dzo" => new(dzo),
-                "dz" => new(dz),
-                "Dzongkha" => new(Dzongkha),
-
-                "eng" => new(eng),
-                "en" => new(en),
-                "English" => new(English),
-
-                "epo" => new(epo),
-                "eo" => new(eo),
-                "Esperanto" => new(Esperanto),
-
-                "est" => new(est),
-                "et" => new(et),
-                "Estonian" => new(Estonian),
-
-                "ewe" => new(ewe),
-                "ee" => new(ee),
-                "Ewe" => new(Ewe),
-
-                "fao" => new(fao),
-                "fo" => new(fo),
-                "Faroese" => new(Faroese),
-
-                "fij" => new(fij),
-                "fj" => new(fj),
-                "Fijian" => new(Fijian),
-
-                "fin" => new(fin),
-                "fi" => new(fi),
-                "Finnish" => new(Finnish),
-
-                "fra" => new(fra),
-                "fre" => new(fre),
-                "fr" => new(fr),
-                "French" => new(French),
-
-                "fry" => new(fry),
-                "fy" => new(fy),
-                "Western_Frisian" => new(Western_Frisian),
-
-                "ful" => new(ful),
-                "ff" => new(ff),
-                "Fulah" => new(Fulah),
-
-                "gla" => new(gla),
-                "gd" => new(gd),
-                "Gaelic" => new(Gaelic),
-
-                "glg" => new(glg),
-                "gl" => new(gl),
-                "Galician" => new(Galician),
-
-                "lug" => new(lug),
-                "lg" => new(lg),
-                "Ganda" => new(Ganda),
-
-                "kat" => new(kat),
-                "geo" => new(geo),
-                "ka" => new(ka),
-                "Georgian" => new(Georgian),
-
-                "deu" => new(deu),
-                "ger" => new(ger),
-                "de" => new(de),
-                "German" => new(German),
-
-                "ell" => new(ell),
-                "gre" => new(gre),
-                "el" => new(el),
-                "Greek" => new(Greek),
-
-                "kal" => new(kal),
-                "kl" => new(kl),
-                "Greenlandic" => new(Greenlandic),
-
-                "grn" => new(grn),
-                "gn" => new(gn),
-                "Guarani" => new(Guarani),
-
-                "guj" => new(guj),
-                "gu" => new(gu),
-                "Gujarati" => new(Gujarati),
-
-                "hat" => new(hat),
-                "ht" => new(ht),
-                "Haitian_Creole" => new(Haitian_Creole),
-
-                "hau" => new(hau),
-                "ha" => new(ha),
-                "Hausa" => new(Hausa),
-
-                "heb" => new(heb),
-                "he" => new(he),
-                "Hebrew" => new(Hebrew),
-
-                "her" => new(her),
-                "hz" => new(hz),
-                "Herero" => new(Herero),
-
-                "hin" => new(hin),
-                "hi" => new(hi),
-                "Hindi" => new(Hindi),
-
-                "hmo" => new(hmo),
-                "ho" => new(ho),
-                "Hiri_Motu" => new(Hiri_Motu),
-
-                "hun" => new(hun),
-                "hu" => new(hu),
-                "Hungarian" => new(Hungarian),
-
-                "isl" => new(isl),
-                "ice" => new(ice),
-                "is" => new(@is),
-                "Icelandic" => new(Icelandic),
-
-                "ido" => new(ido),
-                "io" => new(io),
-                "Ido" => new(Ido),
-
-                "ibo" => new(ibo),
-                "ig" => new(ig),
-                "Igbo" => new(Igbo),
-
-                "ind" => new(ind),
-                "id" => new(id),
-                "Indonesian" => new(Indonesian),
-
-                "ina" => new(ina),
-                "ia" => new(ia),
-                "Interlingua" => new(Interlingua),
-
-                "ile" => new(ile),
-                "ie" => new(ie),
-                "Interlingue_Occidental" => new(Interlingue_Occidental),
-
-                "iku" => new(iku),
-                "iu" => new(iu),
-                "Inuktitut" => new(Inuktitut),
-
-                "ipk" => new(ipk),
-                "ik" => new(ik),
-                "Inupiaq" => new(Inupiaq),
-
-                "gle" => new(gle),
-                "ga" => new(ga),
-                "Irish" => new(Irish),
-
-                "ita" => new(ita),
-                "it" => new(it),
-                "Italian" => new(Italian),
-
-                "jpn" => new(jpn),
-                "ja" => new(ja),
-                "Japanese" => new(Japanese),
-
-                "jav" => new(jav),
-                "jv" => new(jv),
-                "Javanese" => new(Javanese),
-
-                "kan" => new(kan),
-                "kn" => new(kn),
-                "Kannada" => new(Kannada),
-
-                "kau" => new(kau),
-                "kr" => new(kr),
-                "Kanuri" => new(Kanuri),
-
-                "kas" => new(kas),
-                "ks" => new(ks),
-                "Kashmiri" => new(Kashmiri),
-
-                "kaz" => new(kaz),
-                "kk" => new(kk),
-                "Kazakh" => new(Kazakh),
-
-                "khm" => new(khm),
-                "km" => new(km),
-                "Central_Khmer" => new(Central_Khmer),
-
-                "kik" => new(kik),
-                "ki" => new(ki),
-                "Kikuyu" => new(Kikuyu),
-
-                "kin" => new(kin),
-                "rw" => new(rw),
-                "Kinyarwanda" => new(Kinyarwanda),
-
-                "kir" => new(kir),
-                "ky" => new(ky),
-                "Kirghiz" => new(Kirghiz),
-
-                "kom" => new(kom),
-                "kv" => new(kv),
-                "Komi" => new(Komi),
-
-                "kon" => new(kon),
-                "kg" => new(kg),
-                "Kongo" => new(Kongo),
-
-                "kor" => new(kor),
-                "ko" => new(ko),
-                "Korean" => new(Korean),
-
-                "kua" => new(kua),
-                "kj" => new(kj),
-                "Kuanyama" => new(Kuanyama),
-
-                "kur" => new(kur),
-                "ku" => new(ku),
-                "Kurdish" => new(Kurdish),
-
-                "lao" => new(lao),
-                "lo" => new(lo),
-                "Lao" => new(Lao),
-
-                "lat" => new(lat),
-                "la" => new(la),
-                "Latin" => new(Latin),
-
-                "lav" => new(lav),
-                "lv" => new(lv),
-                "Latvian" => new(Latvian),
-
-                "lim" => new(lim),
-                "li" => new(li),
-                "Limburgan" => new(Limburgan),
-
-                "lin" => new(lin),
-                "ln" => new(ln),
-                "Lingala" => new(Lingala),
-
-                "lit" => new(lit),
-                "lt" => new(lt),
-                "Lithuanian" => new(Lithuanian),
-
-                "lub" => new(lub),
-                "lu" => new(lu),
-                "Luba_Katanga" => new(Luba_Katanga),
-
-                "ltz" => new(ltz),
-                "lb" => new(lb),
-                "Luxembourgish" => new(Luxembourgish),
-
-                "mkd" => new(mkd),
-                "mac" => new(mac),
-                "mk" => new(mk),
-                "Macedonian" => new(Macedonian),
-
-                "mlg" => new(mlg),
-                "mg" => new(mg),
-                "Malagasy" => new(Malagasy),
-
-                "msa" => new(msa),
-                "may" => new(may),
-                "ms" => new(ms),
-                "Malay" => new(Malay),
-
-                "mal" => new(mal),
-                "ml" => new(ml),
-                "Malayalam" => new(Malayalam),
-
-                "mlt" => new(mlt),
-                "mt" => new(mt),
-                "Maltese" => new(Maltese),
-
-                "glv" => new(glv),
-                "gv" => new(gv),
-                "Manx" => new(Manx),
-
-                "mri" => new(mri),
-                "mao" => new(mao),
-                "mi" => new(mi),
-                "Maori" => new(Maori),
-
-                "mar" => new(mar),
-                "mr" => new(mr),
-                "Marathi" => new(Marathi),
-
-                "mah" => new(mah),
-                "mh" => new(mh),
-                "Marshallese" => new(Marshallese),
-
-                "mon" => new(mon),
-                "mn" => new(mn),
-                "Mongolian" => new(Mongolian),
-
-                "nau" => new(nau),
-                "na" => new(na),
-                "Nauru" => new(Nauru),
-
-                "nav" => new(nav),
-                "nv" => new(nv),
-                "Navajo" => new(Navajo),
-
-                "nde" => new(nde),
-                "nd" => new(nd),
-                "North_Ndebele" => new(North_Ndebele),
-
-                "nbl" => new(nbl),
-                "nr" => new(nr),
-                "South_Ndebele" => new(South_Ndebele),
-
-                "ndo" => new(ndo),
-                "ng" => new(ng),
-                "Ndonga" => new(Ndonga),
-
-                "nep" => new(nep),
-                "ne" => new(ne),
-                "Nepali" => new(Nepali),
-
-                "nor" => new(nor),
-                "no" => new(no),
-                "Norwegian" => new(Norwegian),
-
-                "nob" => new(nob),
-                "nb" => new(nb),
-                "Norwegian_Bokmal" => new(Norwegian_Bokmal),
-
-                "nno" => new(nno),
-                "nn" => new(nn),
-                "Norwegian_Nynorsk" => new(Norwegian_Nynorsk),
-
-                "oci" => new(oci),
-                "oc" => new(oc),
-                "Occitan" => new(Occitan),
-
-                "oji" => new(oji),
-                "oj" => new(oj),
-                "Ojibwa" => new(Ojibwa),
-
-                "ori" => new(ori),
-                "or" => new(or),
-                "Oriya" => new(Oriya),
-
-                "orm" => new(orm),
-                "om" => new(om),
-                "Oromo" => new(Oromo),
-
-                "oss" => new(oss),
-                "os" => new(os),
-                "Ossetian" => new(Ossetian),
-
-                "pli" => new(pli),
-                "pi" => new(pi),
-                "Pali" => new(Pali),
-
-                "pus" => new(pus),
-                "ps" => new(ps),
-                "Pashto" => new(Pashto),
-
-                "fas" => new(fas),
-                "per" => new(per),
-                "fa" => new(fa),
-                "Persian" => new(Persian),
-
-                "pol" => new(pol),
-                "pl" => new(pl),
-                "Polish" => new(Polish),
-
-                "por" => new(por),
-                "pt" => new(pt),
-                "Portuguese" => new(Portuguese),
-
-                "pan" => new(pan),
-                "pa" => new(pa),
-                "Punjabi" => new(Punjabi),
-
-                "que" => new(que),
-                "qu" => new(qu),
-                "Quechua" => new(Quechua),
-
-                "ron" => new(ron),
-                "rum" => new(rum),
-                "ro" => new(ro),
-                "Romanian" => new(Romanian),
-
-                "roh" => new(roh),
-                "rm" => new(rm),
-                "Romansh" => new(Romansh),
-
-                "run" => new(run),
-                "rn" => new(rn),
-                "Rundi" => new(Rundi),
-
-                "rus" => new(rus),
-                "ru" => new(ru),
-                "Russian" => new(Russian),
-
-                "sme" => new(sme),
-                "se" => new(se),
-                "Northern_Sami" => new(Northern_Sami),
-
-                "smo" => new(smo),
-                "sm" => new(sm),
-                "Samoan" => new(Samoan),
-
-                "sag" => new(sag),
-                "sg" => new(sg),
-                "Sango" => new(Sango),
-
-                "san" => new(san),
-                "sa" => new(sa),
-                "Sanskrit" => new(Sanskrit),
-
-                "srd" => new(srd),
-                "sc" => new(sc),
-                "Sardinian" => new(Sardinian),
-
-                "srp" => new(srp),
-                "sr" => new(sr),
-                "Serbian" => new(Serbian),
-
-                "sna" => new(sna),
-                "sn" => new(sn),
-                "Shona" => new(Shona),
-
-                "snd" => new(snd),
-                "sd" => new(sd),
-                "Sindhi" => new(Sindhi),
-
-                "sin" => new(sin),
-                "si" => new(si),
-                "Sinhala" => new(Sinhala),
-
-                "slk" => new(slk),
-                "slo" => new(slo),
-                "sk" => new(sk),
-                "Slovak" => new(Slovak),
-
-                "slv" => new(slv),
-                "sl" => new(sl),
-                "Slovenian" => new(Slovenian),
-
-                "som" => new(som),
-                "so" => new(so),
-                "Somali" => new(Somali),
-
-                "sot" => new(sot),
-                "st" => new(st),
-                "Southern_Sotho" => new(Southern_Sotho),
-
-                "spa" => new(spa),
-                "es" => new(es),
-                "Spanish" => new(Spanish),
-
-                "sun" => new(sun),
-                "su" => new(su),
-                "Sundanese" => new(Sundanese),
-
-                "swa" => new(swa),
-                "sw" => new(sw),
-                "Swahili" => new(Swahili),
-
-                "ssw" => new(ssw),
-                "ss" => new(ss),
-                "Swati" => new(Swati),
-
-                "swe" => new(swe),
-                "sv" => new(sv),
-                "Swedish" => new(Swedish),
-
-                "tgl" => new(tgl),
-                "tl" => new(tl),
-                "Tagalog" => new(Tagalog),
-
-                "tah" => new(tah),
-                "ty" => new(ty),
-                "Tahitian" => new(Tahitian),
-
-                "tgk" => new(tgk),
-                "tg" => new(tg),
-                "Tajik" => new(Tajik),
-
-                "tam" => new(tam),
-                "ta" => new(ta),
-                "Tamil" => new(Tamil),
-
-                "tat" => new(tat),
-                "tt" => new(tt),
-                "Tatar" => new(Tatar),
-
-                "tel" => new(tel),
-                "te" => new(te),
-                "Telugu" => new(Telugu),
-
-                "tha" => new(tha),
-                "th" => new(th),
-                "Thai" => new(Thai),
-
-                "bod" => new(bod),
-                "tib" => new(tib),
-                "bo" => new(bo),
-                "Tibetan" => new(Tibetan),
-
-                "tir" => new(tir),
-                "ti" => new(ti),
-                "Tigrinya" => new(Tigrinya),
-
-                "ton" => new(ton),
-                "to" => new(to),
-                "Tonga" => new(Tonga),
-
-                "tso" => new(tso),
-                "ts" => new(ts),
-                "Tsonga" => new(Tsonga),
-
-                "tsn" => new(tsn),
-                "tn" => new(tn),
-                "Tswana" => new(Tswana),
-
-                "tur" => new(tur),
-                "tr" => new(tr),
-                "Turkish" => new(Turkish),
-
-                "tuk" => new(tuk),
-                "tk" => new(tk),
-                "Turkmen" => new(Turkmen),
-
-                "twi" => new(twi),
-                "tw" => new(tw),
-                "Twi" => new(Twi),
-
-                "uig" => new(uig),
-                "ug" => new(ug),
-                "Uighur" => new(Uighur),
-
-                "ukr" => new(ukr),
-                "uk" => new(uk),
-                "Ukrainian" => new(Ukrainian),
-
-                "urd" => new(urd),
-                "ur" => new(ur),
-                "Urdu" => new(Urdu),
-
-                "uzb" => new(uzb),
-                "uz" => new(uz),
-                "Uzbek" => new(Uzbek),
-
-                "ven" => new(ven),
-                "ve" => new(ve),
-                "Venda" => new(Venda),
-
-                "vie" => new(vie),
-                "vi" => new(vi),
-                "Vietnamese" => new(Vietnamese),
-
-                "vol" => new(vol),
-                "vo" => new(vo),
-                "Volapük" => new(Volapük),
-
-                "wln" => new(wln),
-                "wa" => new(wa),
-                "Walloon" => new(Walloon),
-
-                "cym" => new(cym),
-                "wel" => new(wel),
-                "cy" => new(cy),
-                "Welsh" => new(Welsh),
-
-                "wol" => new(wol),
-                "wo" => new(wo),
-                "Wolof" => new(Wolof),
-
-                "xho" => new(xho),
-                "xh" => new(xh),
-                "Xhosa" => new(Xhosa),
-
-                "iii" => new(iii),
-                "ii" => new(ii),
-                "Sichuan_Yi" => new(Sichuan_Yi),
-
-                "yid" => new(yid),
-                "yi" => new(yi),
-                "Yiddish" => new(Yiddish),
-
-                "yor" => new(yor),
-                "yo" => new(yo),
-                "Yoruba" => new(Yoruba),
-
-                "zha" => new(zha),
-                "za" => new(za),
-                "Zhuang" => new(Zhuang),
-
-                "zul" => new(zul),
-                "zu" => new(zu),
-                "Zulu" => new(Zulu),
-
-                _ => new(none),
-            };
+            if (name is not null && Map.TryGetValue(name, out int num))
+                return new(num);
+            return new(0);
         }
 
-        public static bool TryParse(string name, out LanguageCodes code)
+        public static bool TryParse(string? name, out LanguageCodes code)
         {
             code = Parse(name);
-            return code != 0;
+            return code != 0 || name is "und" or "Undetermined";
         }
 
         public static implicit operator LanguageCodes(int number)
         {
             return new(number);
         }
-
-        #region constants
-
-        public const int none = 0;
-        public const int any = 1000;
-        public const int und = 1;
-
-        public const int abk = 2;
-        public const int ab = 2;
-        public const int Abkhazian = 2;
-
-        public const int aar = 3;
-        public const int aa = 3;
-        public const int Afar = 3;
-
-        public const int afr = 4;
-        public const int af = 4;
-        public const int Afrikaans = 4;
-
-        public const int aka = 5;
-        public const int ak = 5;
-        public const int Akan = 5;
-
-        public const int sqi = 6;
-        public const int alb = 6;
-        public const int sq = 6;
-        public const int Albanian = 6;
-
-        public const int amh = 7;
-        public const int am = 7;
-        public const int Amharic = 7;
-
-        public const int ara = 8;
-        public const int ar = 8;
-        public const int Arabic = 8;
-
-        public const int arg = 9;
-        public const int an = 9;
-        public const int Aragonese = 9;
-
-        public const int hye = 10;
-        public const int arm = 10;
-        public const int hy = 10;
-        public const int Armenian = 10;
-
-        public const int asm = 11;
-        public const int @as = 11;
-        public const int Assamese = 11;
-
-        public const int ava = 12;
-        public const int av = 12;
-        public const int Avaric = 12;
-
-        public const int ave = 13;
-        public const int ae = 13;
-        public const int Avestan = 13;
-
-        public const int aym = 14;
-        public const int ay = 14;
-        public const int Aymara = 14;
-
-        public const int aze = 15;
-        public const int az = 15;
-        public const int Azerbaijani = 15;
-
-        public const int bam = 16;
-        public const int bm = 16;
-        public const int Bambara = 16;
-
-        public const int bak = 17;
-        public const int ba = 17;
-        public const int Bashkir = 17;
-
-        public const int eus = 18;
-        public const int baq = 18;
-        public const int eu = 18;
-        public const int Basque = 18;
-
-        public const int bel = 19;
-        public const int be = 19;
-        public const int Belarusian = 19;
-
-        public const int ben = 20;
-        public const int bn = 20;
-        public const int Bengali = 20;
-
-        public const int bis = 21;
-        public const int bi = 21;
-        public const int Bislama = 21;
-
-        public const int bos = 22;
-        public const int bs = 22;
-        public const int Bosnian = 22;
-
-        public const int bre = 23;
-        public const int br = 23;
-        public const int Breton = 23;
-
-        public const int bul = 24;
-        public const int bg = 24;
-        public const int Bulgarian = 24;
-
-        public const int mya = 25;
-        public const int bur = 25;
-        public const int my = 25;
-        public const int Burmese = 25;
-
-        public const int cat = 26;
-        public const int ca = 26;
-        public const int Catalan = 26;
-
-        public const int cha = 27;
-        public const int ch = 27;
-        public const int Chamorro = 27;
-
-        public const int che = 28;
-        public const int ce = 28;
-        public const int Chechen = 28;
-
-        public const int nya = 29;
-        public const int ny = 29;
-        public const int Chichewa = 29;
-
-        public const int zho = 30;
-        public const int chi = 30;
-        public const int zh = 30;
-        public const int Chinese = 30;
-
-        public const int chu = 31;
-        public const int cu = 31;
-        public const int Old_Slavonic = 31;
-
-        public const int chv = 32;
-        public const int cv = 32;
-        public const int Chuvash = 32;
-
-        public const int cor = 33;
-        public const int kw = 33;
-        public const int Cornish = 33;
-
-        public const int cos = 34;
-        public const int co = 34;
-        public const int Corsican = 34;
-
-        public const int cre = 35;
-        public const int cr = 35;
-        public const int Cree = 35;
-
-        public const int hrv = 36;
-        public const int hr = 36;
-        public const int Croatian = 36;
-
-        public const int ces = 37;
-        public const int cze = 37;
-        public const int cs = 37;
-        public const int Czech = 37;
-
-        public const int dan = 38;
-        public const int da = 38;
-        public const int Danish = 38;
-
-        public const int div = 39;
-        public const int dv = 39;
-        public const int Divehi = 39;
-
-        public const int nld = 40;
-        public const int dut = 40;
-        public const int nl = 40;
-        public const int Dutch = 40;
-
-        public const int dzo = 41;
-        public const int dz = 41;
-        public const int Dzongkha = 41;
-
-        public const int eng = 42;
-        public const int en = 42;
-        public const int English = 42;
-
-        public const int epo = 43;
-        public const int eo = 43;
-        public const int Esperanto = 43;
-
-        public const int est = 44;
-        public const int et = 44;
-        public const int Estonian = 44;
-
-        public const int ewe = 45;
-        public const int ee = 45;
-        public const int Ewe = 45;
-
-        public const int fao = 46;
-        public const int fo = 46;
-        public const int Faroese = 46;
-
-        public const int fij = 47;
-        public const int fj = 47;
-        public const int Fijian = 47;
-
-        public const int fin = 48;
-        public const int fi = 48;
-        public const int Finnish = 48;
-
-        public const int fra = 49;
-        public const int fre = 49;
-        public const int fr = 49;
-        public const int French = 49;
-
-        public const int fry = 50;
-        public const int fy = 50;
-        public const int Western_Frisian = 50;
-
-        public const int ful = 51;
-        public const int ff = 51;
-        public const int Fulah = 51;
-
-        public const int gla = 52;
-        public const int gd = 52;
-        public const int Gaelic = 52;
-
-        public const int glg = 53;
-        public const int gl = 53;
-        public const int Galician = 53;
-
-        public const int lug = 54;
-        public const int lg = 54;
-        public const int Ganda = 54;
-
-        public const int kat = 55;
-        public const int geo = 55;
-        public const int ka = 55;
-        public const int Georgian = 55;
-
-        public const int deu = 56;
-        public const int ger = 56;
-        public const int de = 56;
-        public const int German = 56;
-
-        public const int ell = 57;
-        public const int gre = 57;
-        public const int el = 57;
-        public const int Greek = 57;
-
-        public const int kal = 58;
-        public const int kl = 58;
-        public const int Greenlandic = 58;
-
-        public const int grn = 59;
-        public const int gn = 59;
-        public const int Guarani = 59;
-
-        public const int guj = 60;
-        public const int gu = 60;
-        public const int Gujarati = 60;
-
-        public const int hat = 61;
-        public const int ht = 61;
-        public const int Haitian_Creole = 61;
-
-        public const int hau = 62;
-        public const int ha = 62;
-        public const int Hausa = 62;
-
-        public const int heb = 63;
-        public const int he = 63;
-        public const int Hebrew = 63;
-
-        public const int her = 64;
-        public const int hz = 64;
-        public const int Herero = 64;
-
-        public const int hin = 65;
-        public const int hi = 65;
-        public const int Hindi = 65;
-
-        public const int hmo = 66;
-        public const int ho = 66;
-        public const int Hiri_Motu = 66;
-
-        public const int hun = 67;
-        public const int hu = 67;
-        public const int Hungarian = 67;
-
-        public const int isl = 68;
-        public const int ice = 68;
-        public const int @is = 68;
-        public const int Icelandic = 68;
-
-        public const int ido = 69;
-        public const int io = 69;
-        public const int Ido = 69;
-
-        public const int ibo = 70;
-        public const int ig = 70;
-        public const int Igbo = 70;
-
-        public const int ind = 71;
-        public const int id = 71;
-        public const int Indonesian = 71;
-
-        public const int ina = 72;
-        public const int ia = 72;
-        public const int Interlingua = 72;
-
-        public const int ile = 73;
-        public const int ie = 73;
-        public const int Interlingue_Occidental = 73;
-
-        public const int iku = 74;
-        public const int iu = 74;
-        public const int Inuktitut = 74;
-
-        public const int ipk = 75;
-        public const int ik = 75;
-        public const int Inupiaq = 75;
-
-        public const int gle = 76;
-        public const int ga = 76;
-        public const int Irish = 76;
-
-        public const int ita = 77;
-        public const int it = 77;
-        public const int Italian = 77;
-
-        public const int jpn = 78;
-        public const int ja = 78;
-        public const int Japanese = 78;
-
-        public const int jav = 79;
-        public const int jv = 79;
-        public const int Javanese = 79;
-
-        public const int kan = 80;
-        public const int kn = 80;
-        public const int Kannada = 80;
-
-        public const int kau = 81;
-        public const int kr = 81;
-        public const int Kanuri = 81;
-
-        public const int kas = 82;
-        public const int ks = 82;
-        public const int Kashmiri = 82;
-
-        public const int kaz = 83;
-        public const int kk = 83;
-        public const int Kazakh = 83;
-
-        public const int khm = 84;
-        public const int km = 84;
-        public const int Central_Khmer = 84;
-
-        public const int kik = 85;
-        public const int ki = 85;
-        public const int Kikuyu = 85;
-
-        public const int kin = 86;
-        public const int rw = 86;
-        public const int Kinyarwanda = 86;
-
-        public const int kir = 87;
-        public const int ky = 87;
-        public const int Kirghiz = 87;
-
-        public const int kom = 88;
-        public const int kv = 88;
-        public const int Komi = 88;
-
-        public const int kon = 89;
-        public const int kg = 89;
-        public const int Kongo = 89;
-
-        public const int kor = 90;
-        public const int ko = 90;
-        public const int Korean = 90;
-
-        public const int kua = 91;
-        public const int kj = 91;
-        public const int Kuanyama = 91;
-
-        public const int kur = 92;
-        public const int ku = 92;
-        public const int Kurdish = 92;
-
-        public const int lao = 93;
-        public const int lo = 93;
-        public const int Lao = 93;
-
-        public const int lat = 94;
-        public const int la = 94;
-        public const int Latin = 94;
-
-        public const int lav = 95;
-        public const int lv = 95;
-        public const int Latvian = 95;
-
-        public const int lim = 96;
-        public const int li = 96;
-        public const int Limburgan = 96;
-
-        public const int lin = 97;
-        public const int ln = 97;
-        public const int Lingala = 97;
-
-        public const int lit = 98;
-        public const int lt = 98;
-        public const int Lithuanian = 98;
-
-        public const int lub = 99;
-        public const int lu = 99;
-        public const int Luba_Katanga = 99;
-
-        public const int ltz = 100;
-        public const int lb = 100;
-        public const int Luxembourgish = 100;
-
-        public const int mkd = 101;
-        public const int mac = 101;
-        public const int mk = 101;
-        public const int Macedonian = 101;
-
-        public const int mlg = 102;
-        public const int mg = 102;
-        public const int Malagasy = 102;
-
-        public const int msa = 103;
-        public const int may = 103;
-        public const int ms = 103;
-        public const int Malay = 103;
-
-        public const int mal = 104;
-        public const int ml = 104;
-        public const int Malayalam = 104;
-
-        public const int mlt = 105;
-        public const int mt = 105;
-        public const int Maltese = 105;
-
-        public const int glv = 106;
-        public const int gv = 106;
-        public const int Manx = 106;
-
-        public const int mri = 107;
-        public const int mao = 107;
-        public const int mi = 107;
-        public const int Maori = 107;
-
-        public const int mar = 108;
-        public const int mr = 108;
-        public const int Marathi = 108;
-
-        public const int mah = 109;
-        public const int mh = 109;
-        public const int Marshallese = 109;
-
-        public const int mon = 110;
-        public const int mn = 110;
-        public const int Mongolian = 110;
-
-        public const int nau = 111;
-        public const int na = 111;
-        public const int Nauru = 111;
-
-        public const int nav = 112;
-        public const int nv = 112;
-        public const int Navajo = 112;
-
-        public const int nde = 113;
-        public const int nd = 113;
-        public const int North_Ndebele = 113;
-
-        public const int nbl = 114;
-        public const int nr = 114;
-        public const int South_Ndebele = 114;
-
-        public const int ndo = 115;
-        public const int ng = 115;
-        public const int Ndonga = 115;
-
-        public const int nep = 116;
-        public const int ne = 116;
-        public const int Nepali = 116;
-
-        public const int nor = 117;
-        public const int no = 117;
-        public const int Norwegian = 117;
-
-        public const int nob = 118;
-        public const int nb = 118;
-        public const int Norwegian_Bokmal = 118;
-
-        public const int nno = 119;
-        public const int nn = 119;
-        public const int Norwegian_Nynorsk = 119;
-
-        public const int oci = 120;
-        public const int oc = 120;
-        public const int Occitan = 120;
-
-        public const int oji = 121;
-        public const int oj = 121;
-        public const int Ojibwa = 121;
-
-        public const int ori = 122;
-        public const int or = 122;
-        public const int Oriya = 122;
-
-        public const int orm = 123;
-        public const int om = 123;
-        public const int Oromo = 123;
-
-        public const int oss = 124;
-        public const int os = 124;
-        public const int Ossetian = 124;
-
-        public const int pli = 125;
-        public const int pi = 125;
-        public const int Pali = 125;
-
-        public const int pus = 126;
-        public const int ps = 126;
-        public const int Pashto = 126;
-
-        public const int fas = 127;
-        public const int per = 127;
-        public const int fa = 127;
-        public const int Persian = 127;
-
-        public const int pol = 128;
-        public const int pl = 128;
-        public const int Polish = 128;
-
-        public const int por = 129;
-        public const int pt = 129;
-        public const int Portuguese = 129;
-
-        public const int pan = 130;
-        public const int pa = 130;
-        public const int Punjabi = 130;
-
-        public const int que = 131;
-        public const int qu = 131;
-        public const int Quechua = 131;
-
-        public const int ron = 132;
-        public const int rum = 132;
-        public const int ro = 132;
-        public const int Romanian = 132;
-
-        public const int roh = 133;
-        public const int rm = 133;
-        public const int Romansh = 133;
-
-        public const int run = 134;
-        public const int rn = 134;
-        public const int Rundi = 134;
-
-        public const int rus = 135;
-        public const int ru = 135;
-        public const int Russian = 135;
-
-        public const int sme = 136;
-        public const int se = 136;
-        public const int Northern_Sami = 136;
-
-        public const int smo = 137;
-        public const int sm = 137;
-        public const int Samoan = 137;
-
-        public const int sag = 138;
-        public const int sg = 138;
-        public const int Sango = 138;
-
-        public const int san = 139;
-        public const int sa = 139;
-        public const int Sanskrit = 139;
-
-        public const int srd = 140;
-        public const int sc = 140;
-        public const int Sardinian = 140;
-
-        public const int srp = 141;
-        public const int sr = 141;
-        public const int Serbian = 141;
-
-        public const int sna = 142;
-        public const int sn = 142;
-        public const int Shona = 142;
-
-        public const int snd = 143;
-        public const int sd = 143;
-        public const int Sindhi = 143;
-
-        public const int sin = 144;
-        public const int si = 144;
-        public const int Sinhala = 144;
-
-        public const int slk = 145;
-        public const int slo = 145;
-        public const int sk = 145;
-        public const int Slovak = 145;
-
-        public const int slv = 146;
-        public const int sl = 146;
-        public const int Slovenian = 146;
-
-        public const int som = 147;
-        public const int so = 147;
-        public const int Somali = 147;
-
-        public const int sot = 148;
-        public const int st = 148;
-        public const int Southern_Sotho = 148;
-
-        public const int spa = 149;
-        public const int es = 149;
-        public const int Spanish = 149;
-
-        public const int sun = 150;
-        public const int su = 150;
-        public const int Sundanese = 150;
-
-        public const int swa = 151;
-        public const int sw = 151;
-        public const int Swahili = 151;
-
-        public const int ssw = 152;
-        public const int ss = 152;
-        public const int Swati = 152;
-
-        public const int swe = 153;
-        public const int sv = 153;
-        public const int Swedish = 153;
-
-        public const int tgl = 154;
-        public const int tl = 154;
-        public const int Tagalog = 154;
-
-        public const int tah = 155;
-        public const int ty = 155;
-        public const int Tahitian = 155;
-
-        public const int tgk = 156;
-        public const int tg = 156;
-        public const int Tajik = 156;
-
-        public const int tam = 157;
-        public const int ta = 157;
-        public const int Tamil = 157;
-
-        public const int tat = 158;
-        public const int tt = 158;
-        public const int Tatar = 158;
-
-        public const int tel = 159;
-        public const int te = 159;
-        public const int Telugu = 159;
-
-        public const int tha = 160;
-        public const int th = 160;
-        public const int Thai = 160;
-
-        public const int bod = 161;
-        public const int tib = 161;
-        public const int bo = 161;
-        public const int Tibetan = 161;
-
-        public const int tir = 162;
-        public const int ti = 162;
-        public const int Tigrinya = 162;
-
-        public const int ton = 163;
-        public const int to = 163;
-        public const int Tonga = 163;
-
-        public const int tso = 164;
-        public const int ts = 164;
-        public const int Tsonga = 164;
-
-        public const int tsn = 165;
-        public const int tn = 165;
-        public const int Tswana = 165;
-
-        public const int tur = 166;
-        public const int tr = 166;
-        public const int Turkish = 166;
-
-        public const int tuk = 167;
-        public const int tk = 167;
-        public const int Turkmen = 167;
-
-        public const int twi = 168;
-        public const int tw = 168;
-        public const int Twi = 168;
-
-        public const int uig = 169;
-        public const int ug = 169;
-        public const int Uighur = 169;
-
-        public const int ukr = 170;
-        public const int uk = 170;
-        public const int Ukrainian = 170;
-
-        public const int urd = 171;
-        public const int ur = 171;
-        public const int Urdu = 171;
-
-        public const int uzb = 172;
-        public const int uz = 172;
-        public const int Uzbek = 172;
-
-        public const int ven = 173;
-        public const int ve = 173;
-        public const int Venda = 173;
-
-        public const int vie = 174;
-        public const int vi = 174;
-        public const int Vietnamese = 174;
-
-        public const int vol = 175;
-        public const int vo = 175;
-        public const int Volapük = 175;
-
-        public const int wln = 176;
-        public const int wa = 176;
-        public const int Walloon = 176;
-
-        public const int cym = 177;
-        public const int wel = 177;
-        public const int cy = 177;
-        public const int Welsh = 177;
-
-        public const int wol = 178;
-        public const int wo = 178;
-        public const int Wolof = 178;
-
-        public const int xho = 179;
-        public const int xh = 179;
-        public const int Xhosa = 179;
-
-        public const int iii = 180;
-        public const int ii = 180;
-        public const int Sichuan_Yi = 180;
-
-        public const int yid = 181;
-        public const int yi = 181;
-        public const int Yiddish = 181;
-
-        public const int yor = 182;
-        public const int yo = 182;
-        public const int Yoruba = 182;
-
-        public const int zha = 183;
-        public const int za = 183;
-        public const int Zhuang = 183;
-
-        public const int zul = 184;
-        public const int zu = 184;
-        public const int Zulu = 184;
-
-        #endregion
 
         #region converter
 
@@ -2206,6 +137,585 @@ namespace Shared
         {
             return this.Int.GetHashCode();
         }
+
+        #endregion
+
+        #region init
+
+        private static Dictionary<string, int>? _Map;
+        public static Dictionary<string, int> Map
+        {
+            get
+            {
+                if (_Map == null)
+                {
+                    _Map = new Dictionary<string, int>();
+                    foreach (var fi in typeof(LanguageCodes).GetFields(BindingFlags.Public | BindingFlags.Static))
+                    {
+                        if (!fi.IsLiteral || fi.IsInitOnly || fi.FieldType != typeof(int))
+                            continue;
+                        _Map[fi.Name] = (int)fi.GetValue(null)!;
+                    }
+                }
+                return _Map;
+            }
+        }
+
+        #endregion
+
+        internal static void ScrapeFromWeb()
+        {
+            // copy table from https://www.loc.gov/standards/iso639-2/php/code_list.php
+#pragma warning disable SYSLIB1045
+            var text = System.IO.File.ReadAllText(@"E:\Github\AutoCompress\AutoCompress\Resources\iso639-2 from 2017-12-21.txt");
+            text = Regex.Replace(text, @"(^.*?\t.*?\t[\w ,-]*(?<! )).*", "$1", RegexOptions.Multiline);
+            text = Regex.Replace(text, @" ?\t ?", "\t", RegexOptions.Multiline);
+            text = Regex.Replace(text, @" \(\w\)", "", RegexOptions.Multiline);
+            text = Regex.Replace(text, @"(?>(^\w+)\n)?(^.+?\t)(.*)", "$2$1\t$3", RegexOptions.Multiline);
+            text = Regex.Replace(text, @",", "", RegexOptions.Multiline);
+            text = Regex.Replace(text, @"[ -]", "_", RegexOptions.Multiline);
+            var matches = Regex.Matches(text, @"(?<c3>\w{3})\t(?<ca>\w{3})?\t(?<c2>\w{2})?\t(?<cn>[\w]+)", RegexOptions.Multiline);
+#pragma warning restore SYSLIB1045
+
+            int num = -1;
+            var set = new HashSet<string>();
+            foreach (Match match in matches)
+            {
+                if (match.Groups["c3"].Value is not "und")
+                    continue;
+                print(match);
+                break;
+            }
+            foreach (Match match in matches)
+            {
+                if (match.Groups["c3"].Value is not "mul")
+                    continue;
+                print(match);
+                break;
+            }
+            foreach (Match match in matches)
+            {
+                print(match);
+            }
+
+            void print(Match match)
+            {
+                string c3 = match.Groups["c3"].Value;
+                if (set.Contains(c3))
+                    return;
+                num++;
+                set.Add(c3);
+
+                if (c3 is "new")
+                    c3 = "@new";
+                Console.Write($"public const int {c3} = {num}");
+
+                string ca = match.Groups["ca"].Value;
+                if (ca != "")
+                    Console.Write($", {ca} = {num}");
+
+                string c2 = match.Groups["c2"].Value;
+                if (c2 is "is")
+                    c2 = "@is";
+                if (c2 is "as")
+                    c2 = "@as";
+                if (c2 != "")
+                    Console.Write($", {c2} = {num}");
+
+                string cn = match.Groups["cn"].Value;
+                cn = cn.Replace('Ã¼', 'u');
+                Console.Write($", {cn} = {num};\n");
+            }
+        }
+
+        #region constants
+
+        public const int und = 0, Undetermined = 0;
+        public const int mul = 1, Multiple_languages = 1;
+        public const int aar = 2, aa = 2, Afar = 2;
+        public const int abk = 3, ab = 3, Abkhazian = 3;
+        public const int ace = 4, Achinese = 4;
+        public const int ach = 5, Acoli = 5;
+        public const int ada = 6, Adangme = 6;
+        public const int ady = 7, Adyghe = 7;
+        public const int afa = 8, Afro_Asiatic_languages = 8;
+        public const int afh = 9, Afrihili = 9;
+        public const int afr = 10, af = 10, Afrikaans = 10;
+        public const int ain = 11, Ainu = 11;
+        public const int aka = 12, ak = 12, Akan = 12;
+        public const int akk = 13, Akkadian = 13;
+        public const int sqi = 14, alb = 14, sq = 14, Albanian = 14;
+        public const int ale = 15, Aleut = 15;
+        public const int alg = 16, Algonquian_languages = 16;
+        public const int alt = 17, Southern_Altai = 17;
+        public const int amh = 18, am = 18, Amharic = 18;
+        public const int ang = 19, English_Old = 19;
+        public const int anp = 20, Angika = 20;
+        public const int apa = 21, Apache_languages = 21;
+        public const int ara = 22, ar = 22, Arabic = 22;
+        public const int arc = 23, Official_Aramaic = 23;
+        public const int arg = 24, an = 24, Aragonese = 24;
+        public const int hye = 25, arm = 25, hy = 25, Armenian = 25;
+        public const int arn = 26, Mapudungun = 26;
+        public const int arp = 27, Arapaho = 27;
+        public const int art = 28, Artificial_languages = 28;
+        public const int arw = 29, Arawak = 29;
+        public const int asm = 30, @as = 30, Assamese = 30;
+        public const int ast = 31, Asturian = 31;
+        public const int ath = 32, Athapascan_languages = 32;
+        public const int aus = 33, Australian_languages = 33;
+        public const int ava = 34, av = 34, Avaric = 34;
+        public const int ave = 35, ae = 35, Avestan = 35;
+        public const int awa = 36, Awadhi = 36;
+        public const int aym = 37, ay = 37, Aymara = 37;
+        public const int aze = 38, az = 38, Azerbaijani = 38;
+        public const int bad = 39, Banda_languages = 39;
+        public const int bai = 40, Bamileke_languages = 40;
+        public const int bak = 41, ba = 41, Bashkir = 41;
+        public const int bal = 42, Baluchi = 42;
+        public const int bam = 43, bm = 43, Bambara = 43;
+        public const int ban = 44, Balinese = 44;
+        public const int eus = 45, baq = 45, eu = 45, Basque = 45;
+        public const int bas = 46, Basa = 46;
+        public const int bat = 47, Baltic_languages = 47;
+        public const int bej = 48, Beja = 48;
+        public const int bel = 49, be = 49, Belarusian = 49;
+        public const int bem = 50, Bemba = 50;
+        public const int ben = 51, bn = 51, Bengali = 51;
+        public const int ber = 52, Berber_languages = 52;
+        public const int bho = 53, Bhojpuri = 53;
+        public const int bih = 54, Bihari_languages = 54;
+        public const int bik = 55, Bikol = 55;
+        public const int bin = 56, Bini = 56;
+        public const int bis = 57, bi = 57, Bislama = 57;
+        public const int bla = 58, Siksika = 58;
+        public const int bnt = 59, Bantu_languages = 59;
+        public const int bod = 60, tib = 60, bo = 60, Tibetan = 60;
+        public const int bos = 61, bs = 61, Bosnian = 61;
+        public const int bra = 62, Braj = 62;
+        public const int bre = 63, br = 63, Breton = 63;
+        public const int btk = 64, Batak_languages = 64;
+        public const int bua = 65, Buriat = 65;
+        public const int bug = 66, Buginese = 66;
+        public const int bul = 67, bg = 67, Bulgarian = 67;
+        public const int mya = 68, bur = 68, my = 68, Burmese = 68;
+        public const int byn = 69, Blin = 69;
+        public const int cad = 70, Caddo = 70;
+        public const int cai = 71, Central_American_Indian_languages = 71;
+        public const int car = 72, Galibi_Carib = 72;
+        public const int cat = 73, ca = 73, Catalan = 73;
+        public const int cau = 74, Caucasian_languages = 74;
+        public const int ceb = 75, Cebuano = 75;
+        public const int cel = 76, Celtic_languages = 76;
+        public const int ces = 77, cze = 77, cs = 77, Czech = 77;
+        public const int cha = 78, ch = 78, Chamorro = 78;
+        public const int chb = 79, Chibcha = 79;
+        public const int che = 80, ce = 80, Chechen = 80;
+        public const int chg = 81, Chagatai = 81;
+        public const int zho = 82, chi = 82, zh = 82, Chinese = 82;
+        public const int chk = 83, Chuukese = 83;
+        public const int chm = 84, Mari = 84;
+        public const int chn = 85, Chinook_jargon = 85;
+        public const int cho = 86, Choctaw = 86;
+        public const int chp = 87, Chipewyan = 87;
+        public const int chr = 88, Cherokee = 88;
+        public const int chu = 89, cu = 89, Church_Slavic = 89;
+        public const int chv = 90, cv = 90, Chuvash = 90;
+        public const int chy = 91, Cheyenne = 91;
+        public const int cmc = 92, Chamic_languages = 92;
+        public const int cnr = 93, Montenegrin = 93;
+        public const int cop = 94, Coptic = 94;
+        public const int cor = 95, kw = 95, Cornish = 95;
+        public const int cos = 96, co = 96, Corsican = 96;
+        public const int cpe = 97, Creoles_and_pidgins_English_based = 97;
+        public const int cpf = 98, Creoles_and_pidgins_French_based = 98;
+        public const int cpp = 99, Creoles_and_pidgins_Portuguese_based = 99;
+        public const int cre = 100, cr = 100, Cree = 100;
+        public const int crh = 101, Crimean_Tatar = 101;
+        public const int crp = 102, Creoles_and_pidgins = 102;
+        public const int csb = 103, Kashubian = 103;
+        public const int cus = 104, Cushitic_languages = 104;
+        public const int cym = 105, wel = 105, cy = 105, Welsh = 105;
+        public const int dak = 106, Dakota = 106;
+        public const int dan = 107, da = 107, Danish = 107;
+        public const int dar = 108, Dargwa = 108;
+        public const int day = 109, Land_Dayak_languages = 109;
+        public const int del = 110, Delaware = 110;
+        public const int den = 111, Slave = 111;
+        public const int deu = 112, ger = 112, de = 112, German = 112;
+        public const int dgr = 113, Tlicho = 113;
+        public const int din = 114, Dinka = 114;
+        public const int div = 115, dv = 115, Divehi = 115;
+        public const int doi = 116, Dogri = 116;
+        public const int dra = 117, Dravidian_languages = 117;
+        public const int dsb = 118, Lower_Sorbian = 118;
+        public const int dua = 119, Duala = 119;
+        public const int dum = 120, Dutch_Middle = 120;
+        public const int nld = 121, dut = 121, nl = 121, Dutch = 121;
+        public const int dyu = 122, Dyula = 122;
+        public const int dzo = 123, dz = 123, Dzongkha = 123;
+        public const int efi = 124, Efik = 124;
+        public const int egy = 125, Egyptian = 125;
+        public const int eka = 126, Ekajuk = 126;
+        public const int ell = 127, gre = 127, el = 127, Greek_Modern = 127;
+        public const int elx = 128, Elamite = 128;
+        public const int eng = 129, en = 129, English = 129;
+        public const int enm = 130, English_Middle = 130;
+        public const int epo = 131, eo = 131, Esperanto = 131;
+        public const int est = 132, et = 132, Estonian = 132;
+        public const int ewe = 133, ee = 133, Ewe = 133;
+        public const int ewo = 134, Ewondo = 134;
+        public const int fan = 135, Fang = 135;
+        public const int fao = 136, fo = 136, Faroese = 136;
+        public const int fas = 137, per = 137, fa = 137, Persian = 137;
+        public const int fat = 138, Fanti = 138;
+        public const int fij = 139, fj = 139, Fijian = 139;
+        public const int fil = 140, Filipino = 140;
+        public const int fin = 141, fi = 141, Finnish = 141;
+        public const int fiu = 142, Finno_Ugrian_languages = 142;
+        public const int fon = 143, Fon = 143;
+        public const int fra = 144, fre = 144, fr = 144, French = 144;
+        public const int frm = 145, French_Middle = 145;
+        public const int fro = 146, French_Old = 146;
+        public const int frr = 147, Northern_Frisian = 147;
+        public const int frs = 148, Eastern_Frisian = 148;
+        public const int fry = 149, fy = 149, Western_Frisian = 149;
+        public const int ful = 150, ff = 150, Fulah = 150;
+        public const int fur = 151, Friulian = 151;
+        public const int gaa = 152, Ga = 152;
+        public const int gay = 153, Gayo = 153;
+        public const int gba = 154, Gbaya = 154;
+        public const int gem = 155, Germanic_languages = 155;
+        public const int kat = 156, geo = 156, ka = 156, Georgian = 156;
+        public const int gez = 157, Geez = 157;
+        public const int gil = 158, Gilbertese = 158;
+        public const int gla = 159, gd = 159, Gaelic = 159;
+        public const int gle = 160, ga = 160, Irish = 160;
+        public const int glg = 161, gl = 161, Galician = 161;
+        public const int glv = 162, gv = 162, Manx = 162;
+        public const int gmh = 163, German_Middle_High = 163;
+        public const int goh = 164, German_Old_High = 164;
+        public const int gon = 165, Gondi = 165;
+        public const int gor = 166, Gorontalo = 166;
+        public const int got = 167, Gothic = 167;
+        public const int grb = 168, Grebo = 168;
+        public const int grc = 169, Greek_Ancient = 169;
+        public const int grn = 170, gn = 170, Guarani = 170;
+        public const int gsw = 171, Swiss_German = 171;
+        public const int guj = 172, gu = 172, Gujarati = 172;
+        public const int gwi = 173, Gwich = 173;
+        public const int hai = 174, Haida = 174;
+        public const int hat = 175, ht = 175, Haitian = 175;
+        public const int hau = 176, ha = 176, Hausa = 176;
+        public const int haw = 177, Hawaiian = 177;
+        public const int heb = 178, he = 178, Hebrew = 178;
+        public const int her = 179, hz = 179, Herero = 179;
+        public const int hil = 180, Hiligaynon = 180;
+        public const int him = 181, Himachali_languages = 181;
+        public const int hin = 182, hi = 182, Hindi = 182;
+        public const int hit = 183, Hittite = 183;
+        public const int hmn = 184, Hmong = 184;
+        public const int hmo = 185, ho = 185, Hiri_Motu = 185;
+        public const int hrv = 186, hr = 186, Croatian = 186;
+        public const int hsb = 187, Upper_Sorbian = 187;
+        public const int hun = 188, hu = 188, Hungarian = 188;
+        public const int hup = 189, Hupa = 189;
+        public const int iba = 190, Iban = 190;
+        public const int ibo = 191, ig = 191, Igbo = 191;
+        public const int isl = 192, ice = 192, @is = 192, Icelandic = 192;
+        public const int ido = 193, io = 193, Ido = 193;
+        public const int iii = 194, ii = 194, Sichuan_Yi = 194;
+        public const int ijo = 195, Ijo_languages = 195;
+        public const int iku = 196, iu = 196, Inuktitut = 196;
+        public const int ile = 197, ie = 197, Interlingue = 197;
+        public const int ilo = 198, Iloko = 198;
+        public const int ina = 199, ia = 199, Interlingua = 199;
+        public const int inc = 200, Indic_languages = 200;
+        public const int ind = 201, id = 201, Indonesian = 201;
+        public const int ine = 202, Indo_European_languages = 202;
+        public const int inh = 203, Ingush = 203;
+        public const int ipk = 204, ik = 204, Inupiaq = 204;
+        public const int ira = 205, Iranian_languages = 205;
+        public const int iro = 206, Iroquoian_languages = 206;
+        public const int ita = 207, it = 207, Italian = 207;
+        public const int jav = 208, jv = 208, Javanese = 208;
+        public const int jbo = 209, Lojban = 209;
+        public const int jpn = 210, ja = 210, Japanese = 210;
+        public const int jpr = 211, Judeo_Persian = 211;
+        public const int jrb = 212, Judeo_Arabic = 212;
+        public const int kaa = 213, Kara_Kalpak = 213;
+        public const int kab = 214, Kabyle = 214;
+        public const int kac = 215, Kachin = 215;
+        public const int kal = 216, kl = 216, Kalaallisut = 216;
+        public const int kam = 217, Kamba = 217;
+        public const int kan = 218, kn = 218, Kannada = 218;
+        public const int kar = 219, Karen_languages = 219;
+        public const int kas = 220, ks = 220, Kashmiri = 220;
+        public const int kau = 221, kr = 221, Kanuri = 221;
+        public const int kaw = 222, Kawi = 222;
+        public const int kaz = 223, kk = 223, Kazakh = 223;
+        public const int kbd = 224, Kabardian = 224;
+        public const int kha = 225, Khasi = 225;
+        public const int khi = 226, Khoisan_languages = 226;
+        public const int khm = 227, km = 227, Central_Khmer = 227;
+        public const int kho = 228, Khotanese = 228;
+        public const int kik = 229, ki = 229, Kikuyu = 229;
+        public const int kin = 230, rw = 230, Kinyarwanda = 230;
+        public const int kir = 231, ky = 231, Kirghiz = 231;
+        public const int kmb = 232, Kimbundu = 232;
+        public const int kok = 233, Konkani = 233;
+        public const int kom = 234, kv = 234, Komi = 234;
+        public const int kon = 235, kg = 235, Kongo = 235;
+        public const int kor = 236, ko = 236, Korean = 236;
+        public const int kos = 237, Kosraean = 237;
+        public const int kpe = 238, Kpelle = 238;
+        public const int krc = 239, Karachay_Balkar = 239;
+        public const int krl = 240, Karelian = 240;
+        public const int kro = 241, Kru_languages = 241;
+        public const int kru = 242, Kurukh = 242;
+        public const int kua = 243, kj = 243, Kuanyama = 243;
+        public const int kum = 244, Kumyk = 244;
+        public const int kur = 245, ku = 245, Kurdish = 245;
+        public const int kut = 246, Kutenai = 246;
+        public const int lad = 247, Ladino = 247;
+        public const int lah = 248, Lahnda = 248;
+        public const int lam = 249, Lamba = 249;
+        public const int lao = 250, lo = 250, Lao = 250;
+        public const int lat = 251, la = 251, Latin = 251;
+        public const int lav = 252, lv = 252, Latvian = 252;
+        public const int lez = 253, Lezghian = 253;
+        public const int lim = 254, li = 254, Limburgan = 254;
+        public const int lin = 255, ln = 255, Lingala = 255;
+        public const int lit = 256, lt = 256, Lithuanian = 256;
+        public const int lol = 257, Mongo = 257;
+        public const int loz = 258, Lozi = 258;
+        public const int ltz = 259, lb = 259, Luxembourgish = 259;
+        public const int lua = 260, Luba_Lulua = 260;
+        public const int lub = 261, lu = 261, Luba_Katanga = 261;
+        public const int lug = 262, lg = 262, Ganda = 262;
+        public const int lui = 263, Luiseno = 263;
+        public const int lun = 264, Lunda = 264;
+        public const int luo = 265, Luo = 265;
+        public const int lus = 266, Lushai = 266;
+        public const int mkd = 267, mac = 267, mk = 267, Macedonian = 267;
+        public const int mad = 268, Madurese = 268;
+        public const int mag = 269, Magahi = 269;
+        public const int mah = 270, mh = 270, Marshallese = 270;
+        public const int mai = 271, Maithili = 271;
+        public const int mak = 272, Makasar = 272;
+        public const int mal = 273, ml = 273, Malayalam = 273;
+        public const int man = 274, Mandingo = 274;
+        public const int mri = 275, mao = 275, mi = 275, Maori = 275;
+        public const int map = 276, Austronesian_languages = 276;
+        public const int mar = 277, mr = 277, Marathi = 277;
+        public const int mas = 278, Masai = 278;
+        public const int msa = 279, may = 279, ms = 279, Malay = 279;
+        public const int mdf = 280, Moksha = 280;
+        public const int mdr = 281, Mandar = 281;
+        public const int men = 282, Mende = 282;
+        public const int mga = 283, Irish_Middle = 283;
+        public const int mic = 284, Mi = 284;
+        public const int min = 285, Minangkabau = 285;
+        public const int mis = 286, Uncoded_languages = 286;
+        public const int mkh = 287, Mon_Khmer_languages = 287;
+        public const int mlg = 288, mg = 288, Malagasy = 288;
+        public const int mlt = 289, mt = 289, Maltese = 289;
+        public const int mnc = 290, Manchu = 290;
+        public const int mni = 291, Manipuri = 291;
+        public const int mno = 292, Manobo_languages = 292;
+        public const int moh = 293, Mohawk = 293;
+        public const int mon = 294, mn = 294, Mongolian = 294;
+        public const int mos = 295, Mossi = 295;
+        public const int mun = 296, Munda_languages = 296;
+        public const int mus = 297, Creek = 297;
+        public const int mwl = 298, Mirandese = 298;
+        public const int mwr = 299, Marwari = 299;
+        public const int myn = 300, Mayan_languages = 300;
+        public const int myv = 301, Erzya = 301;
+        public const int nah = 302, Nahuatl_languages = 302;
+        public const int nai = 303, North_American_Indian_languages = 303;
+        public const int nap = 304, Neapolitan = 304;
+        public const int nau = 305, na = 305, Nauru = 305;
+        public const int nav = 306, nv = 306, Navajo = 306;
+        public const int nbl = 307, nr = 307, Ndebele_South = 307;
+        public const int nde = 308, nd = 308, Ndebele_North = 308;
+        public const int ndo = 309, ng = 309, Ndonga = 309;
+        public const int nds = 310, Low_German = 310;
+        public const int nep = 311, ne = 311, Nepali = 311;
+        public const int @new = 312, Nepal_Bhasa = 312;
+        public const int nia = 313, Nias = 313;
+        public const int nic = 314, Niger_Kordofanian_languages = 314;
+        public const int niu = 315, Niuean = 315;
+        public const int nno = 316, nn = 316, Norwegian_Nynorsk = 316;
+        public const int nob = 317, nb = 317, BokmÃ¥l_Norwegian = 317;
+        public const int nog = 318, Nogai = 318;
+        public const int non = 319, Norse_Old = 319;
+        public const int nor = 320, no = 320, Norwegian = 320;
+        public const int nqo = 321, N = 321;
+        public const int nso = 322, Pedi = 322;
+        public const int nub = 323, Nubian_languages = 323;
+        public const int nwc = 324, Classical_Newari = 324;
+        public const int nya = 325, ny = 325, Chichewa = 325;
+        public const int nym = 326, Nyamwezi = 326;
+        public const int nyn = 327, Nyankole = 327;
+        public const int nyo = 328, Nyoro = 328;
+        public const int nzi = 329, Nzima = 329;
+        public const int oci = 330, oc = 330, Occitan = 330;
+        public const int oji = 331, oj = 331, Ojibwa = 331;
+        public const int ori = 332, or = 332, Oriya = 332;
+        public const int orm = 333, om = 333, Oromo = 333;
+        public const int osa = 334, Osage = 334;
+        public const int oss = 335, os = 335, Ossetian = 335;
+        public const int ota = 336, Turkish_Ottoman = 336;
+        public const int oto = 337, Otomian_languages = 337;
+        public const int paa = 338, Papuan_languages = 338;
+        public const int pag = 339, Pangasinan = 339;
+        public const int pal = 340, Pahlavi = 340;
+        public const int pam = 341, Pampanga = 341;
+        public const int pan = 342, pa = 342, Panjabi = 342;
+        public const int pap = 343, Papiamento = 343;
+        public const int pau = 344, Palauan = 344;
+        public const int peo = 345, Persian_Old = 345;
+        public const int phi = 346, Philippine_languages = 346;
+        public const int phn = 347, Phoenician = 347;
+        public const int pli = 348, pi = 348, Pali = 348;
+        public const int pol = 349, pl = 349, Polish = 349;
+        public const int pon = 350, Pohnpeian = 350;
+        public const int por = 351, pt = 351, Portuguese = 351;
+        public const int pra = 352, Prakrit_languages = 352;
+        public const int pro = 353, ProvenÃ§al_Old = 353;
+        public const int pus = 354, ps = 354, Pushto = 354;
+        public const int qtz = 355, Reserved_for_local_use = 355;
+        public const int que = 356, qu = 356, Quechua = 356;
+        public const int raj = 357, Rajasthani = 357;
+        public const int rap = 358, Rapanui = 358;
+        public const int rar = 359, Rarotongan = 359;
+        public const int roa = 360, Romance_languages = 360;
+        public const int roh = 361, rm = 361, Romansh = 361;
+        public const int rom = 362, Romany = 362;
+        public const int ron = 363, rum = 363, ro = 363, Romanian = 363;
+        public const int run = 364, rn = 364, Rundi = 364;
+        public const int rup = 365, Aromanian = 365;
+        public const int rus = 366, ru = 366, Russian = 366;
+        public const int sad = 367, Sandawe = 367;
+        public const int sag = 368, sg = 368, Sango = 368;
+        public const int sah = 369, Yakut = 369;
+        public const int sai = 370, South_American_Indian_languages = 370;
+        public const int sal = 371, Salishan_languages = 371;
+        public const int sam = 372, Samaritan_Aramaic = 372;
+        public const int san = 373, sa = 373, Sanskrit = 373;
+        public const int sas = 374, Sasak = 374;
+        public const int sat = 375, Santali = 375;
+        public const int scn = 376, Sicilian = 376;
+        public const int sco = 377, Scots = 377;
+        public const int sel = 378, Selkup = 378;
+        public const int sem = 379, Semitic_languages = 379;
+        public const int sga = 380, Irish_Old = 380;
+        public const int sgn = 381, Sign_Languages = 381;
+        public const int shn = 382, Shan = 382;
+        public const int sid = 383, Sidamo = 383;
+        public const int sin = 384, si = 384, Sinhala = 384;
+        public const int sio = 385, Siouan_languages = 385;
+        public const int sit = 386, Sino_Tibetan_languages = 386;
+        public const int sla = 387, Slavic_languages = 387;
+        public const int slk = 388, slo = 388, sk = 388, Slovak = 388;
+        public const int slv = 389, sl = 389, Slovenian = 389;
+        public const int sma = 390, Southern_Sami = 390;
+        public const int sme = 391, se = 391, Northern_Sami = 391;
+        public const int smi = 392, Sami_languages = 392;
+        public const int smj = 393, Lule_Sami = 393;
+        public const int smn = 394, Inari_Sami = 394;
+        public const int smo = 395, sm = 395, Samoan = 395;
+        public const int sms = 396, Skolt_Sami = 396;
+        public const int sna = 397, sn = 397, Shona = 397;
+        public const int snd = 398, sd = 398, Sindhi = 398;
+        public const int snk = 399, Soninke = 399;
+        public const int sog = 400, Sogdian = 400;
+        public const int som = 401, so = 401, Somali = 401;
+        public const int son = 402, Songhai_languages = 402;
+        public const int sot = 403, st = 403, Sotho_Southern = 403;
+        public const int spa = 404, es = 404, Spanish = 404;
+        public const int srd = 405, sc = 405, Sardinian = 405;
+        public const int srn = 406, Sranan_Tongo = 406;
+        public const int srp = 407, sr = 407, Serbian = 407;
+        public const int srr = 408, Serer = 408;
+        public const int ssa = 409, Nilo_Saharan_languages = 409;
+        public const int ssw = 410, ss = 410, Swati = 410;
+        public const int suk = 411, Sukuma = 411;
+        public const int sun = 412, su = 412, Sundanese = 412;
+        public const int sus = 413, Susu = 413;
+        public const int sux = 414, Sumerian = 414;
+        public const int swa = 415, sw = 415, Swahili = 415;
+        public const int swe = 416, sv = 416, Swedish = 416;
+        public const int syc = 417, Classical_Syriac = 417;
+        public const int syr = 418, Syriac = 418;
+        public const int tah = 419, ty = 419, Tahitian = 419;
+        public const int tai = 420, Tai_languages = 420;
+        public const int tam = 421, ta = 421, Tamil = 421;
+        public const int tat = 422, tt = 422, Tatar = 422;
+        public const int tel = 423, te = 423, Telugu = 423;
+        public const int tem = 424, Timne = 424;
+        public const int ter = 425, Tereno = 425;
+        public const int tet = 426, Tetum = 426;
+        public const int tgk = 427, tg = 427, Tajik = 427;
+        public const int tgl = 428, tl = 428, Tagalog = 428;
+        public const int tha = 429, th = 429, Thai = 429;
+        public const int tig = 430, Tigre = 430;
+        public const int tir = 431, ti = 431, Tigrinya = 431;
+        public const int tiv = 432, Tiv = 432;
+        public const int tkl = 433, Tokelau = 433;
+        public const int tlh = 434, Klingon = 434;
+        public const int tli = 435, Tlingit = 435;
+        public const int tmh = 436, Tamashek = 436;
+        public const int ton = 438, tog = 438, to = 438, Tonga = 438;
+        public const int tpi = 439, Tok_Pisin = 439;
+        public const int tsi = 440, Tsimshian = 440;
+        public const int tsn = 441, tn = 441, Tswana = 441;
+        public const int tso = 442, ts = 442, Tsonga = 442;
+        public const int tuk = 443, tk = 443, Turkmen = 443;
+        public const int tum = 444, Tumbuka = 444;
+        public const int tup = 445, Tupi_languages = 445;
+        public const int tur = 446, tr = 446, Turkish = 446;
+        public const int tut = 447, Altaic_languages = 447;
+        public const int tvl = 448, Tuvalu = 448;
+        public const int twi = 449, tw = 449, Twi = 449;
+        public const int tyv = 450, Tuvinian = 450;
+        public const int udm = 451, Udmurt = 451;
+        public const int uga = 452, Ugaritic = 452;
+        public const int uig = 453, ug = 453, Uighur = 453;
+        public const int ukr = 454, uk = 454, Ukrainian = 454;
+        public const int umb = 455, Umbundu = 455;
+        public const int urd = 456, ur = 456, Urdu = 456;
+        public const int uzb = 457, uz = 457, Uzbek = 457;
+        public const int vai = 458, Vai = 458;
+        public const int ven = 459, ve = 459, Venda = 459;
+        public const int vie = 460, vi = 460, Vietnamese = 460;
+        public const int vol = 461, vo = 461, Volapuk = 461;
+        public const int vot = 462, Votic = 462;
+        public const int wak = 463, Wakashan_languages = 463;
+        public const int wal = 464, Wolaitta = 464;
+        public const int war = 465, Waray = 465;
+        public const int was = 466, Washo = 466;
+        public const int wen = 467, Sorbian_languages = 467;
+        public const int wln = 468, wa = 468, Walloon = 468;
+        public const int wol = 469, wo = 469, Wolof = 469;
+        public const int xal = 470, Kalmyk = 470;
+        public const int xho = 471, xh = 471, Xhosa = 471;
+        public const int yao = 472, Yao = 472;
+        public const int yap = 473, Yapese = 473;
+        public const int yid = 474, yi = 474, Yiddish = 474;
+        public const int yor = 475, yo = 475, Yoruba = 475;
+        public const int ypk = 476, Yupik_languages = 476;
+        public const int zap = 477, Zapotec = 477;
+        public const int zbl = 478, Blissymbols = 478;
+        public const int zen = 479, Zenaga = 479;
+        public const int zgh = 480, Standard_Moroccan_Tamazight = 480;
+        public const int zha = 481, za = 481, Zhuang = 481;
+        public const int znd = 482, Zande_languages = 482;
+        public const int zul = 483, zu = 483, Zulu = 483;
+        public const int zun = 484, Zuni = 484;
+        public const int zxx = 485, No_linguistic_content = 485;
+        public const int zza = 486, Zaza = 486;
 
         #endregion
     }
