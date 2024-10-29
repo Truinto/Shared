@@ -602,7 +602,7 @@ namespace Shared.CollectionNS
         /// </summary>
         public static void MoveTo<T>(this IList<T> array, int index1, int index2, bool throwOnOutOfBounds = false)
         {
-            ArgumentNullException.ThrowIfNull(array);
+            if (array == null) throw new ArgumentNullException(nameof(array));
 
             if (!throwOnOutOfBounds && (index1 >= array.Count || index2 >= array.Count))
                 return;
@@ -626,7 +626,7 @@ namespace Shared.CollectionNS
         /// </summary>
         public static void Swap<T>(this IList<T> array, int index1, int index2, bool throwOnOutOfBounds = false)
         {
-            ArgumentNullException.ThrowIfNull(array);
+            if (array == null) throw new ArgumentNullException(nameof(array));
 
             if (!throwOnOutOfBounds && (index1 >= array.Count || index2 >= array.Count))
                 return;
