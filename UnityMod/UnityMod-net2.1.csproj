@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<Version>1.0.2.48</Version>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Authors>Truinto</Authors>
+		<Title>$(MSBuildProjectName)</Title>
+		<RepositoryUrl>https://github.com/Truinto/</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RootNamespace>Shared</RootNamespace>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Optimize>false</Optimize>
+	</PropertyGroup>
+
+	<!-- Library Path -->
+	<PropertyGroup>
+		<Lib Condition="'$(Lib)' == ''">..\non-public\lib\</Lib>
+	</PropertyGroup>
+
+	<!-- Project References -->
+	<ItemGroup>
+		<PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.7.0" />
+
+		<Reference Private="false" Include="0Harmony" HintPath="$(Lib)\0Harmony-net2.0.dll" />
+		<Reference Private="false" Include="Newtonsoft.Json" HintPath="$(Lib)\Newtonsoft.Json.dll" />
+		<Reference Private="false" Include="UnityModManager" HintPath="$(Lib)\UnityModManager\UnityModManager.dll" />
+		<Reference Private="false" Include="UnityEngine" HintPath="$(Lib)\UnityEngine.dll" />
+		<Reference Private="false" Include="UnityEngine.CoreModule" HintPath="$(Lib)\UnityEngine.CoreModule.dll" />
+		<Reference Private="false" Include="UnityEngine.InputLegacyModule" HintPath="$(Lib)\UnityEngine.InputLegacyModule.dll" />
+		<Reference Private="false" Include="UnityEngine.UI" HintPath="$(Lib)\UnityEngine.UI.dll" />
+
+		<Compile Include="..\General\Attributes.cs" Link="Attributes.cs" />
+		<Compile Include="..\General\Logger.cs" Link="Logger.cs" />
+		<Compile Include="..\General\Collection.cs" Link="Collection.cs" />
+	</ItemGroup>
+
+	<!-- Update build version -->
+	<Target Name="Versioning" BeforeTargets="BeforeBuild">
+		<ItemGroup>
+			<_VersioningIn Include="$(MSBuildThisFileFullPath)" />
+			<_VersioningIn Include="changelog.md" />
+			<_VersioningOut Include="$(MSBuildThisFileFullPath)" />
+		</ItemGroup>
+		<VersioningTask InputFiles="@(_VersioningIn)" UpdateFiles="@(_VersioningOut)" MaxMatch="1" TouchFiles="false" AutoIncrease="true" />
+	</Target>
+
+	<!-- Copy to solution folder -->
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<ItemGroup>
+			<_CopyItems Include="$(TargetDir)$(TargetName).dll" />
+			<_CopyItems Include="$(TargetDir)$(TargetName).xml" />
+		</ItemGroup>
+
+		<Copy SourceFiles="@(_CopyItems)" DestinationFolder="$(ProjectDir)..\" UseHardlinksIfPossible="true" />
+	</Target>
+
+</Project>
