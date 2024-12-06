@@ -57,9 +57,9 @@ namespace Shared
         /// <summary>Currently selected line of code.</summary>
         public CodeInstruction Current => Code[Index];
         /// <summary>Line of code after selection. Does not move index. Returns null, if end of code.</summary>
-        public CodeInstruction Next => !IsLast ? Code[Index + 1] : null;
+        public CodeInstruction? Next => !IsLast ? Code[Index + 1] : null;
         /// <summary>Line of code before selection. Does not move index. Returns null, if index is 0.</summary>
-        public CodeInstruction Previous => !IsFirst ? Code[Index - 1] : null;
+        public CodeInstruction? Previous => !IsFirst ? Code[Index - 1] : null;
         /// <summary>True if original method is static. False if it's an instance object.</summary>
         public bool IsStatic => Original.IsStatic;
         /// <summary>True if index is 0.</summary>
@@ -184,7 +184,7 @@ namespace Shared
         /// Also resolves property getter, but their setter is ignored.
         /// </summary>
         /// <seealso cref="GetMemberInfo(Type, string, Type[], Type[])"/>
-        public TranspilerTool Seek(Type type, string name, Type[] parameters = null, Type[] generics = null)
+        public TranspilerTool Seek(Type type, string name, Type[]? parameters = null, Type[]? generics = null)
         {
             while (true)
             {
@@ -202,7 +202,7 @@ namespace Shared
         /// Also resolves property getter, but their setting is ignored.
         /// </summary>
         /// <seealso cref="GetMemberInfo(Type, string, Type[], Type[])"/>
-        public TranspilerTool Rewind(Type type, string name, Type[] parameters = null, Type[] generics = null)
+        public TranspilerTool Rewind(Type type, string name, Type[]? parameters = null, Type[]? generics = null)
         {
             while (true)
             {
@@ -292,7 +292,7 @@ namespace Shared
         /// <summary>
         /// Moves index forward until a specified OpCode is used. Can optionally compare the operand as well.
         /// </summary>
-        public TranspilerTool Seek(OpCode op, object operand = null)
+        public TranspilerTool Seek(OpCode op, object? operand = null)
         {
             while (true)
             {
@@ -308,7 +308,7 @@ namespace Shared
         /// <summary>
         /// Moves index backward until a specified OpCode is used. Can optionally compare the operand as well.
         /// </summary>
-        public TranspilerTool Rewind(OpCode op, object operand = null)
+        public TranspilerTool Rewind(OpCode op, object? operand = null)
         {
             while (true)
             {
@@ -317,6 +317,38 @@ namespace Shared
 
                 --Index;
                 if (Current.opcode == op && (operand == null || Current.operand == operand))
+                    return this;
+            }
+        }
+
+        /// <summary>
+        /// Moves index forward until a specified OpCode is used. Can optionally compare the operand as well.
+        /// </summary>
+        public TranspilerTool Seek(LocalInfo local, bool loadIsTrue_storeIsFalse)
+        {
+            while (true)
+            {
+                if (IsLast)
+                    throw new IndexOutOfRangeException("IsLast");
+
+                ++Index;
+                if (loadIsTrue_storeIsFalse ? IsLdloc(local) : IsStloc(local))
+                    return this;
+            }
+        }
+
+        /// <summary>
+        /// Moves index backward until a specified OpCode is used. Can optionally compare the operand as well.
+        /// </summary>
+        public TranspilerTool Rewind(LocalInfo local, bool loadIsTrue_storeIsFalse)
+        {
+            while (true)
+            {
+                if (IsFirst)
+                    throw new IndexOutOfRangeException("IsFirst");
+
+                --Index;
+                if (loadIsTrue_storeIsFalse ? IsLdloc(local) : IsStloc(local))
                     return this;
             }
         }
@@ -1237,14 +1269,37 @@ namespace Shared
         #region Locals
 
         /// <summary>
+        /// Get local of an exact specific type. Set local name if name is non-null (throws if name is used by other local).<br/>
+        /// Throws if no match.
+        /// </summary>
+        public LocalInfo GetLocal(Type type, string? name = null, int occurrence = 0)
+        {
+            for (int i = 0; i < LocalsExtended.Count; i++)
+            {
+                if (LocalsExtended[i].Type == type && occurrence-- <= 0)
+                {
+                    if (name != null && LocalsExtended[i].Name != name)
+                    {
+                        if (LocalsExtended[i].Name.StartsWith("V_"))
+                            NameLocal(LocalsExtended[i], name);
+                    }
+                    return LocalsExtended[i];
+                }
+            }
+            throw new InvalidCastException("unable to find matching local type");
+        }
+
+        /// <summary>
         /// Get local with a specific name or create a new local, if name is null or non-existent and type is given.
         /// </summary>
-        public LocalInfo GetLocal(string name = null, Type type = null, bool canMake = true)
+        public LocalInfo GetLocal(string? name = null, Type? type = null, bool canMake = true)
         {
             var info = name == null ? default : LocalsExtended.Find(f => f.Name == name);
             if (info.IsEmpty && type != null && canMake)
             {
                 info = new(Generator.DeclareLocal(type), name);
+                if (LocalsExtended.Any(a => a.Index == info.Index))
+                    throw new Exception($"Label with the same index already exists! {info.Index}");
                 LocalsExtended.Add(info);
             }
 
@@ -1255,9 +1310,9 @@ namespace Shared
         }
 
         /// <summary>
-        /// Get local by index.
+        /// Get local by index. Throws if type is non-null and field type mismatch.
         /// </summary>
-        public LocalInfo GetLocal(int index, Type type = null)
+        public LocalInfo GetLocal(int index, Type? type = null)
         {
             var info = LocalsExtended.Find(f => f.Index == index);
 
@@ -1338,12 +1393,18 @@ namespace Shared
         {
             if (!Current.IsLdloc() && !Current.IsStloc())
                 return -1;
+            if (Current.opcode == OpCodes.Ldloc_0 || Current.opcode == OpCodes.Stloc_0)
+                return 0;
+            if (Current.opcode == OpCodes.Ldloc_1 || Current.opcode == OpCodes.Stloc_1)
+                return 1;
+            if (Current.opcode == OpCodes.Ldloc_2 || Current.opcode == OpCodes.Stloc_2)
+                return 2;
+            if (Current.opcode == OpCodes.Ldloc_3 || Current.opcode == OpCodes.Stloc_3)
+                return 3;
             if (Current.operand is LocalVariableInfo lv)
                 return lv.LocalIndex;
             if (Current.operand is int integer)
                 return integer;
-            if (int.TryParse(Current.opcode.Name.Last().ToString(), out int value))
-                return value;
             return -1;
         }
 
@@ -1728,15 +1789,15 @@ namespace Shared
         /// <summary></summary>
         public int Index => Local?.LocalIndex ?? -1;
         /// <summary></summary>
-        public Type Type => Local?.LocalType;
+        public Type? Type => Local?.LocalType;
         /// <summary></summary>
-        public bool IsEmpty => Name == null;
+        public bool IsEmpty => Local is null;
 
         /// <summary></summary>
-        internal LocalInfo(LocalVariableInfo local, string name)
+        internal LocalInfo(LocalVariableInfo local, string? name)
         {
             this.Local = local ?? throw new ArgumentNullException();
-            this.Name = name ?? throw new ArgumentNullException();
+            this.Name = name ?? $"V_{Index}";
         }
 
         /// <summary></summary>

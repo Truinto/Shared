@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>1.0.2.48</Version>
+		<Version>1.0.2.50</Version>
 		<TargetFramework>netstandard2.1</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<Authors>Truinto</Authors>
@@ -12,6 +12,7 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<Optimize>false</Optimize>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<!-- Library Path -->
@@ -39,7 +40,9 @@
 	<!-- Update build version -->
 	<Target Name="Versioning" BeforeTargets="BeforeBuild">
 		<ItemGroup>
-			<_VersioningIn Include="$(MSBuildThisFileFullPath)" />
+			<_VersioningIn Include="UnityMod.csproj" />
+			<_VersioningIn Include="UnityMod-net2.1.csproj" />
+			<_VersioningIn Include="UnityMod-net472.csproj" />
 			<_VersioningIn Include="changelog.md" />
 			<_VersioningOut Include="$(MSBuildThisFileFullPath)" />
 		</ItemGroup>

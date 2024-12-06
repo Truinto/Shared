@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<Version>1.0.2.44</Version>
-		<TargetFramework>net48</TargetFramework>
+		<TargetFramework>net472</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<Authors>Truinto</Authors>
 		<Title>$(MSBuildProjectName)</Title>

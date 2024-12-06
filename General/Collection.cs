@@ -43,7 +43,7 @@ namespace Shared.CollectionNS
         /// Checks if right type can be assigned to left type. <br/>
         /// Works similiar to IsAssignableFrom, but will returns false for ValueTypes (which need boxing) and void (which overflows the stack).     
         /// </summary>
-        public static bool IsTypeCompatible(this Type left, Type right)
+        public static bool IsTypeCompatible(this Type? left, Type? right)
         {
             if (left == null || right == null)
                 return false;
