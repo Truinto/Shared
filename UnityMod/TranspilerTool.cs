@@ -416,6 +416,9 @@ namespace Shared
             return OpCode_Member.Contains(Current.opcode) && memberinfo.Equals(Current.operand);
         }
 
+        /// <summary>Checks if current line branches to a label.</summary>
+        public bool IsBranch() => Current.opcode.FlowControl is FlowControl.Branch or FlowControl.Cond_Branch;
+
         /// <summary>Checks if current line stores local and has matching index.</summary>
         public bool IsStloc(int localIndex) => Current.IsStloc() && localIndex == GetLocalIndex();
 
@@ -739,7 +742,7 @@ namespace Shared
         }
 
         /// <summary>
-        /// Injects jump to given label.<br/>
+        /// Injects jump to given label, if delegate return true.<br/>
         /// This function will inject necessary load OpCodes.<br/>
         /// Use <see cref="GetLabel(CodeInstruction, string, bool)"/> to jump to a specific CodeInstruction.<br/>
         /// <b>bool Function([object __instance], [object arg0], [object arg1...])</b>
@@ -1214,7 +1217,7 @@ namespace Shared
         /// <summary>
         /// Get label with a specific name or create a new label, if name is null or non-existent.
         /// </summary>
-        public LabelInfo GetLabel(string name = null, bool canMake = true)
+        public LabelInfo GetLabel(string? name = null, bool canMake = true)
         {
             var info = name == null ? default : LabelsExtended.Find(f => f.Name == name);
             if (info.IsEmpty && canMake)
@@ -1262,6 +1265,22 @@ namespace Shared
             if (index < 0)
                 throw new Exception($"Label with index {label} doesn't exists! {name}");
             LabelsExtended[index] = new(label, name);
+        }
+
+        /// <summary>
+        /// Get index of label of the current line. May return empty LabelInfo.
+        /// </summary>
+        public LabelInfo GetTargetLabel()
+        {
+            if (!IsBranch())
+                return default;
+
+            if (Current.operand is Label label)
+                return LabelsExtended.Find(a => a.Index == label.GetHashCode());
+            if (Current.operand is int integer)
+                return LabelsExtended.Find(a => a.Index == integer);
+
+            return default;
         }
 
         #endregion
@@ -1718,7 +1737,7 @@ namespace Shared
         /// <summary></summary>
         public readonly Label Label;
         /// <summary></summary>
-        public readonly string Name;
+        public readonly string? Name;
 
         /// <summary></summary>
         public int Index => !IsEmpty ? Label.GetHashCode() : -1;
@@ -1726,7 +1745,7 @@ namespace Shared
         public bool IsEmpty => Name == null;
 
         /// <summary></summary>
-        internal LabelInfo(Label label, string name = null)
+        internal LabelInfo(Label label, string? name = null)
         {
             this.Label = label;
             this.Name = name ?? "L_" + label.GetHashCode();

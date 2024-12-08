@@ -417,6 +417,9 @@
             </summary>
             <seealso cref="M:Shared.TranspilerTool.GetMemberInfo(System.Type,System.String,System.Type[],System.Type[])"/>
         </member>
+        <member name="M:Shared.TranspilerTool.IsBranch">
+            <summary>Checks if current line branches to a label.</summary>
+        </member>
         <member name="M:Shared.TranspilerTool.IsStloc(System.Int32)">
             <summary>Checks if current line stores local and has matching index.</summary>
         </member>
@@ -546,7 +549,7 @@
         </member>
         <member name="M:Shared.TranspilerTool.InsertJump(System.Delegate,Shared.LabelInfo,System.Boolean)">
             <summary>
-            Injects jump to given label.<br/>
+            Injects jump to given label, if delegate return true.<br/>
             This function will inject necessary load OpCodes.<br/>
             Use <see cref="M:Shared.TranspilerTool.GetLabel(HarmonyLib.CodeInstruction,System.String,System.Boolean)"/> to jump to a specific CodeInstruction.<br/>
             <b>bool Function([object __instance], [object arg0], [object arg1...])</b>
@@ -668,6 +671,11 @@
         <member name="M:Shared.TranspilerTool.NameLabel(System.Reflection.Emit.Label,System.String)">
             <summary>
             Set name of label.
+            </summary>
+        </member>
+        <member name="M:Shared.TranspilerTool.GetTargetLabel">
+            <summary>
+            Get index of label of the current line. May return empty LabelInfo.
             </summary>
         </member>
         <member name="M:Shared.TranspilerTool.GetLocal(System.Type,System.String,System.Int32)">
