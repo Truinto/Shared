@@ -1185,7 +1185,7 @@ namespace Shared
         /// <summary>
         /// Get a label to a specific CodeInstruction. Name must be attached to this CodeInstruction or be null.
         /// </summary>
-        public LabelInfo GetLabel(CodeInstruction line, string name = null, bool canMake = true)
+        public LabelInfo GetLabel(CodeInstruction line, string? name = null, bool canMake = true)
         {
             LabelInfo label;
             if (name != null)
@@ -1268,7 +1268,15 @@ namespace Shared
         }
 
         /// <summary>
-        /// Get index of label of the current line. May return empty LabelInfo.
+        /// Get label to the current line. Throws if canMake is false and no label exists.
+        /// </summary>
+        public LabelInfo GetCurrentLabel(bool canMake = true)
+        {
+            return GetLabel(line: Current, name: null, canMake: canMake);
+        }
+
+        /// <summary>
+        /// Get label of the current operand. May return empty LabelInfo.
         /// </summary>
         public LabelInfo GetTargetLabel()
         {
