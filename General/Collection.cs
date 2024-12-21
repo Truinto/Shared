@@ -213,8 +213,7 @@ namespace Shared.CollectionNS
                         ib++;
                 }
                 return true;
-            }
-            catch (Exception)
+            } catch (Exception)
             {
                 if (!throwOnError)
                     return false;
@@ -586,7 +585,7 @@ namespace Shared.CollectionNS
         /// </summary>
         public static void Sort<T1, T2>(this IList<T1> collection, Func<T1, T2> keySelector) where T2 : IComparable<T2>
         {
-                QuickSort(collection, keySelector, 0, collection.Count - 1);
+            QuickSort(collection, keySelector, 0, collection.Count - 1);
         }
 
         /// <summary>
