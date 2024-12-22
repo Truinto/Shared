@@ -1299,6 +1299,9 @@ namespace Shared
         /// Get local of an exact specific type. Set local name if name is non-null (throws if name is used by other local).<br/>
         /// Throws if no match.
         /// </summary>
+        /// <param name="type">Type of local to search.</param>
+        /// <param name="name">Optional name to set or compare. (Throws when mismatch)</param>
+        /// <param name="occurrence">Zero-based index of occurrence.</param>
         public LocalInfo GetLocal(Type type, string? name = null, int occurrence = 0)
         {
             for (int i = 0; i < LocalsExtended.Count; i++)
@@ -1729,6 +1732,62 @@ namespace Shared
                     yield return lambda;
                 }
             }
+        }
+
+        /// <summary>
+        /// Searches method body for a particular lambda expression and returns their MethodInfo.
+        /// </summary>
+        /// <param name="parentMethod">Method to search through.</param>
+        /// <param name="returnType">Return value of the wanted method.</param>
+        /// <param name="parameters">Parameters of the wanted method.</param>
+        /// <param name="occurrence">Zero-based index of occurrence.</param>
+        public static MethodInfo? GetLambda(MethodInfo parentMethod, Type returnType, Type[] parameters, int occurrence = 0)
+        {
+            returnType ??= typeof(void);
+            parameters ??= [];
+
+            var instructions = PatchProcessor.GetOriginalInstructions(parentMethod);
+            foreach (var line in instructions)
+            {
+                if (line.opcode == OpCodes.Ldftn
+                    && line.operand is MethodInfo mi
+                    && (returnType == null || mi.ReturnType == returnType)
+                    && mi.GetParameters().Types().SequenceEqual(parameters)
+                    && occurrence-- <= 0)
+                {
+                    return mi;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Searches method body all lambda expressions and returns their MethodInfo.
+        /// </summary>
+        /// <param name="parentMethod">Method to search through.</param>
+        public static List<MethodInfo> GetLambdas(MethodInfo parentMethod)
+        {
+            var results = new List<MethodInfo>();
+            var instructions = PatchProcessor.GetOriginalInstructions(parentMethod);
+            foreach (var line in instructions)
+            {
+                if (line.opcode == OpCodes.Ldftn
+                    && line.operand is MethodInfo mi)
+                {
+                    results.Add(mi);
+                }
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Create TranspilerTool for analyzing purposes.
+        /// </summary>
+        public static TranspilerTool Load(MethodInfo original)
+        {
+            return new TranspilerTool(PatchProcessor.GetOriginalInstructions(original, out var generator), generator, original);
         }
 
         #endregion

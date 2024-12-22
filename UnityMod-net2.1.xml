@@ -673,9 +673,14 @@
             Set name of label.
             </summary>
         </member>
+        <member name="M:Shared.TranspilerTool.GetCurrentLabel(System.Boolean)">
+            <summary>
+            Get label to the current line. Throws if canMake is false and no label exists.
+            </summary>
+        </member>
         <member name="M:Shared.TranspilerTool.GetTargetLabel">
             <summary>
-            Get index of label of the current line. May return empty LabelInfo.
+            Get label of the current operand. May return empty LabelInfo.
             </summary>
         </member>
         <member name="M:Shared.TranspilerTool.GetLocal(System.Type,System.String,System.Int32)">
@@ -683,6 +688,9 @@
             Get local of an exact specific type. Set local name if name is non-null (throws if name is used by other local).<br/>
             Throws if no match.
             </summary>
+            <param name="type">Type of local to search.</param>
+            <param name="name">Optional name to set or compare. (Throws when mismatch)</param>
+            <param name="occurrence">Zero-based index of occurrence.</param>
         </member>
         <member name="M:Shared.TranspilerTool.GetLocal(System.String,System.Type,System.Boolean)">
             <summary>
@@ -819,6 +827,26 @@
             <summary>
             Untested. Returns <i><paramref name="parentMethod"/></i> and embedded methods which call <i><paramref name="lookingforMethod"/></i>.
             Does resolve some wrapped method calls (e.g. lambda expressions).
+            </summary>
+        </member>
+        <member name="M:Shared.TranspilerTool.GetLambda(System.Reflection.MethodInfo,System.Type,System.Type[],System.Int32)">
+            <summary>
+            Searches method body for a particular lambda expression and returns their MethodInfo.
+            </summary>
+            <param name="parentMethod">Method to search through.</param>
+            <param name="returnType">Return value of the wanted method.</param>
+            <param name="parameters">Parameters of the wanted method.</param>
+            <param name="occurrence">Zero-based index of occurrence.</param>
+        </member>
+        <member name="M:Shared.TranspilerTool.GetLambdas(System.Reflection.MethodInfo)">
+            <summary>
+            Searches method body all lambda expressions and returns their MethodInfo.
+            </summary>
+            <param name="parentMethod">Method to search through.</param>
+        </member>
+        <member name="M:Shared.TranspilerTool.Load(System.Reflection.MethodInfo)">
+            <summary>
+            Create TranspilerTool for analyzing purposes.
             </summary>
         </member>
         <member name="T:Shared.LabelInfo">
