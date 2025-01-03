@@ -89,6 +89,9 @@ namespace Shared.PathsNS
 
         internal static void Sandbox()
         {
+            //var files = Directory.GetFiles(TargetPath.Groups["dir"].Value)
+            //    .OrderBy(f => Strings.Rx_Number().Replace(f, match => match.Value.PadLeft(4, '0')));
+
             System.IO.Directory.Delete("");
             System.IO.Directory.Exists("");
             System.IO.Directory.CreateDirectory("");

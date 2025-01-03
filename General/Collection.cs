@@ -328,6 +328,26 @@ namespace Shared.CollectionNS
 
         #region Insert
 
+        /// <summary>
+        /// Adds an item to a enumerable.
+        /// </summary>
+        public static IEnumerable<T> Concat<T>(this IEnumerable<T> enumerable, T value)
+        {
+            foreach (var item in enumerable)
+                yield return item;
+            yield return value;
+        }
+
+        /// <summary>
+        /// Adds an item to a enumerable.
+        /// </summary>
+        public static IEnumerable<T> Concat<T>(this T value, IEnumerable<T> enumerable)
+        {
+            yield return value;
+            foreach (var item in enumerable)
+                yield return item;
+        }
+
         /// <summary>Injects a new element into an enumerable, if a condition is met.</summary>
         public static IEnumerable<T> InjectBefore<T>(this IEnumerable<T> enumerable, Func<T, bool> pred, Func<T, T> value)
         {

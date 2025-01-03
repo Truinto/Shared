@@ -14,8 +14,10 @@ namespace Shared.StringsNS
     /// <summary>
     /// Extension class for string operations.
     /// </summary>
-    public static class Strings
+    public static partial class Strings
     {
+        #region Regex
+
         /// <summary>
         /// Regular expression for matching an email address.<br/>
         /// General Email Regex (RFC 5322 Official Standard) from https://emailregex.com.
@@ -41,6 +43,26 @@ namespace Shared.StringsNS
         /// Regular expression for removing styles from HTML.
         /// </summary>
         public const string RemoveHtmlStylesRegex = @"(?s)<style.*?(/>|</style>)";
+
+        /// <summary>
+        /// Capture groups are<br/>
+        /// dir: directory full name<br/>
+        /// vol: volume (C:/ or /)<br/>
+        /// folder: all folder name captures (Value has last entry only)<br/>
+        /// file: filename including extension<br/>
+        /// name: filename excluding extension<br/>
+        /// ext: extension including period<br/>
+        /// </summary>
+#if NET7_0_OR_GREATER
+        [GeneratedRegex(@"\d+")]
+        public static partial Regex Rx_Number();
+#else
+        /// <summary> Splits path into segments. </summary>
+        public static Regex Rx_Number() => _Rx_Number ??= new(@"\d+", RegexOptions.Compiled);
+        private static Regex? _Rx_Number;
+#endif
+
+        #endregion
 
         #region Args
 
