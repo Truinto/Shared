@@ -55,12 +55,21 @@ namespace Shared.StringsNS
         /// </summary>
 #if NET7_0_OR_GREATER
         [GeneratedRegex(@"\d+")]
-        public static partial Regex Rx_Number();
+        public static partial Regex Rx_Integer();
 #else
         /// <summary> Splits path into segments. </summary>
-        public static Regex Rx_Number() => _Rx_Number ??= new(@"\d+", RegexOptions.Compiled);
-        private static Regex? _Rx_Number;
+        public static Regex Rx_Integer() => _Rx_Integer ??= new(@"\d+", RegexOptions.Compiled);
+        private static Regex? _Rx_Integer;
 #endif
+
+        /// <summary>
+        /// Extension to check if match is success.
+        /// </summary>
+        public static bool TryMatch(this Regex rx, string input, out Match match)
+        {
+            match = rx.Match(input);
+            return match.Success;
+        }
 
         #endregion
 
@@ -186,8 +195,7 @@ namespace Shared.StringsNS
                 var dir = new DirectoryInfo(path);
                 //Console.WriteLine($"{dir.FullName}, {dir.Name}, {dir.Parent}");
                 return dir.FullName;
-            }
-            catch (Exception) { return default; }
+            } catch (Exception) { return default; }
         }
 
         public static void GetDirCompletion(this string path, List<string> dirs)
@@ -208,8 +216,7 @@ namespace Shared.StringsNS
                 var subs = parent.GetDirectories(search, SearchOption.TopDirectoryOnly);
                 dirs.AddRange(subs.Where(w => !w.Attributes.HasFlag(FileAttributes.Hidden)).Select(s => s.FullName));
                 //Debug.WriteLine($"list={dirs.Join()}");
-            }
-            catch (Exception) { }
+            } catch (Exception) { }
         }
 
         /// <summary>
@@ -389,8 +396,7 @@ namespace Shared.StringsNS
                 if (start < 0)
                     return str.Substring(0, str.LastIndexOf(c));
                 return str.Substring(start, str.IndexOf(c, start));
-            }
-            catch (Exception)
+            } catch (Exception)
             {
                 return null;
             }
