@@ -160,8 +160,12 @@ namespace Shared.PathsNS
 #endif
 
         /// <summary>True if paths are equal. Resolves relative paths. Ignores closing path separator.</summary>
-        public static bool AreEqual(this FileInfo path1, FileInfo path2)
+        public static bool AreEqual(this FileInfo? path1, FileInfo? path2)
         {
+            if (path1 is null || path2 is null)
+                return false;
+            if (ReferenceEquals(path1, path2))
+                return true;
             return AreEqual(path1.FullName, path2.FullName);
         }
 
