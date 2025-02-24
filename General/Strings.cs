@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -58,7 +59,7 @@ namespace Shared.StringsNS
         public static partial Regex Rx_Integer();
 #else
         /// <summary> Splits path into segments. </summary>
-        public static Regex Rx_Integer() => _Rx_Integer ??= new(@"\d+", RegexOptions.Compiled);
+        public static Regex Rx_Integer() => _Rx_Integer ??= new(@"\d+");
         private static Regex? _Rx_Integer;
 #endif
 
@@ -175,148 +176,6 @@ namespace Shared.StringsNS
 
         #region Conversions
 
-        #endregion
-
-        #region Enum
-
-        #endregion
-
-        #region Path
-
-        /// <summary>
-        /// Converts string into valid absolute path.<br/>
-        /// Returns null, if invalid path (e.g. illegal characters).
-        /// </summary>
-        public static string? FilterPath(this string path)
-        {
-            try
-            {
-                path = path.Trim();
-                var dir = new DirectoryInfo(path);
-                //Console.WriteLine($"{dir.FullName}, {dir.Name}, {dir.Parent}");
-                return dir.FullName;
-            } catch (Exception) { return default; }
-        }
-
-        public static void GetDirCompletion(this string path, List<string> dirs)
-        {
-            try
-            {
-                dirs.Clear();
-                var info = new DirectoryInfo(path);
-                var parent = info.Parent;
-                string search = $"{info.Name}*";
-
-                if (parent == null || info.Exists)
-                {
-                    search = "*";
-                    parent = info;
-                }
-
-                var subs = parent.GetDirectories(search, SearchOption.TopDirectoryOnly);
-                dirs.AddRange(subs.Where(w => !w.Attributes.HasFlag(FileAttributes.Hidden)).Select(s => s.FullName));
-                //Debug.WriteLine($"list={dirs.Join()}");
-            } catch (Exception) { }
-        }
-
-        /// <summary>
-        /// Returns to windows style volume expanded string "C:\".
-        /// Otherwise returns input string.
-        /// </summary>
-        public static string? ExpandWindowsVolume(this string letter)
-        {
-            if (letter == null || letter.Length < 1 || letter.Length > 2)
-                return letter;
-            if (!letter[0].IsLetter())
-                return letter;
-            if (letter.Length == 2 && letter[1] != ':')
-                return letter;
-            return $"{letter[0]}:\\";
-        }
-
-        public static string MergePaths(IEnumerable<string> paths)
-        {
-            if (paths == null)
-                return "";
-
-            var sb = GetSb();
-            bool first = true;
-            foreach (string path in paths)
-            {
-                string? full = FilterPath(path);
-                if (full.IsEmpty())
-                    continue;
-
-                if (!first)
-                    sb.Append(System.IO.Path.PathSeparator);
-                else
-                    first = false;
-                sb.Append(full);
-            }
-            return FlushSb();
-        }
-
-        private static readonly char[] InvalidFileNameChars =
-        [
-            '"', '<', '>', '|', '\0', '\u0001', '\u0002', '\u0003', '\u0004', '\u0005',
-            '\u0006', '\a', '\b', '\t', '\n', '\v', '\f', '\r', '\u000e', '\u000f',
-            '\u0010', '\u0011', '\u0012', '\u0013', '\u0014', '\u0015', '\u0016', '\u0017', '\u0018', '\u0019',
-            '\u001a', '\u001b', '\u001c', '\u001d', '\u001e', '\u001f', ':', '*', '?', '\\',
-            '/'
-        ];
-
-        /// <summary>
-        /// Checks for files or directories.
-        /// </summary>
-        public static bool PathExists(string path)
-        {
-            if (File.Exists(path))
-                return true;
-            if (Directory.Exists(path))
-                return true;
-            return false;
-        }
-
-        private static Regex? _rxFileBrackets;
-        private static Regex? _rxFileExtension;
-        /// <summary>
-        /// Returns file path that does not exist. Appends (1) or increases existing numberation, if file already exists.
-        /// </summary>
-        public static string GetUniqueFilename(string path)
-        {
-            _rxFileBrackets ??= new Regex(@"(.*)\((\d+)\)(?!.*[\/\\])(.*)", RegexOptions.Compiled | RegexOptions.RightToLeft);
-            _rxFileExtension ??= new Regex(@"(.*)(?!.*[\/\\])(\..*)", RegexOptions.Compiled | RegexOptions.RightToLeft);
-
-            while (PathExists(path))
-            {
-                Match match;
-                if ((match = _rxFileBrackets.Match(path)).Success && int.TryParse(match.Groups[2].Value, out int number))
-                    path = match.Result($"$1({number + 1})$3");
-                else if ((match = _rxFileExtension.Match(path)).Success)
-                    path = match.Result("$1(1)$2");
-                else
-                    path += "(1)";
-            }
-
-            return path;
-        }
-
-        public static string? FilterFilename(this string filename)
-        {
-            if (filename == null)
-                return null;
-
-            var sb = GetSb();
-            foreach (char c in filename.Trim())
-            {
-                if (!InvalidFileNameChars.Contains(c))
-                    sb.Append(c);
-            }
-            return FlushSb();
-        }
-
-        #endregion
-
         /// <summary>
         /// Escapes Unicode and ASCII non printable characters
         /// </summary>
@@ -377,30 +236,11 @@ namespace Shared.StringsNS
             return FlushSb();
         }
 
-        /// <summary>Returns substring. Always excludes char 'c'. Returns null, if index is out of range or char not found.</summary>
-        /// <param name="str">source string</param>
-        /// <param name="c">char to search for</param>
-        /// <param name="start">start index; negative number search last index instead</param>
-        /// <param name="tail">get tail instead of head</param>
-        public static string? TrySubstring(this string str, char c, int start = 0, bool tail = false)
-        {
-            try
-            {
-                if (tail)
-                {
-                    if (start < 0)
-                        return str.Substring(str.LastIndexOf(c) + 1);
-                    return str.Substring(str.IndexOf(c, start) + 1);
-                }
+        #endregion
 
-                if (start < 0)
-                    return str.Substring(0, str.LastIndexOf(c));
-                return str.Substring(start, str.IndexOf(c, start));
-            } catch (Exception)
-            {
-                return null;
-            }
-        }
+        #region Enum
+
+        #endregion
 
         #region Search and Compare
 
@@ -464,6 +304,100 @@ namespace Shared.StringsNS
 
         #endregion
 
+        #region Substring
+
+        /// <summary>Returns substring. Always excludes char 'c'. Returns null, if index is out of range or char not found.</summary>
+        /// <param name="str">source string</param>
+        /// <param name="c">char to search for</param>
+        /// <param name="start">start index; negative number search last index instead</param>
+        /// <param name="tail">get tail instead of head</param>
+        public static string? TrySubstring(this string str, char c, int start = 0, bool tail = false)
+        {
+            try
+            {
+                if (tail)
+                {
+                    if (start < 0)
+                        return str.Substring(str.LastIndexOf(c) + 1);
+                    return str.Substring(str.IndexOf(c, start) + 1);
+                }
+
+                if (start < 0)
+                    return str.Substring(0, str.LastIndexOf(c));
+                return str.Substring(start, str.IndexOf(c, start));
+            } catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <inheritdoc cref="TrySubstring(string, char, int, bool)"/>
+        public static bool TrySubstring(this string str, char c, int start, bool tail, [NotNullWhen(true)] out string? outstring)
+        {
+            outstring = TrySubstring(str, c, start, tail);
+            return str != null;
+        }
+
+#if NET7_0_OR_GREATER
+        /// <summary>
+        /// Returns substring. Always excludes char 'c'. Returns false, if index out of bounds.<br/>
+        /// Example with c='.'<br/>
+        /// M.Fru.Bar<br/>
+        /// 0 ^ 1 ^ 2
+        /// </summary>
+        public static bool TrySubstringByOccurrence(this string str, char c, Index occurrence, out string outstring)
+        {
+            int len = str.Length;
+            int count = 0;
+            int start = 0;
+            int end = len;
+
+            if (!occurrence.IsFromEnd)
+            {
+                for (int i = 0; i < len; i++)
+                {
+                    if (str[i] == c)
+                    {
+                        if (count++ >= occurrence.Value)
+                        {
+                            outstring = str[start..i];
+                            return true;
+                        }
+                        start = i + 1;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = len - 1; i >= 0; i--)
+                {
+                    if (str[i] == c)
+                    {
+                        if (count++ >= occurrence.Value)
+                        {
+                            outstring = str[(i + 1)..end];
+                            return true;
+                        }
+                        end = i;
+                    }
+                }
+            }
+
+            if (count >= occurrence.Value)
+            {
+                outstring = str[start..end];
+                return true;
+            }
+
+            outstring = str;
+            return false;
+        }
+#endif
+
+        #endregion
+
+        #region Replacement
+
         /// <summary>
         /// Evaluator for Regex.Replace extension.
         /// </summary>
@@ -494,6 +428,8 @@ namespace Shared.StringsNS
             }
             return FlushSb();
         }
+
+        #endregion
 
         #region Buffer
 

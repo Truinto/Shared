@@ -84,10 +84,10 @@ namespace UnitTest
             foreach (var (path, root, directory, fileNameNoExtension, extension) in test_strings)
             {
                 var p = new PathInfo(path);
-                Assert.IsTrue(p.Root == root.Replace(c1, c2));
-                Assert.IsTrue(p.Directory == directory.Replace(c1, c2));
-                Assert.IsTrue(p.FileNameNoExtension == fileNameNoExtension.Replace(c1, c2));
-                Assert.IsTrue(p.Extension == extension.Replace(c1, c2));
+                Assert.AreEqual(root.Replace(c1, c2), p.Root);
+                Assert.AreEqual(directory.Replace(c1, c2), p.Directory);
+                Assert.AreEqual(fileNameNoExtension.Replace(c1, c2), p.FileNameNoExtension);
+                Assert.AreEqual(extension.Replace(c1, c2), p.Extension);
             }
         }
 
@@ -105,6 +105,8 @@ namespace UnitTest
                 /* 6*/ ("Folder1/.Folder2/.File.ext", "Folder1/.Folder2/", "", "Folder1", ".Folder2", ".File.ext", ".File", ".ext"),
                 /* 7*/ ("/Folder1/.Folder2/.File.ext", "/Folder1/.Folder2/", "/", "Folder1", ".Folder2", ".File.ext", ".File", ".ext"),
                 /* 8*/ ("../.Folder2/.File.ext", "../.Folder2/", "", "..", ".Folder2", ".File.ext", ".File", ".ext"),
+                
+                /* 9*/ ("C:/folder/", "C:/folder/", "C:/", "folder", null, "", "", ""),
             ];
 
             int i = 0;
@@ -122,6 +124,24 @@ namespace UnitTest
                 Assert.AreEqual(cap.Count > 1 ? cap[1].Value : null, folder2, $"folder2 mismatch {i}");
                 i++;
             }
+        }
+
+        [TestMethod]
+        public void Test_Paths_GetUniqueFilename()
+        {
+            File.WriteAllText("1.txt", "");
+            Assert.AreEqual("1(1).txt", Paths.GetUniqueFilename("1.txt"));
+
+            File.WriteAllText("2.txt", "");
+            File.WriteAllText("2(1).txt", "");
+            Assert.AreEqual("2(2).txt", Paths.GetUniqueFilename("2.txt"));
+
+            Directory.CreateDirectory("3");
+            Assert.AreEqual("3(1)", Paths.GetUniqueFilename("3"));
+
+            Directory.CreateDirectory("4");
+            Directory.CreateDirectory("4(1)");
+            Assert.AreEqual("4(2)", Paths.GetUniqueFilename("4"));
         }
     }
 }

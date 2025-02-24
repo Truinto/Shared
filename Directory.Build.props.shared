@@ -6,7 +6,7 @@
 
 		<Company>Truinto</Company>
 		<Authors>Truinto</Authors>
-		<Copyright>Copyright © Truinto 2024</Copyright>
+		<Copyright>Copyright © Truinto 2025</Copyright>
 		<Title>$(MSBuildProjectName)</Title>
 		<RepositoryUrl>https://github.com/Truinto/</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>

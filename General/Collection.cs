@@ -57,6 +57,21 @@ namespace Shared.CollectionNS
         /// <summary>
         /// Find index in a collection by a predicate.
         /// </summary>
+        public static int GetIndex<T>(this IEnumerable enumerable, Func<T, bool> pred)
+        {
+            int num = 0;
+            foreach (T item in enumerable)
+            {
+                if (pred(item))
+                    return num;
+                num++;
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// Find index in a collection by a predicate.
+        /// </summary>
         public static int GetIndex<T>(this IEnumerable<T> enumerable, Func<T, bool> pred)
         {
             int num = 0;
@@ -97,6 +112,20 @@ namespace Shared.CollectionNS
                 i++;
             }
             return notFound;
+        }
+
+        /// <summary>
+        /// Get element at index or default.
+        /// </summary>
+        public static T? AtIndex<T>(this IEnumerable enumerable, int index)
+        {
+            int i = 0;
+            foreach (var obj in enumerable)
+            {
+                if (i == index)
+                    return (T)obj;
+            }
+            return default;
         }
 
         /// <summary>

@@ -163,10 +163,12 @@ namespace Shared
 
         #endregion
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0079:Useless SuppressMessage", Justification = "Required suppression marked unnecessarily.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "SYSLIB1045:GeneratedRegexAttribute", Justification = "Simplified, just for debug.")]
         internal static void ScrapeFromWeb()
         {
             // copy table from https://www.loc.gov/standards/iso639-2/php/code_list.php
-#pragma warning disable SYSLIB1045
+
             var text = System.IO.File.ReadAllText(@"E:\Github\AutoCompress\AutoCompress\Resources\iso639-2 from 2017-12-21.txt");
             text = Regex.Replace(text, @"(^.*?\t.*?\t[\w ,-]*(?<! )).*", "$1", RegexOptions.Multiline);
             text = Regex.Replace(text, @" ?\t ?", "\t", RegexOptions.Multiline);
@@ -175,7 +177,6 @@ namespace Shared
             text = Regex.Replace(text, @",", "", RegexOptions.Multiline);
             text = Regex.Replace(text, @"[ -]", "_", RegexOptions.Multiline);
             var matches = Regex.Matches(text, @"(?<c3>\w{3})\t(?<ca>\w{3})?\t(?<c2>\w{2})?\t(?<cn>[\w]+)", RegexOptions.Multiline);
-#pragma warning restore SYSLIB1045
 
             int num = -1;
             var set = new HashSet<string>();

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 
 #pragma warning disable SYSLIB1045 // GeneratedRegexAttribute
@@ -141,6 +142,29 @@ namespace Shared.PathsNS
     /// </summary>
     public static partial class Paths
     {
+        public static readonly char[] InvalidFileNameChars =
+        [
+            '"', '<', '>', '|', '\0', '\u0001', '\u0002', '\u0003', '\u0004', '\u0005',
+            '\u0006', '\a', '\b', '\t', '\n', '\v', '\f', '\r', '\u000e', '\u000f',
+            '\u0010', '\u0011', '\u0012', '\u0013', '\u0014', '\u0015', '\u0016', '\u0017', '\u0018', '\u0019',
+            '\u001a', '\u001b', '\u001c', '\u001d', '\u001e', '\u001f', ':', '*', '?', '\\',
+            '/'
+        ];
+
+        public static string? FilterFilename(this string filename)
+        {
+            if (filename == null)
+                return null;
+
+            var sb = new StringBuilder();
+            foreach (char c in filename.Trim())
+            {
+                if (!InvalidFileNameChars.Contains(c))
+                    sb.Append(c);
+            }
+            return sb.ToString();
+        }
+
         /// <summary>
         /// Capture groups are<br/>
         /// dir: directory full name<br/>
@@ -155,7 +179,7 @@ namespace Shared.PathsNS
         public static partial Regex Rx_Path();
 #else
         /// <summary> Splits path into segments. </summary>
-        public static Regex Rx_Path() => _Rx_Path ??= new(@"^(?<dir>(?<vol>(?:[A-Za-z]:)?[\\/])?(?:(?<folder>[^\\/]+)[\\/])*)(?<file>(?<name>[^\\/]*?)?(?<ext>\.[^\\/\.]+)?)$", RegexOptions.Compiled);
+        public static Regex Rx_Path() => _Rx_Path ??= new(@"^(?<dir>(?<vol>(?:[A-Za-z]:)?[\\/])?(?:(?<folder>[^\\/]+)[\\/])*)(?<file>(?<name>[^\\/]*?)?(?<ext>\.[^\\/\.]+)?)$");
         private static Regex? _Rx_Path;
 #endif
 
@@ -206,6 +230,18 @@ namespace Shared.PathsNS
             return true;
         }
 
+        /// <summary>
+        /// Checks for files or directories.
+        /// </summary>
+        public static bool Exists(string path)
+        {
+            if (File.Exists(path))
+                return true;
+            if (Directory.Exists(path))
+                return true;
+            return false;
+        }
+
         /// <summary>True if paths are equal. Resolves relative paths. Ignores closing path separator.</summary>
         public static bool AreEqual(string path1, string path2)
         {
@@ -234,6 +270,41 @@ namespace Shared.PathsNS
                 length,
                 RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal
                 ) == 0;
+        }
+
+
+
+#if NET7_0_OR_GREATER
+        [GeneratedRegex(@"^(.*?)([^\\\/]+?)(?:\((\d+)\))?(\.\w+)?$")]
+        private static partial Regex Rx_UniqueFilename();
+#else
+        public static Regex Rx_UniqueFilename() => _Rx_UniqueFilename ??= new(@"^(.*?)([^\\\/]+?)(?:\((\d+)\))?(\.\w+)?$");
+        private static Regex? _Rx_UniqueFilename;
+#endif
+        /// <summary>
+        /// Returns file path that does not exist. Appends (1) or increases existing numberation, if file already exists.
+        /// </summary>
+        public static string GetUniqueFilename(string path)
+        {
+            if (!Exists(path))
+                return path;
+
+            var m1 = Rx_UniqueFilename().Match(path);
+            if (!m1.Success)
+                throw new Exception($"Path malformed '{path}'");
+
+            string parent = m1.Groups[1].Value;
+            if (parent.Length == 0)
+                parent = ".";
+
+            int number = 0;
+            foreach (var p in Directory.GetFileSystemEntries(parent, $"{m1.Groups[2].Value}*{m1.Groups[3].Value}", SearchOption.TopDirectoryOnly))
+            {
+                var m2 = Rx_UniqueFilename().Match(p);
+                if (m2.Success && m2.Groups[3].Success)
+                    number = Math.Max(number, int.Parse(m2.Groups[3].Value));
+            }
+            return $"{m1.Groups[1].Value}{m1.Groups[2].Value}({number+1}){m1.Groups[4].Value}";
         }
 
         /// <summary>Folder path of the currently running executable. Same as <seealso cref="AppContext.BaseDirectory"/>.</summary>

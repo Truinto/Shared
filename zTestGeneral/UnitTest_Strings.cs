@@ -67,5 +67,27 @@ namespace UnitTest
                 Assert.AreEqual(solution, actual, $"{i++}");
             }
         }
+
+        [TestMethod]
+        public void Test_Strings_TrySubstringByOccurrence()
+        {
+            Assert.IsTrue(Strings.TrySubstringByOccurrence("Foo.Bar.Mee", '.', 0, out string str));
+            Assert.AreEqual("Foo", str);
+            Assert.IsTrue(Strings.TrySubstringByOccurrence("Foo.Bar.Mee", '.', 1, out str));
+            Assert.AreEqual("Bar", str);
+            Assert.IsTrue(Strings.TrySubstringByOccurrence("Foo.Bar.Mee", '.', 2, out str));
+            Assert.AreEqual("Mee", str);
+            Assert.IsTrue(Strings.TrySubstringByOccurrence("Foo.Bar.Mee", '.', ^2, out str));
+            Assert.AreEqual("Foo", str);
+            Assert.IsTrue(Strings.TrySubstringByOccurrence("Foo.Bar.Mee", '.', ^1, out str));
+            Assert.AreEqual("Bar", str);
+            Assert.IsTrue(Strings.TrySubstringByOccurrence("Foo.Bar.Mee", '.', ^0, out str));
+            Assert.AreEqual("Mee", str);
+
+            Assert.IsFalse(Strings.TrySubstringByOccurrence("Foo.Bar.Mee", '.', 3, out str));
+            Assert.AreEqual("Foo.Bar.Mee", str);
+            Assert.IsFalse(Strings.TrySubstringByOccurrence("Foo.Bar.Mee", '.', ^3, out str));
+            Assert.AreEqual("Foo.Bar.Mee", str);
+        }
     }
 }
