@@ -307,6 +307,40 @@ namespace Shared.ConsoleNS
             return GetText(startL, startT, -1);
         }
 
+        public static void GetDirCompletion(this string path, List<string> dirs)
+        {
+            try
+            {
+                dirs.Clear();
+                var info = new DirectoryInfo(path);
+                var parent = info.Parent;
+                string search = $"{info.Name}*";
+                if (parent == null || info.Exists)
+                {
+                    search = "*";
+                    parent = info;
+                }
+                var subs = parent.GetDirectories(search, SearchOption.TopDirectoryOnly);
+                dirs.AddRange(subs.Where(w => !w.Attributes.HasFlag(FileAttributes.Hidden)).Select(s => s.FullName));
+                //Debug.WriteLine($"list={dirs.Join()}");
+            } catch (Exception) { }
+        }
+
+        /// <summary>
+        /// Returns to windows style volume expanded string "C:\".
+        /// Otherwise returns input string.
+        /// </summary>
+        public static string? ExpandWindowsVolume(this string letter)
+        {
+            if (letter == null || letter.Length < 1 || letter.Length > 2)
+                return letter;
+            if (!letter[0].IsLetter())
+                return letter;
+            if (letter.Length == 2 && letter[1] != ':')
+                return letter;
+            return $"{letter[0]}:\\";
+        }
+
         private static List<string>? _dirs;
         private static int _dirsI;
         public static string ReadLineTabComplete()
