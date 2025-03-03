@@ -143,5 +143,17 @@ namespace UnitTest
             Directory.CreateDirectory("4(1)");
             Assert.AreEqual("4(2)", Paths.GetUniqueFilename("4"));
         }
+
+        [TestMethod]
+        public void Test_Paths_Split()
+        {
+            CollectionAssert.AreEqual((string[])["C:\\WINDOWS\\system32", "C:\\Temp;2"], Paths.Split("C:\\WINDOWS\\system32;\"C:\\Temp;2\""));
+            CollectionAssert.AreEqual((string[])["", "", ""], Paths.Split(";;"));
+            CollectionAssert.AreEqual((string[])["", "", ""], Paths.Split("\"\";;"));
+            CollectionAssert.AreEqual((string[])["", "", ""], Paths.Split(";\"\";"));
+            CollectionAssert.AreEqual((string[])["", "", ""], Paths.Split(";;\"\""));
+            CollectionAssert.AreEqual((string[])[], Paths.Split(""));
+            CollectionAssert.AreEqual((string[])[], Paths.Split(null));
+        }
     }
 }

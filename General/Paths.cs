@@ -272,7 +272,39 @@ namespace Shared.PathsNS
                 ) == 0;
         }
 
+        public static List<string> Split(string? paths)
+        {
+            var list = new List<string>();
+            if (paths is null or "")
+                return list;
 
+            bool isQuote = false;
+            int len = paths.Length;
+            int lastSemi = -1;
+            for (int i = 0; ; i++)
+            {
+                if (i == len)
+                {
+                    if (lastSemi + 1 < len && paths[lastSemi + 1] is '\"')
+                        list.Add(paths[(lastSemi + 2)..(i - 1)]);
+                    else
+                        list.Add(paths[(lastSemi + 1)..(i)]);
+                    break;
+                }
+
+                if (paths[i] is '\"')
+                    isQuote = !isQuote;
+                else if (!isQuote && paths[i] is ';')
+                {
+                    if (paths[lastSemi + 1] is '\"')
+                        list.Add(paths[(lastSemi + 2)..(i - 1)]);
+                    else
+                        list.Add(paths[(lastSemi + 1)..(i)]);
+                    lastSemi = i;
+                }
+            }
+            return list;
+        }
 
 #if NET7_0_OR_GREATER
         [GeneratedRegex(@"^(.*?)([^\\\/]+?)(?:\((\d+)\))?(\.\w+)?$")]
@@ -304,7 +336,7 @@ namespace Shared.PathsNS
                 if (m2.Success && m2.Groups[3].Success)
                     number = Math.Max(number, int.Parse(m2.Groups[3].Value));
             }
-            return $"{m1.Groups[1].Value}{m1.Groups[2].Value}({number+1}){m1.Groups[4].Value}";
+            return $"{m1.Groups[1].Value}{m1.Groups[2].Value}({number + 1}){m1.Groups[4].Value}";
         }
 
         /// <summary>Folder path of the currently running executable. Same as <seealso cref="AppContext.BaseDirectory"/>.</summary>

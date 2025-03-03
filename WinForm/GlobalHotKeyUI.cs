@@ -123,7 +123,7 @@ namespace Shared
         /// </param>
         /// <param name="vk">The virtual-key code of the hot key.</param>
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern bool RegisterHotKey(IntPtr hWnd, int id, KeyModifiers fsModifiers, Keys vk);
+        private extern static bool RegisterHotKey(IntPtr hWnd, int id, KeyModifiers fsModifiers, Keys vk);
 
         /// <summary>
         /// Frees a hot key previously registered by the calling thread.
@@ -136,6 +136,6 @@ namespace Shared
         /// The identifier of the hot key to be freed.
         /// </param>
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+        private extern static bool UnregisterHotKey(IntPtr hWnd, int id);
     }
 }

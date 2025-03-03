@@ -200,7 +200,7 @@ namespace Shared.ConsoleNS
         }
 
         [DllImport("libc", EntryPoint = "getuid")]
-        private static extern uint getuid();
+        private extern static uint getuid();
         public static bool IsAdmin()
         {
             bool isAdmin;
@@ -743,19 +743,19 @@ namespace Shared.ConsoleNS
         }
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern void SetLastError(int dwErrCode);
+        private extern static void SetLastError(int dwErrCode);
 
         [DllImport("kernel32.dll", SetLastError = false, CharSet = CharSet.Unicode)]
-        private static extern int GetLastError();
+        private extern static int GetLastError();
 
         [DllImport("kernel32.dll", SetLastError = false, CharSet = CharSet.Unicode)]
-        private static extern int FormatMessageW(int dwFlags, IntPtr lpSource, int dwMessageId, int dwLanguageId, IntPtr lpBuffer, int nSize, IntPtr Arguments);
+        private extern static int FormatMessageW(int dwFlags, IntPtr lpSource, int dwMessageId, int dwLanguageId, IntPtr lpBuffer, int nSize, IntPtr Arguments);
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern bool GetConsoleScreenBufferInfo(IntPtr hConsoleOutput, out CONSOLE_SCREEN_BUFFER_INFO lpConsoleScreenBufferInfo);
+        private extern static bool GetConsoleScreenBufferInfo(IntPtr hConsoleOutput, out CONSOLE_SCREEN_BUFFER_INFO lpConsoleScreenBufferInfo);
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern IntPtr GetStdHandle(int num = STD_OUTPUT_HANDLE);
+        private extern static IntPtr GetStdHandle(int num = STD_OUTPUT_HANDLE);
 
         /// <param name="hStdout">result of 'GetStdHandle(-11)'</param>
         /// <param name="ch">A̲N̲S̲I̲ character result</param>
@@ -765,7 +765,7 @@ namespace Shared.ConsoleNS
         /// <returns>false if error</returns>
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Ansi)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool ReadConsoleOutputCharacterA(IntPtr hStdout, out byte ch, int c_in, COORD coord_XY, out int c_out);
+        private extern static bool ReadConsoleOutputCharacterA(IntPtr hStdout, out byte ch, int c_in, COORD coord_XY, out int c_out);
 
         /// <param name="hStdout">result of 'GetStdHandle(-11)'</param>
         /// <param name="ch">U̲n̲i̲c̲o̲d̲e̲ character result</param>
@@ -775,7 +775,7 @@ namespace Shared.ConsoleNS
         /// <returns>false if error</returns>
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool ReadConsoleOutputCharacterW(IntPtr hStdout, out char ch, int c_in, COORD coord_XY, out int c_out);
+        private extern static bool ReadConsoleOutputCharacterW(IntPtr hStdout, out char ch, int c_in, COORD coord_XY, out int c_out);
 
         /// <summary>
         /// 
@@ -788,46 +788,46 @@ namespace Shared.ConsoleNS
         /// <returns></returns>
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool WriteConsoleOutputCharacterW(IntPtr hStdout, char ch, int c_in, COORD coord_XY, out int c_out);
+        private extern static bool WriteConsoleOutputCharacterW(IntPtr hStdout, char ch, int c_in, COORD coord_XY, out int c_out);
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern bool SetConsoleOutputCP(uint wCodePageID = 65001u);
+        private extern static bool SetConsoleOutputCP(uint wCodePageID = 65001u);
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern bool SetConsoleCP(uint wCodePageID = 65001u);
-
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool GetVolumeNameForVolumeMountPointW(string lpszVolumeMountPoint, IntPtr lpszVolumeName, int cchBufferLength);
-
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern IntPtr FindFirstVolumeMountPointW(string lpszRootPathName, IntPtr lpszVolumeMountPoint, int cchBufferLength);
+        private extern static bool SetConsoleCP(uint wCodePageID = 65001u);
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool FindNextVolumeMountPointW(IntPtr hFindVolumeMountPoint, IntPtr lpszVolumeMountPoint, int cchBufferLength);
+        private extern static bool GetVolumeNameForVolumeMountPointW(string lpszVolumeMountPoint, IntPtr lpszVolumeName, int cchBufferLength);
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private extern static IntPtr FindFirstVolumeMountPointW(string lpszRootPathName, IntPtr lpszVolumeMountPoint, int cchBufferLength);
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool FindVolumeMountPointClose(IntPtr hFindVolumeMountPoint);
+        private extern static bool FindNextVolumeMountPointW(IntPtr hFindVolumeMountPoint, IntPtr lpszVolumeMountPoint, int cchBufferLength);
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private extern static bool FindVolumeMountPointClose(IntPtr hFindVolumeMountPoint);
 
         /// <param name="lpszVolumeMountPoint">Y:\MountX</param>
         /// <param name="lpszVolumeName">\\?\Volume{00000000-0000-0000-0000-000000000000}\</param>
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool SetVolumeMountPointW(string lpszVolumeMountPoint, string lpszVolumeName);
+        private extern static bool SetVolumeMountPointW(string lpszVolumeMountPoint, string lpszVolumeName);
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool DeleteVolumeMountPointW(string lpszVolumeMountPoint);
+        private extern static bool DeleteVolumeMountPointW(string lpszVolumeMountPoint);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool GetProcessHandleCount(IntPtr hProcess, out int pdwHandleCount);
+        private extern static bool GetProcessHandleCount(IntPtr hProcess, out int pdwHandleCount);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool QueryProcessCycleTime(IntPtr processHandle, out ulong cycleTime);
+        private extern static bool QueryProcessCycleTime(IntPtr processHandle, out ulong cycleTime);
 
         public static void TEST()
         {
@@ -859,7 +859,7 @@ namespace Shared.ConsoleNS
 
         [DllImport("shell32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool IsUserAnAdmin();
+        private extern static bool IsUserAnAdmin();
 
         #endregion
 
