@@ -1541,7 +1541,9 @@ namespace Shared
             OpCodes.Call,
             OpCodes.Callvirt,
             OpCodes.Ldsfld,
+            OpCodes.Ldsflda,
             OpCodes.Ldfld,
+            OpCodes.Ldflda,
         ];
 
         /// <summary>
