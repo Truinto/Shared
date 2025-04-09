@@ -361,7 +361,7 @@ namespace Shared.PathsNS
         /// <summary>C:\Program Files (x86)</summary>
         public static string ProgramFilesX86 => Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86, Environment.SpecialFolderOption.DoNotVerify);
 
-        /// <summary>C:\Users\%username%\OneDrive - Bruker Physik GmbH\Documents</summary>
+        /// <summary>C:\Users\%username%\Documents</summary>
         public static string MyDocuments => Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments, Environment.SpecialFolderOption.DoNotVerify);
 
         /// <summary>C:\Users\%username%\Pictures</summary>
