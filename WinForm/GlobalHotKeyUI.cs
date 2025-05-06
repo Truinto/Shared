@@ -11,7 +11,7 @@ namespace Shared
     /// <summary>
     /// Class to register global hotkey. Works only if thread messages are processed (e.g. WindowsForms).
     /// </summary>
-    public class GlobalHotKeyUI : IMessageFilter, IDisposable
+    public partial class GlobalHotKeyUI : IMessageFilter, IDisposable
     {
         /// <summary>
         /// Message identifier 0x312 means that the mesage is a WM_HOTKEY message.
@@ -122,8 +122,9 @@ namespace Shared
         /// MOD_WIN     0x0008
         /// </param>
         /// <param name="vk">The virtual-key code of the hot key.</param>
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private extern static bool RegisterHotKey(IntPtr hWnd, int id, KeyModifiers fsModifiers, Keys vk);
+        [LibraryImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool RegisterHotKey(IntPtr hWnd, int id, KeyModifiers fsModifiers, Keys vk);
 
         /// <summary>
         /// Frees a hot key previously registered by the calling thread.
@@ -135,7 +136,19 @@ namespace Shared
         /// <param name="id">
         /// The identifier of the hot key to be freed.
         /// </param>
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private extern static bool UnregisterHotKey(IntPtr hWnd, int id);
+        [LibraryImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool UnregisterHotKey(IntPtr hWnd, int id);
+    }
+
+    [Flags]
+    public enum KeyModifiers : Int16
+    {
+        None = 0,
+        Alt = 1,
+        Control = 2,
+        Shift = 4,
+        /// <summary>reserved by WINDOWS</summary>
+        Windows = 8
     }
 }

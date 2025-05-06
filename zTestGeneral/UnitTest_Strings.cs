@@ -38,7 +38,8 @@ namespace UnitTest
             foreach (var (test, solution) in values)
             {
                 var actual = Strings.SplitArgs(test);
-                CollectionAssert.AreEqual(solution, actual, $"{i++} '{test}'({actual.Count}) != '{Strings.Join(solution)}'({solution.Length})");
+                CollectionAssert.AreEqual(solution, actual, $"{i} '{test}'({actual.Count}) != '{Strings.Join(solution)}'({solution.Length})");
+                i++;
             }
         }
 
@@ -64,7 +65,8 @@ namespace UnitTest
             foreach (var (test, solution) in values)
             {
                 var actual = Strings.JoinArgs(test);
-                Assert.AreEqual(solution, actual, $"{i++}");
+                Assert.AreEqual(solution, actual, $"at {i}");
+                i++;
             }
         }
 
@@ -88,6 +90,36 @@ namespace UnitTest
             Assert.AreEqual("Foo.Bar.Mee", str);
             Assert.IsFalse(Strings.TrySubstringByOccurrence("Foo.Bar.Mee", '.', ^3, out str));
             Assert.AreEqual("Foo.Bar.Mee", str);
+        }
+
+
+        [TestMethod]
+        public void Test_Strings_CompareNatural()
+        {
+            (string? str1, string? str2, int solution)[] values = [
+                ( "", "", 0 ),
+                ( null, null, 0 ),
+                ( "", null, 1 ),
+                ( null, "", -1 ),
+                ( "abc", "cba", -1 ),
+                ( "cba", "abc", 1 ),
+                ( "a123", "a0123", 0 ),
+                ( "2", "11", -1 ),
+                ( "11", "2", 1 ),
+                ( "000 2", "0 11", -1 ),
+                ( "000 11", "0 2", 1 ),
+                ( "0 2", "000 11", -1 ),
+                ( "0 11", "000 2", 1 ),
+                ( "1", "1a", -1 ),
+                ( "1a", "1", 1 ),
+            ];
+
+            int i = 0;
+            foreach (var (str1, str2, solution) in values)
+            {
+                Assert.AreEqual(solution, Strings.CompareNatural(str1, str2), $"at {i}");
+                i++;
+            }
         }
     }
 }

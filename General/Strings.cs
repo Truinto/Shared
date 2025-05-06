@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -216,12 +217,30 @@ namespace Shared.StringsNS
         }
 
         /// <summary>Joins an enumeration with a value converter and a delimiter to a string</summary>
+        /// <param name="enumeration">The enumeration</param>
+        /// <param name="converter">An optional value converter (from T to string)</param>
+        /// <param name="delimiter">An optional delimiter</param>
+        /// <returns>The values joined into a string</returns>
+        public static string Join(this IEnumerable enumeration, Func<object, string>? converter = null, string delimiter = ", ")
+        {
+            converter ??= t => t?.ToString() ?? "";
+            var sb = GetSb();
+            foreach (var obj in enumeration)
+            {
+                if (sb.Length > 0)
+                    sb.Append(delimiter);
+
+                sb.Append(converter(obj));
+            }
+            return FlushSb();
+        }
+
+        /// <summary>Joins an enumeration with a value converter and a delimiter to a string</summary>
         /// <typeparam name="T">The inner type of the enumeration</typeparam>
         /// <param name="enumeration">The enumeration</param>
         /// <param name="converter">An optional value converter (from T to string)</param>
         /// <param name="delimiter">An optional delimiter</param>
         /// <returns>The values joined into a string</returns>
-        ///
         public static string Join<T>(this IEnumerable<T> enumeration, Func<T, string>? converter = null, string delimiter = ", ")
         {
             converter ??= t => t?.ToString() ?? "";
@@ -243,6 +262,45 @@ namespace Shared.StringsNS
         #endregion
 
         #region Search and Compare
+
+        /// <summary>
+        /// A <see cref="string.Compare(string?, string?)"/> variant that uses padding for each number pair to get a natural sorting of numbers.
+        /// </summary>
+        public static int CompareNatural(string? str1, string? str2)
+        {
+            if (str1 == null)
+                return str2 == null ? 0 : -1;
+            if (str2 == null)
+                return 1;
+
+            for (int i = 0, j = 0; i < str1.Length && j < str2.Length; i++, j++)
+            {
+                char c1 = str1[i];
+                char c2 = str2[j];
+                if (c1.IsNumber() && c2.IsNumber())
+                {
+                    int start1 = i, start2 = j;
+                    while (++i < str1.Length && str1[i].IsNumber()) ;
+                    while (++j < str2.Length && str2[j].IsNumber()) ;
+                    int max = Math.Max(i - start1, j - start2);
+                    string pad1 = str1[start1..i].PadLeft(max, '0');
+                    string pad2 = str2[start2..j].PadLeft(max, '0');
+                    int compare = string.Compare(pad1, pad2, StringComparison.Ordinal);
+                    if (compare != 0)
+                        return compare;
+                    if (i >= str1.Length)
+                        return j >= str2.Length ? 0 : -1;
+                    if (j >= str2.Length)
+                        return 1;
+                    c1 = str1[i];
+                    c2 = str2[j];
+                }
+                if (c1 == c2)
+                    continue;
+                return c1 < c2 ? -1 : 1;
+            }
+            return 0;
+        }
 
         public static bool IsNumber(this char c)
         {
