@@ -28,6 +28,7 @@ namespace Shared
         protected override void Dispose(bool disposing)
         {
             ChangeClipboardChain(this.Handle, nextClipboardViewer);
+            base.Dispose(disposing);
         }
 
         [LibraryImport("user32.dll")]

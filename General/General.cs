@@ -33,8 +33,7 @@ namespace Shared.GeneralNS
                 {
                     object? value = pi.GetValue(obj);
                     Debug.WriteLine($"  property={pi.Name} f-type={pi.PropertyType} o-type={value?.GetType()} tostring={value}");
-                }
-                catch (Exception)
+                } catch (Exception)
                 {
                     Debug.WriteLine($"  property={pi.Name} f-type={pi.PropertyType}");
                 }
@@ -47,8 +46,7 @@ namespace Shared.GeneralNS
             {
                 value = Convert.ToSingle(obj, CultureInfo.InvariantCulture);
                 return true;
-            }
-            catch (Exception)
+            } catch (Exception)
             {
                 value = float.NaN;
                 return false;
@@ -61,11 +59,32 @@ namespace Shared.GeneralNS
             {
                 value = Convert.ToDouble(obj, CultureInfo.InvariantCulture);
                 return true;
-            }
-            catch (Exception)
+            } catch (Exception)
             {
                 value = double.NaN;
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Opens a path in the default explorer.<br/>
+        /// Directory path start the explorer in that directory. File path is run with default app.<br/>
+        /// If <paramref name="location"/> is true, the explorer will instead navigate to that path and select it.<br/>
+        /// Not tested in linux/macOS.
+        /// </summary>
+        public static void OpenExplorer(string? path, bool location = false)
+        {
+            if (path is null or "")
+                return;
+
+            if (Path.Exists(path))
+            {
+                if (OperatingSystem.IsWindows())
+                    Process.Start("explorer.exe", location ? ["/select,", "file://" + path] : ["file://" + path]);
+                else if (OperatingSystem.IsLinux())
+                    Process.Start("xdg-open", ["file://" + (location ? Path.GetDirectoryName(path) : path)]);
+                else if (OperatingSystem.IsMacOS())
+                    Process.Start("open", location ? ["-R", path] : [path]);
             }
         }
     }

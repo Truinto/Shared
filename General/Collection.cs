@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,8 @@ namespace Shared.CollectionNS
     /// </summary>
     public static class CollectionTool
     {
+        #region Search
+
         /// <summary>
         /// Gets the first element that is of type <typeparamref name="T"/>.
         /// </summary>
@@ -37,7 +40,19 @@ namespace Shared.CollectionNS
                     yield return t;
         }
 
-        #region Search
+        public static T? GetFirst<T>(this IList<T> list)
+        {
+            if (list.Count <= 0)
+                return default;
+            return list[0];
+        }
+
+        public static T? GetLast<T>(this IList<T> list)
+        {
+            if (list.Count <= 0)
+                return default;
+            return list[^1];
+        }
 
         /// <summary>
         /// Checks if right type can be assigned to left type. <br/>

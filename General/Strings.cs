@@ -302,29 +302,34 @@ namespace Shared.StringsNS
             return 0;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNumber(this char c)
         {
-            return c is >= (char)48 and <= (char)57;
+            return c is >= '0' and <= '9';
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsUppercase(this char c)
         {
-            return c is >= (char)65 and <= (char)90;
+            return c is >= 'A' and <= 'Z';
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsLowercase(this char c)
         {
-            return c is >= (char)97 and <= (char)122;
+            return c is >= 'a' and <= 'z';
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsLetter(this char c)
         {
-            return c is >= (char)65 and <= (char)90 or >= (char)97 and <= (char)122;
+            return c is >= 'A' and <= 'Z' or >= 'a' and <= 'z';
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsAlphanumeric(this char c)
         {
-            return c is >= (char)48 and <= (char)57 or >= (char)65 and <= (char)90 or >= (char)97 and <= (char)122;
+            return c is >= '0' and <= '9' or >= 'A' and <= 'Z' or >= 'a' and <= 'z';
         }
 
         public static bool IsNotSpaced(this StringBuilder sb)
@@ -462,7 +467,8 @@ namespace Shared.StringsNS
         public delegate string RegexEvaluator(Match match, int index, int count);
 
         /// <summary>
-        /// Regex.Replace, but with additional index and count values.
+        /// Regex.Replace, but with additional index and count values.<br/>
+        /// Index is zero based.
         /// </summary>
         public static string Replace(this Regex rx, string input, RegexEvaluator evaluator)
         {
