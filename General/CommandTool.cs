@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace Shared
 {
-    public partial class CommandTool
+    public partial class CommandTool : IDisposable
     {
         public delegate void OnKeyPressDelegate(object sender, ConsoleKeyInfo key, out bool consumed);
 
@@ -23,11 +23,13 @@ namespace Shared
         public int ExitCode;
         public Process? Process;
         public bool EatCancel;
+        public ProcessPriorityClass Priority = ProcessPriorityClass.Normal;
 
         public CommandTool()
         {
             this.FilePath ??= "";
-            _handler = new EventHandler(Handler);
+            if (!Application.MessageLoop)
+                _handler = new EventHandler(Handler);
         }
 
         public CommandTool(string filePath, string args, Action<string>? onStandard = null, Action<string>? onError = null, OnKeyPressDelegate? onKeyPress = null) : this()
@@ -50,7 +52,22 @@ namespace Shared
 
         ~CommandTool()
         {
-            SetConsoleCtrlHandler(_handler, false);
+            Disposing();
+        }
+
+        public void Dispose()
+        {
+            Disposing();
+            GC.SuppressFinalize(this);
+        }
+
+        private void Disposing()
+        {
+            try
+            {
+                SetConsoleCtrlHandlerCall(_handler, false);
+                Process?.Kill();
+            } catch (Exception) { }
         }
 
         /// <summary>
@@ -70,11 +87,11 @@ namespace Shared
         public int Execute()
         {
             if (this.ArgsList is null)
-                Trace.WriteLine($"run-command {this.FilePath} {this.Args}");
+                Debug.WriteLine($"run-command {this.FilePath} {this.Args}");
             else
-                Trace.WriteLine($"run-command {this.FilePath} {this.ArgsList.JoinArgs()}");
+                Debug.WriteLine($"run-command {this.FilePath} {this.ArgsList.JoinArgs()}");
 
-            SetConsoleCtrlHandler(_handler, true);
+            SetConsoleCtrlHandlerCall(_handler, true);
 
             ExitCode = -1;
             try
@@ -90,15 +107,16 @@ namespace Shared
                     CreateNoWindow = true,
                     WindowStyle = ProcessWindowStyle.Hidden,
                     UseShellExecute = false,
-                    //StandardOutputEncoding = Encoding.UTF8,
-                    //StandardErrorEncoding = Encoding.UTF8,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    StandardErrorEncoding = Encoding.UTF8,
                     RedirectStandardInput = true,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                 };
 
-                foreach (var arg in this.ArgsList ?? [])
-                    Process.StartInfo.ArgumentList.Add(arg);
+                if (ArgsList != null)
+                    foreach (var arg in this.ArgsList)
+                        Process.StartInfo.ArgumentList.Add(arg);
 
                 Process.EnableRaisingEvents = true;
                 Process.OutputDataReceived += (sender, args) =>
@@ -125,35 +143,33 @@ namespace Shared
                 };
 
                 Process.Start();
+
+                Process.PriorityClass = Priority;
                 Process.BeginOutputReadLine();
                 Process.BeginErrorReadLine();
-                Process.PriorityClass = ProcessPriorityClass.BelowNormal;
 
-                while (true)
+                if (OnKeyPress != null)
                 {
-                    if (OnKeyPress != null && Console.KeyAvailable)
+                    while (true)
                     {
-                        var key = Console.ReadKey(true);
-                        Trace.WriteLine($"key-press {key.Modifiers} {key.Key}");
-                        OnKeyPress(this, key, out bool consumed);
-                        if (!consumed)
-                            Process?.StandardInput.Write(key.KeyChar);
-                        continue;
+                        if (Console.KeyAvailable)
+                        {
+                            var key = Console.ReadKey(true);
+                            Debug.WriteLine($"key-press {key.Modifiers} {key.Key}");
+                            OnKeyPress(this, key, out bool consumed);
+                            if (!consumed)
+                                Process?.StandardInput.Write(key.KeyChar);
+                            continue;
+                        }
+                        if (Process?.WaitForExit(200) != false)
+                            break;
                     }
-
-                    //Thread.Sleep(200);
-                    //if (_process.HasExited)
-                    //    break;
-
-                    if (Process?.WaitForExit(200) != false)
-                        break;
                 }
 
                 Process?.WaitForExit(); // do not remove this!
                 ExitCode = Process?.ExitCode ?? -1;
                 Process = null;
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 Debug.WriteLine($"Process error: {e}");
 #if DEBUG
@@ -161,7 +177,7 @@ namespace Shared
 #endif
             }
 
-            SetConsoleCtrlHandler(_handler, false);
+            SetConsoleCtrlHandlerCall(_handler, false);
 
             return ExitCode;
         }
@@ -172,17 +188,17 @@ namespace Shared
         public void Start()
         {
             if (this.ArgsList is null)
-                Trace.WriteLine($"run-command {this.FilePath} {this.Args}");
+                Debug.WriteLine($"run-command {this.FilePath} {this.Args}");
             else
-                Trace.WriteLine($"run-command {this.FilePath} {this.ArgsList.JoinArgs()}");
+                Debug.WriteLine($"run-command {this.FilePath} {this.ArgsList.JoinArgs()}");
 
-            SetConsoleCtrlHandler(_handler, true);
+            SetConsoleCtrlHandlerCall(_handler, true);
 
             ExitCode = -1;
             try
             {
-                var sb_standard = new StringBuilder();
-                var sb_error = new StringBuilder();
+                Sb_Output.Clear();
+                Sb_Error.Clear();
 
                 Process = new Process();
                 Process.StartInfo = new()
@@ -192,8 +208,8 @@ namespace Shared
                     CreateNoWindow = true,
                     WindowStyle = ProcessWindowStyle.Hidden,
                     UseShellExecute = false,
-                    //StandardOutputEncoding = Encoding.UTF8,
-                    //StandardErrorEncoding = Encoding.UTF8,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    StandardErrorEncoding = Encoding.UTF8,
                     RedirectStandardInput = true,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -208,7 +224,7 @@ namespace Shared
                     {
                         OnStandard?.Invoke(args.Data);
                         Debug.WriteLine(args.Data);
-                        sb_standard.AppendLine(args.Data);
+                        Sb_Output.AppendLine(args.Data);
                     }
                 };
                 Process.ErrorDataReceived += (sender, args) =>
@@ -219,16 +235,16 @@ namespace Shared
                     {
                         OnError?.Invoke(args.Data);
                         Debug.WriteLine(args.Data);
-                        sb_error.AppendLine(args.Data);
+                        Sb_Error.AppendLine(args.Data);
                     }
                 };
 
                 Process.Start();
+
+                Process.PriorityClass = Priority;
                 Process.BeginOutputReadLine();
                 Process.BeginErrorReadLine();
-                Process.PriorityClass = ProcessPriorityClass.BelowNormal;
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 Debug.WriteLine($"Process error: {e}");
 #if DEBUG
@@ -259,16 +275,24 @@ namespace Shared
             ExitCode = Process?.ExitCode ?? -1;
             Process = null;
 
-            SetConsoleCtrlHandler(_handler, false);
+            SetConsoleCtrlHandlerCall(_handler, false);
         }
 
         #region Kernel32
+
+        private static bool SetConsoleCtrlHandlerCall(EventHandler? handler, bool add)
+        {
+            if (handler != null && OperatingSystem.IsWindows())
+                return SetConsoleCtrlHandler(handler, add);
+            return false;
+        }
+
         [LibraryImport("Kernel32")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static partial bool SetConsoleCtrlHandler(EventHandler handler, [MarshalAs(UnmanagedType.Bool)] bool add);
 
         private delegate bool EventHandler(CtrlType sig);
-        private EventHandler _handler;
+        private EventHandler? _handler;
 
         private enum CtrlType
         {
@@ -283,10 +307,9 @@ namespace Shared
         {
             try
             {
-                Trace.WriteLine("trigger command exit handle");
+                Debug.WriteLine("trigger command exit handle");
                 Process?.Kill();
-            }
-            catch (Exception) { }
+            } catch (Exception) { }
             return EatCancel;
         }
         #endregion
