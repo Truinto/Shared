@@ -13,6 +13,7 @@ namespace Shared
     public partial class ClipboardMonitor : Control
     {
         private IntPtr nextClipboardViewer;
+        private DateTime lastChange;
 
         /// <summary>Clipboard contents changed.</summary>
         public event EventHandler<ClipboardChangedEventArgs>? ClipboardChanged;
@@ -37,7 +38,7 @@ namespace Shared
         [LibraryImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static partial bool ChangeClipboardChain(IntPtr hWndRemove, IntPtr hWndNewNext);
-        
+
         [LibraryImport("user32.dll", EntryPoint = "SendMessageA")]
         private static partial int SendMessage(IntPtr hwnd, int wMsg, IntPtr wParam, IntPtr lParam);
 
@@ -74,6 +75,10 @@ namespace Shared
         {
             try
             {
+                var now = DateTime.Now;
+                if (now < lastChange.AddMilliseconds(200))
+                    return;
+                lastChange = now;
                 var iData = Clipboard.GetDataObject();
                 if (iData is not null)
                     ClipboardChanged?.Invoke(this, new ClipboardChangedEventArgs(iData, GetClipboardOwner()));
