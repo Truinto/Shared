@@ -12,6 +12,7 @@ namespace Shared
     {
         public delegate void OnKeyPressDelegate(object sender, ConsoleKeyInfo key, out bool consumed);
 
+        public object? Parent;
         public string FilePath;
         public string? Args;
         public IEnumerable<string>? ArgsList;
@@ -20,13 +21,15 @@ namespace Shared
         public OnKeyPressDelegate? OnKeyPress;
         public readonly StringBuilder Sb_Output = new();
         public readonly StringBuilder Sb_Error = new();
-        public int ExitCode;
-        public Process? Process;
+        public int ExitCode = -1;
+        public Process? Process = new();
         public bool EatCancel;
         public ProcessPriorityClass Priority = ProcessPriorityClass.Normal;
+        private volatile ProcessState _state;
 
         public CommandTool()
         {
+            _state = ProcessState.Uninitialized;
             this.FilePath ??= "";
             if (!Application.MessageLoop)
                 _handler = new EventHandler(Handler);
@@ -65,8 +68,12 @@ namespace Shared
         {
             try
             {
+                Debug.WriteLine($"disposing {this.FilePath}");
                 SetConsoleCtrlHandlerCall(_handler, false);
-                Process?.Kill();
+                if (State is ProcessState.Running)
+                    Process?.Kill(true);
+                Process = null;
+                _state = ProcessState.Exited;
             } catch (Exception) { }
         }
 
@@ -86,6 +93,9 @@ namespace Shared
         /// </summary>
         public int Execute()
         {
+            if (Process == null)
+                throw new InvalidOperationException("Process already finished");
+
             if (this.ArgsList is null)
                 Debug.WriteLine($"run-command {this.FilePath} {this.Args}");
             else
@@ -93,100 +103,86 @@ namespace Shared
 
             SetConsoleCtrlHandlerCall(_handler, true);
 
-            ExitCode = -1;
-            try
+            Process.StartInfo = new()
             {
-                Sb_Output.Clear();
-                Sb_Error.Clear();
+                FileName = this.FilePath,
+                Arguments = this.Args,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                UseShellExecute = false,
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardErrorEncoding = Encoding.UTF8,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
 
-                Process = new Process();
-                Process.StartInfo = new()
+            if (ArgsList != null)
+                foreach (var arg in this.ArgsList)
+                    Process.StartInfo.ArgumentList.Add(arg);
+
+            Process.EnableRaisingEvents = true;
+            Process.OutputDataReceived += (sender, args) =>
+            {
+                if (args?.Data is null)
+                    return;
+                lock (Sb_Output)
                 {
-                    FileName = this.FilePath,
-                    Arguments = this.Args,
-                    CreateNoWindow = true,
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                    UseShellExecute = false,
-                    StandardOutputEncoding = Encoding.UTF8,
-                    StandardErrorEncoding = Encoding.UTF8,
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                };
-
-                if (ArgsList != null)
-                    foreach (var arg in this.ArgsList)
-                        Process.StartInfo.ArgumentList.Add(arg);
-
-                Process.EnableRaisingEvents = true;
-                Process.OutputDataReceived += (sender, args) =>
-                {
-                    if (args?.Data is null)
-                        return;
-                    lock (this)
-                    {
-                        OnStandard?.Invoke(args.Data);
-                        Debug.WriteLine(args.Data);
-                        Sb_Output.AppendLine(args.Data);
-                    }
-                };
-                Process.ErrorDataReceived += (sender, args) =>
-                {
-                    if (args?.Data is null)
-                        return;
-                    lock (this)
-                    {
-                        OnError?.Invoke(args.Data);
-                        Debug.WriteLine(args.Data);
-                        Sb_Error.AppendLine(args.Data);
-                    }
-                };
-
-                Process.Start();
-
-                Process.PriorityClass = Priority;
-                Process.BeginOutputReadLine();
-                Process.BeginErrorReadLine();
-
-                if (OnKeyPress != null)
-                {
-                    while (true)
-                    {
-                        if (Console.KeyAvailable)
-                        {
-                            var key = Console.ReadKey(true);
-                            Debug.WriteLine($"key-press {key.Modifiers} {key.Key}");
-                            OnKeyPress(this, key, out bool consumed);
-                            if (!consumed)
-                                Process?.StandardInput.Write(key.KeyChar);
-                            continue;
-                        }
-                        if (Process?.WaitForExit(200) != false)
-                            break;
-                    }
+                    OnStandard?.Invoke(args.Data);
+                    Debug.WriteLine(args.Data);
+                    Sb_Output.AppendLine(args.Data);
                 }
-
-                Process?.WaitForExit(); // do not remove this!
-                ExitCode = Process?.ExitCode ?? -1;
-                Process = null;
-            } catch (Exception e)
+            };
+            Process.ErrorDataReceived += (sender, args) =>
             {
-                Debug.WriteLine($"Process error: {e}");
-#if DEBUG
-                throw;
-#endif
+                if (args?.Data is null)
+                    return;
+                lock (Sb_Output)
+                {
+                    OnError?.Invoke(args.Data);
+                    Debug.WriteLine(args.Data);
+                    Sb_Error.AppendLine(args.Data);
+                }
+            };
+
+            Process.Start();
+            _state = ProcessState.Running;
+
+            Process.PriorityClass = Priority;
+            Process.BeginOutputReadLine();
+            Process.BeginErrorReadLine();
+
+            if (OnKeyPress != null)
+            {
+                while (true)
+                {
+                    if (Console.KeyAvailable)
+                    {
+                        var key = Console.ReadKey(true);
+                        Debug.WriteLine($"key-press {key.Modifiers} {key.Key}");
+                        OnKeyPress(this, key, out bool consumed);
+                        if (!consumed)
+                            Process?.StandardInput.Write(key.KeyChar);
+                        continue;
+                    }
+                    if (Process?.WaitForExit(200) != false)
+                        break;
+                }
             }
 
-            SetConsoleCtrlHandlerCall(_handler, false);
+            WaitForExit();
 
             return ExitCode;
         }
 
         /// <summary>
-        /// Asynchronous process execution. Run <see cref="WaitForExit"/>.
+        /// Asynchronous process execution. Run <see cref="WaitForExit"/> or read until <see cref="State"/> is <see cref="ProcessState.Exited"/>.
         /// </summary>
         public void Start()
         {
+            if (Process == null)
+                throw new InvalidOperationException("Process already finished");
+
             if (this.ArgsList is null)
                 Debug.WriteLine($"run-command {this.FilePath} {this.Args}");
             else
@@ -194,76 +190,68 @@ namespace Shared
 
             SetConsoleCtrlHandlerCall(_handler, true);
 
-            ExitCode = -1;
-            try
+            Process.StartInfo = new()
             {
-                Sb_Output.Clear();
-                Sb_Error.Clear();
+                FileName = this.FilePath,
+                Arguments = this.Args,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                UseShellExecute = false,
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardErrorEncoding = Encoding.UTF8,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
 
-                Process = new Process();
-                Process.StartInfo = new()
-                {
-                    FileName = this.FilePath,
-                    Arguments = this.Args,
-                    CreateNoWindow = true,
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                    UseShellExecute = false,
-                    StandardOutputEncoding = Encoding.UTF8,
-                    StandardErrorEncoding = Encoding.UTF8,
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                };
+            if (ArgsList != null)
+                foreach (var arg in this.ArgsList)
+                    Process.StartInfo.ArgumentList.Add(arg);
 
-                Process.EnableRaisingEvents = true;
-                Process.OutputDataReceived += (sender, args) =>
-                {
-                    if (args?.Data is null)
-                        return;
-                    lock (this)
-                    {
-                        OnStandard?.Invoke(args.Data);
-                        Debug.WriteLine(args.Data);
-                        Sb_Output.AppendLine(args.Data);
-                    }
-                };
-                Process.ErrorDataReceived += (sender, args) =>
-                {
-                    if (args?.Data is null)
-                        return;
-                    lock (this)
-                    {
-                        OnError?.Invoke(args.Data);
-                        Debug.WriteLine(args.Data);
-                        Sb_Error.AppendLine(args.Data);
-                    }
-                };
-
-                Process.Start();
-
-                Process.PriorityClass = Priority;
-                Process.BeginOutputReadLine();
-                Process.BeginErrorReadLine();
-            } catch (Exception e)
+            Process.EnableRaisingEvents = true;
+            Process.OutputDataReceived += (sender, args) =>
             {
-                Debug.WriteLine($"Process error: {e}");
-#if DEBUG
-                throw;
-#endif
-            }
+                if (args?.Data is null)
+                    return;
+                lock (Sb_Output)
+                {
+                    OnStandard?.Invoke(args.Data);
+                    Debug.WriteLine(args.Data);
+                    Sb_Output.AppendLine(args.Data);
+                }
+            };
+            Process.ErrorDataReceived += (sender, args) =>
+            {
+                if (args?.Data is null)
+                    return;
+                lock (Sb_Output)
+                {
+                    OnError?.Invoke(args.Data);
+                    Debug.WriteLine(args.Data);
+                    Sb_Error.AppendLine(args.Data);
+                }
+            };
+            Process.Exited += (sender, args) => { _state = ProcessState.Exited; };
+
+            Process.Start();
+            _state = ProcessState.Running;
+
+            Process.PriorityClass = Priority;
+            Process.BeginOutputReadLine();
+            Process.BeginErrorReadLine();
         }
 
         /// <summary>
-        /// Asynchronous check if process is finished. If true calls <see cref="WaitForExit"/>.
+        /// Check process state. Flushes pipes once state is <see cref="ProcessState.Exited"/>.
         /// </summary>
-        public bool HasExited()
+        public ProcessState State
         {
-            bool hasExited = Process?.HasExited ?? true;
-
-            if (hasExited)
-                WaitForExit(); // this makes sure the streams are flushed
-
-            return hasExited;
+            get
+            {
+                if (_state == ProcessState.Exited && Process != null)
+                    WaitForExit();
+                return _state;
+            }
         }
 
         /// <summary>
@@ -274,6 +262,7 @@ namespace Shared
             Process?.WaitForExit();
             ExitCode = Process?.ExitCode ?? -1;
             Process = null;
+            _state = ProcessState.Exited;
 
             SetConsoleCtrlHandlerCall(_handler, false);
         }
@@ -308,7 +297,7 @@ namespace Shared
             try
             {
                 Debug.WriteLine("trigger command exit handle");
-                Process?.Kill();
+                Disposing();
             } catch (Exception) { }
             return EatCancel;
         }
@@ -316,5 +305,13 @@ namespace Shared
 
         [GeneratedRegex(@"[\\^]\n")]
         private static partial Regex Rx_CmdEOL();
+    }
+
+    public enum ProcessState
+    {
+        Invalid,
+        Uninitialized,
+        Running,
+        Exited,
     }
 }

@@ -87,5 +87,27 @@ namespace Shared.GeneralNS
                     Process.Start("open", location ? ["-R", path] : [path]);
             }
         }
+
+
+        public static HttpClient HttpClient = new();
+        public static async Task<bool> DownloadFileAsync(Uri uri, string filePath)
+        {
+            try
+            {
+                if (uri.IsFile)
+                    return false;
+                using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+                using var downloadStream = await HttpClient.GetStreamAsync(uri);
+                await downloadStream.CopyToAsync(fileStream);
+                await fileStream.FlushAsync();
+                fileStream.Close();
+                return true;
+            } catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public static async Task<bool> DownloadFileAsync(string url, string filePath) => await DownloadFileAsync(new Uri(url), filePath);
     }
 }

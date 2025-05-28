@@ -35,7 +35,7 @@ namespace Shared
         /// <summary>
         /// Raise an event when the hotkey is pressed.
         /// </summary>
-        public event EventHandler HotKeyPressed;
+        public event EventHandler? HotKeyPressed;
 
         public bool IsRegistered { get; private set; }
 

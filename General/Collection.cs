@@ -16,6 +16,20 @@ namespace Shared.CollectionNS
         #region Search
 
         /// <summary>
+        /// Returns collection count or iterates and counts through all elements.
+        /// </summary>
+        public static int Count(this IEnumerable enumerable)
+        {
+            if (enumerable is ICollection coll)
+                return coll.Count;
+
+            int count = 0;
+            foreach (var item in enumerable)
+                count++;
+            return count;
+        }
+
+        /// <summary>
         /// Gets the first element that is of type <typeparamref name="T"/>.
         /// </summary>
         public static T? Get<T>(this IEnumerable enumerable)
@@ -149,6 +163,49 @@ namespace Shared.CollectionNS
         public static T? AtIndex<T>(this IEnumerable<T> enumerable, int index)
         {
             return enumerable.ElementAtOrDefault(index);
+        }
+
+        /// <summary>
+        /// Check every element with <see cref="object.ReferenceEquals(object?, object?)"/>. Returns false if <paramref name="element"/> is null.
+        /// </summary>
+        public static bool ContainsReference(this IEnumerable enumerable, object? element)
+        {
+            if (element == null)
+                return false;
+            foreach (var item in enumerable)
+                if (ReferenceEquals(item, element))
+                    return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Check every element with <see cref="object.Equals(object?)"/>. Returns false if <paramref name="element"/> is null.
+        /// </summary>
+        public static bool Contains(this IEnumerable enumerable, object? element)
+        {
+            if (element == null)
+                return false;
+            foreach (var item in enumerable)
+                if (Equals(item, element))
+                    return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Check every element with <see cref="object.Equals(object?)"/>. Recursively up to <paramref name="depth"/>. Returns false if <paramref name="element"/> is null.
+        /// </summary>
+        public static bool ContainsMany(this IEnumerable enumerable, object? element, int depth = 50)
+        {
+            if (element == null || depth < 0)
+                return false;
+            foreach (var item in enumerable)
+            {
+                if (Equals(item, element))
+                    return true;
+                if (item is IEnumerable enumerable2 && ContainsMany(enumerable2, element, depth - 1))
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>

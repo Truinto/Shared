@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+	<ItemGroup>
+		<Compile Include="$(SharedDir)WinForm/FormMessageBox.cs" Link="Shared/FormMessageBox.cs" SubType="UserControl" />
+		<Compile Include="$(SharedDir)WinForm/FormMessageBox.Designer.cs" Link="Shared/FormMessageBox.Designer.cs" DependentUpon="FormMessageBox.cs" />
+		<EmbeddedResource Include="$(SharedDir)WinForm/FormMessageBox.resx" Link="Shared/FormMessageBox.resx" DependentUpon="FormMessageBox.cs" />
+		
+		<Compile Include="$(SharedDir)WinForm/WinformExtensions.cs" Link="Shared/WinformExtensions.cs" />
+	</ItemGroup>
+</Project>

@@ -87,33 +87,6 @@ namespace Shared.ConsoleNS
             return result;
         }
 
-        public static bool DownloadFile(string url, string filePath) => DownloadFile(new Uri(url), filePath);
-
-        public static bool DownloadFile(Uri uri, string filePath)
-        {
-            try
-            {
-                if (uri.IsFile)
-                    return false;
-
-                //var client = new WebClient();
-                //client.DownloadFile(url, filePath);
-                //client.UploadFile(url, null, filePath);
-
-                using var sw = new FileStream(filePath, FileMode.CreateNew);
-                using var client2 = new HttpClient();
-                using var request = client2.GetAsync(uri);
-                request.Result.Content.CopyToAsync(sw).Wait();
-                sw.Close();
-
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
         /// <summary>
         /// Runs command or program. Blocks execution until finished.
         /// </summary>
