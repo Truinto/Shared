@@ -14,14 +14,14 @@ namespace Shared.JsonNS
     public static class JsonTool
     {
         /// <summary>
-        /// Serialization settings.
+        /// Serialization settings with fields.
         /// </summary>
         public static JsonSerializerOptions JsonOptions = new()
         {
             WriteIndented = true,
             AllowTrailingCommas = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
-            IncludeFields = false,
+            IncludeFields = true,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
@@ -29,14 +29,14 @@ namespace Shared.JsonNS
         };
 
         /// <summary>
-        /// Serialization settings with fields.
+        /// Serialization settings, no fields.
         /// </summary>
-        public static JsonSerializerOptions JsonOptionsFields = new()
+        public static JsonSerializerOptions JsonOptionsNoFields = new()
         {
             WriteIndented = true,
             AllowTrailingCommas = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
-            IncludeFields = true,
+            IncludeFields = false,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
@@ -52,7 +52,7 @@ namespace Shared.JsonNS
             WriteIndented = true,
             AllowTrailingCommas = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
-            IncludeFields = false,
+            IncludeFields = true,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
@@ -68,7 +68,7 @@ namespace Shared.JsonNS
             WriteIndented = false,
             AllowTrailingCommas = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
-            IncludeFields = false,
+            IncludeFields = true,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals,
             Converters = { new JsonStringEnumConverter() },
