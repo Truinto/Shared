@@ -65,7 +65,7 @@ namespace Shared.CollectionNS
         {
             if (list.Count <= 0)
                 return default;
-            return list[^1];
+            return list[list.Count - 1];
         }
 
         /// <summary>

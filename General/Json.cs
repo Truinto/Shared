@@ -29,6 +29,21 @@ namespace Shared.JsonNS
         };
 
         /// <summary>
+        /// Serialization settings with fields.
+        /// </summary>
+        public static JsonSerializerOptions JsonOptionsFields = new()
+        {
+            WriteIndented = true,
+            AllowTrailingCommas = true,
+            ReadCommentHandling = JsonCommentHandling.Skip,
+            IncludeFields = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            Converters = { new JsonStringEnumConverter() },
+        };
+
+        /// <summary>
         /// Serialization settings with $ref.
         /// </summary>
         public static JsonSerializerOptions JsonOptionsRef = new()
@@ -64,6 +79,18 @@ namespace Shared.JsonNS
             return JsonSerializer.Serialize<T>(value, options ?? JsonOptions);
         }
 
+        public static bool Serialize<T>(T value, [NotNullWhen(true)] out string? result, JsonSerializerOptions? options = null)
+        {
+            try
+            {
+                return (result = JsonSerializer.Serialize<T>(value, options ?? JsonOptions)) != null;
+            } catch (Exception)
+            {
+                result = null;
+                return false;
+            }
+        }
+
         public static T? Deserialize<T>(string json, JsonSerializerOptions? options = null)
         {
             return JsonSerializer.Deserialize<T>(json, options ?? JsonOptions);
@@ -71,16 +98,30 @@ namespace Shared.JsonNS
 
         public static bool Deserialize<T>(string json, [NotNullWhen(true)] out T? result, JsonSerializerOptions? options = null)
         {
-            return (result = Deserialize<T>(json, options)) != null;
+            try
+            {
+                return (result = JsonSerializer.Deserialize<T>(json, options)) != null;
+            } catch (Exception)
+            {
+                result = default;
+                return false;
+            }
         }
 
-        public static void SerializeFile<T>(string path, T value, JsonSerializerOptions? options = null)
+        public static bool SerializeFile<T>(string path, T value, JsonSerializerOptions? options = null)
         {
-            if (Path.GetDirectoryName(path) is string directory)
-                Directory.CreateDirectory(directory);
+            try
+            {
+                if (Path.GetDirectoryName(path) is string directory)
+                    Directory.CreateDirectory(directory);
 
-            using var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
-            JsonSerializer.Serialize<T>(stream, value, options ?? JsonOptions);
+                using var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+                JsonSerializer.Serialize<T>(stream, value, options ?? JsonOptions);
+                return true;
+            } catch (Exception)
+            {
+                return false;
+            }
         }
 
         public static T? DeserializeFile<T>(string path, JsonSerializerOptions? options = null)
@@ -93,7 +134,14 @@ namespace Shared.JsonNS
 
         public static bool DeserializeFile<T>(string path, [NotNullWhen(true)] out T? result, JsonSerializerOptions? options = null)
         {
-            return (result = DeserializeFile<T>(path, options)) != null;
+            try
+            {
+                return (result = DeserializeFile<T>(path, options)) != null;
+            } catch (Exception)
+            {
+                result = default;
+                return false;
+            }
         }
     }
 }
