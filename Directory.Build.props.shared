@@ -34,7 +34,7 @@
 	<ItemGroup>
 		<!--<GlobalAnalyzerConfigFiles Condition="'@(GlobalAnalyzerConfigFiles)'==''" Include="$(MSBuildThisFileDirectory).globalconfiguration" Link=".globalconfiguration" />-->
 
-		<PackageReference Include="AssemblyPublicizer" Version="1.0.4" ExcludeAssets="runtime" />
+		<PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.*" ExcludeAssets="runtime" PrivateAssets="all" />
 		<PackageReference Include="BuildTaskVersionControl" Version="1.*" ExcludeAssets="runtime" />
 		<PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.*" ExcludeAssets="runtime" />
 	</ItemGroup>
@@ -62,19 +62,6 @@
 		<TargetZipItems Include="$(ModFolder)/$(TargetName)/$(TargetName).dll" />
 		<TargetZipTarget Include="$(ModFolder)/$(TargetName)/$(TargetName).zip" />
 	</ItemGroup>
-
-	<!-- Target to generate publicized assemblies.
-		 required: @TargetPublicizeItems: assemblies to process
-		 optional: $TargetPublicizeDir: where to store new assemblies; if empty folder of first @TargetPublicizeItems -->
-	<Target Name="Publicize" BeforeTargets="Clean;BeforeBuild" AfterTargets="">
-		<ItemGroup>
-			<TargetPublicizeItemsA Include="@(TargetPublicizeItems->Reverse())" />
-		</ItemGroup>
-		<PropertyGroup>
-			<TargetPublicizeDir Condition="'$(TargetPublicizeDir)'==''">$([MSBuild]::NormalizePath('%(TargetPublicizeItemsA.Identity)/../'))</TargetPublicizeDir>
-		</PropertyGroup>
-		<PublicizeTask InputAssemblies="@(TargetPublicizeItems)" OutputDir="$(TargetPublicizeDir)" />
-	</Target>
 
 	<!-- Target to merge given assemblies into primary assembly. Overwrites primary assembly.
 		 required: @TargetMergeItems: files to copy

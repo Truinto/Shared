@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>1.0.2.57</Version>
+		<Version>1.0.2.61</Version>
 		<TargetFramework>net48</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<Authors>Truinto</Authors>
@@ -34,14 +34,6 @@
 		<Compile Include="..\General\Logger.cs" Link="Logger.cs" />
 		<Compile Include="..\General\Collection.cs" Link="Collection.cs" />
 	</ItemGroup>
-
-	<!-- Publicize -->
-	<Target Name="Publicize" BeforeTargets="BeforeBuild" AfterTargets="">
-		<ItemGroup>
-			<PublicizeInput Include="$(Lib)\UnityModManager\0Harmony.dll" />
-		</ItemGroup>
-		<PublicizeTask InputAssemblies="@(PublicizeInput)" OutputDir="$(Lib)\" />
-	</Target>
 
 	<!-- Update build version -->
 	<Target Name="Versioning" BeforeTargets="BeforeBuild">
