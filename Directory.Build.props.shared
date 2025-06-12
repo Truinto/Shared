@@ -32,8 +32,6 @@
 	</ItemDefinitionGroup>
 
 	<ItemGroup>
-		<!--<GlobalAnalyzerConfigFiles Condition="'@(GlobalAnalyzerConfigFiles)'==''" Include="$(MSBuildThisFileDirectory).globalconfiguration" Link=".globalconfiguration" />-->
-
 		<PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.*" ExcludeAssets="runtime" PrivateAssets="all" />
 		<PackageReference Include="BuildTaskVersionControl" Version="1.*" ExcludeAssets="runtime" />
 		<PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.*" ExcludeAssets="runtime" />
@@ -50,8 +48,6 @@
 		<VersioningTask_Out DropRevision="never" Include="$(MSBuildThisFileFullPath)" />
 		<VersioningTask_Out DropRevision="keep" Include="info.json" />
 		<VersioningTask_Out DropRevision="keep" Include="Settings/Repository.json" Max="2" />
-		
-		<TargetPublicizeItems Include="$(GameManaged)/Assembly-CSharp.dll" />
 		
 		<TargetMergeItems Include="$(SolutionDir)/@Shared/UnityMod.dll" />
 		
