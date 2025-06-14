@@ -785,6 +785,24 @@ namespace Shared.CollectionNS
 #endif
         #endregion
 
+        #region Create
+
+        /// <summary>
+        /// Fills collection with a value.
+        /// </summary>
+        public static T[] Fill<T>(this T[] array, T value)
+        {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_0_OR_GREATER
+            Array.Fill(array, value);
+#else
+            for (int i = 0; i < array.Length; i++)
+                array[i] = value;
+#endif
+            return array;
+        }
+
+        #endregion
+
         public static readonly byte[] Buffer = new byte[2048];
 
         private static readonly List<object> _list = [];

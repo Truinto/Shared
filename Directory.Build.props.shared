@@ -2,7 +2,7 @@
 <Project>
 	<PropertyGroup>
 		<LangVersion>latest</LangVersion>
-		<Nullable>annotations</Nullable>
+		<Nullable>enable</Nullable>
 
 		<Company>Truinto</Company>
 		<Authors>Truinto</Authors>
