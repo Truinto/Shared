@@ -1,6 +1,6 @@
+global using System.Text.Json;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Encodings.Web;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Shared.JsonNS
@@ -22,6 +22,7 @@ namespace Shared.JsonNS
             AllowTrailingCommas = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
             IncludeFields = true,
+            IgnoreReadOnlyProperties = true,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
@@ -37,6 +38,7 @@ namespace Shared.JsonNS
             AllowTrailingCommas = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
             IncludeFields = false,
+            IgnoreReadOnlyProperties = true,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
@@ -53,6 +55,7 @@ namespace Shared.JsonNS
             AllowTrailingCommas = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
             IncludeFields = true,
+            IgnoreReadOnlyProperties = true,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
@@ -69,6 +72,7 @@ namespace Shared.JsonNS
             AllowTrailingCommas = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
             IncludeFields = true,
+            IgnoreReadOnlyProperties = true,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals,
             Converters = { new JsonStringEnumConverter() },

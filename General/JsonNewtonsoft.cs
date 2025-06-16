@@ -1,11 +1,18 @@
 global using JsonInclude = Newtonsoft.Json.JsonPropertyAttribute;
-using Newtonsoft.Json;
+global using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using System.Diagnostics.CodeAnalysis;
 using JsonSerializerOptions = Newtonsoft.Json.JsonSerializerSettings;
 
 namespace Shared.JsonNS
 {
+    /// <summary>
+    /// Serialization with Newtonsoft.Json.
+    /// </summary>
+    /// <remarks>
+    /// [JsonInclude] [JsonIgnore]
+    /// </remarks>
     public static class JsonTool
     {
         public static List<JsonConverter> DefaultConverters = [new StringEnumConverter()];
@@ -23,6 +30,8 @@ namespace Shared.JsonNS
             DefaultValueHandling = DefaultValueHandling.Include,
             TypeNameHandling = TypeNameHandling.None,
             MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            ContractResolver = new WritablePropertiesOnlyResolver(),
         };
 
         /// <summary>
@@ -39,6 +48,8 @@ namespace Shared.JsonNS
             DefaultValueHandling = DefaultValueHandling.Include,
             TypeNameHandling = TypeNameHandling.None,
             MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            ContractResolver = new WritablePropertiesOnlyResolver(),
         };
 
         /// <summary>
@@ -55,6 +66,8 @@ namespace Shared.JsonNS
             DefaultValueHandling = DefaultValueHandling.Include,
             TypeNameHandling = TypeNameHandling.None,
             MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            ContractResolver = new WritablePropertiesOnlyResolver(),
         };
 
         public static string Serialize<T>(T value, JsonSerializerOptions? options = null)
@@ -126,6 +139,20 @@ namespace Shared.JsonNS
             {
                 result = default;
                 return false;
+            }
+        }
+
+        public class WritablePropertiesOnlyResolver : DefaultContractResolver
+        {
+            protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
+            {
+                var props = base.CreateProperties(type, memberSerialization);
+                for (int i = props.Count - 1; i >= 0; i--)
+                {
+                    if (!props[i].Writable)
+                        props.RemoveAt(i);
+                }
+                return props;
             }
         }
     }
