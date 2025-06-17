@@ -476,6 +476,28 @@ namespace Shared.CollectionNS
         #region Append
 
         /// <summary>
+        /// Adds elements to a collection. Mutates and returns <paramref name="destination"/>.
+        /// </summary>
+        public static TList Add<T, TList>(this TList destination, IEnumerable<T> source) where TList : ICollection<T>
+        {
+            if (destination == null)
+                throw new ArgumentNullException(nameof(destination));
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+
+            if (destination is List<T> list)
+            {
+                list.AddRange(source);
+                return destination;
+            }
+
+            foreach (var item in source)
+                destination.Add(item);
+
+            return destination;
+        }
+
+        /// <summary>
         /// Returns numerable with element at the first position.
         /// </summary>
         public static IEnumerable<T> AddBefore<T>(this IEnumerable<T> collection, T element)

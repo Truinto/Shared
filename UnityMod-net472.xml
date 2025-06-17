@@ -1105,6 +1105,11 @@
         <member name="M:Shared.CollectionNS.CollectionTool.InjectAfter``1(System.Collections.Generic.IEnumerable{``0},System.Func{``0,System.Boolean},System.Func{``0,``0})">
             <summary>Injects a new element into an enumerable, if a condition is met.</summary>
         </member>
+        <member name="M:Shared.CollectionNS.CollectionTool.Add``2(``1,System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Adds elements to a collection. Mutates and returns <paramref name="destination"/>.
+            </summary>
+        </member>
         <member name="M:Shared.CollectionNS.CollectionTool.AddBefore``1(System.Collections.Generic.IEnumerable{``0},``0)">
             <summary>
             Returns numerable with element at the first position.
