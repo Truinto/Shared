@@ -330,6 +330,21 @@ namespace Shared.CollectionNS
             return enumerable.Where(predicate).Select(selector);
         }
 
+        /// <summary>
+        /// Projects each element into a new form, but filters null elements and null results.
+        /// </summary>
+        public static IEnumerable<TResult> SelectNotNull<T, TResult>(this IEnumerable<T?> enumerable, Func<T?, TResult?> selector) where T : class where TResult : class
+        {
+            foreach (var item in enumerable)
+            {
+                if (item is null)
+                    continue;
+                var item2 = selector(item);
+                if (item2 != null)
+                    yield return item2;
+            }
+        }
+
         #endregion
 
         #region AddUnique

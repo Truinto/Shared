@@ -26,15 +26,19 @@ namespace Shared.ConsoleNS
     {
         public static char[] ArgsIdentifier = ['-', '/'];
 
-        public static bool ReadArgs(this string[] args, params string[] identifier)
+        public static bool ReadArgs(this string[] args, ref bool value, params string[] identifier)
         {
+            value = false;
             if (args == null || identifier == null)
                 return false;
 
             for (int i = 0; i < args.Length; i++)
             {
                 if (identifier.Contains(args[i]))
+                {
+                    value = true;
                     return true;
+                }
             }
             return false;
         }
@@ -124,6 +128,7 @@ namespace Shared.ConsoleNS
         {
             onData ??= System.Console.WriteLine;
 
+            var _lock = new object();
             var p = new Process();
             p.StartInfo.FileName = command;
             p.StartInfo.Arguments = args;
@@ -136,8 +141,8 @@ namespace Shared.ConsoleNS
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.RedirectStandardError = true;
             p.EnableRaisingEvents = true;
-            p.OutputDataReceived += (sender, args) => onData(args.Data ?? "");
-            p.ErrorDataReceived += (sender, args) => onData(args.Data ?? "");
+            p.OutputDataReceived += (sender, args) => { lock (_lock) { onData(args.Data ?? ""); } };
+            p.ErrorDataReceived += (sender, args) => { lock (_lock) { onData(args.Data ?? ""); } };
             if (startNow)
             {
                 p.Start();
@@ -183,8 +188,7 @@ namespace Shared.ConsoleNS
                     isAdmin = IsUserAnAdmin();
                 else
                     isAdmin = getuid() == 0;
-            }
-            catch (Exception)
+            } catch (Exception)
             {
                 isAdmin = false;
             }
@@ -648,8 +652,7 @@ namespace Shared.ConsoleNS
                         y++;
                     }
                 }
-            }
-            catch (Exception) { }
+            } catch (Exception) { }
             return FlushSb();
         }
 
