@@ -37,6 +37,12 @@
 		<PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.*" ExcludeAssets="runtime" />
 	</ItemGroup>
 
+	<Target Name="TargetDefineConstants" AfterTargets="ResolveProjectReferences">
+		<PropertyGroup>
+			<DefineConstants Condition="'$(UseWindowsForms)'=='true'">$(DefineConstants);WINFORMS</DefineConstants>
+		</PropertyGroup>
+	</Target>
+
 
 
 	<!-- Copy this ItemGroup into your project.
@@ -56,7 +62,7 @@
 		<TargetCopyDelete Include="$(ModFolder)/$(TargetName)/$(TargetName).xml" Condition="$(Configuration.Contains('Release'))" />
 		
 		<TargetZipItems Include="$(ModFolder)/$(TargetName)/$(TargetName).dll" />
-		<TargetZipTarget Include="$(ModFolder)/$(TargetName)/$(TargetName).zip" />
+		<TargetZipTarget Include="$(SolutionDir)/publish/$(TargetName).zip" />
 	</ItemGroup>
 
 	<!-- Target to merge given assemblies into primary assembly. Overwrites primary assembly.

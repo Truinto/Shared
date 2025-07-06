@@ -31,8 +31,11 @@ namespace Shared
         {
             _state = ProcessState.Uninitialized;
             this.FilePath ??= "";
-            if (!Application.MessageLoop)
-                _handler = new EventHandler(Handler);
+#if WINFORMS
+            if (!Application.MessageLoop) _handler = new EventHandler(Handler);
+#else
+            _handler = new EventHandler(Handler);
+#endif
         }
 
         public CommandTool(string filePath, string args, Action<string>? onStandard = null, Action<string>? onError = null, OnKeyPressDelegate? onKeyPress = null) : this()

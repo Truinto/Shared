@@ -53,9 +53,26 @@ namespace Shared.JsonNS
         };
 
         /// <summary>
-        /// Serialization settings with $ref and no indenting.
+        /// Serialization settings with no indenting.
         /// </summary>
         public static JsonSerializerOptions JsonOptionsCompact = new()
+        {
+            Formatting = Formatting.None,
+            NullValueHandling = NullValueHandling.Ignore,
+            StringEscapeHandling = StringEscapeHandling.Default,
+            Converters = DefaultConverters,
+            ObjectCreationHandling = ObjectCreationHandling.Replace,
+            DefaultValueHandling = DefaultValueHandling.Include,
+            TypeNameHandling = TypeNameHandling.None,
+            MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            ContractResolver = new WritablePropertiesOnlyResolver(),
+        };
+
+        /// <summary>
+        /// Serialization settings with $ref and no indenting.
+        /// </summary>
+        public static JsonSerializerOptions JsonOptionsCompactRef = new()
         {
             PreserveReferencesHandling = PreserveReferencesHandling.All,
             Formatting = Formatting.None,
