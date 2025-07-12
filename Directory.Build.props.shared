@@ -35,6 +35,7 @@
 		<PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" ExcludeAssets="runtime" PrivateAssets="all" />
 		<PackageReference Include="BuildTaskVersionControl" Version="1.3.0" ExcludeAssets="runtime" />
 		<PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.43" ExcludeAssets="runtime" />
+		<PackageReference Include="BibitesMods.ModsInfoProps" Version="1.0.0" />
 	</ItemGroup>
 
 	<Target Name="TargetDefineConstants" AfterTargets="ResolveProjectReferences">
