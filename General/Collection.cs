@@ -333,11 +333,11 @@ namespace Shared.CollectionNS
         /// <summary>
         /// Projects each element into a new form, but filters null elements and null results.
         /// </summary>
-        public static IEnumerable<TResult> SelectNotNull<T, TResult>(this IEnumerable<T?> enumerable, Func<T?, TResult?> selector) where T : class where TResult : class
+        public static IEnumerable<TResult> SelectNotNull<T, TResult>(this IEnumerable<T> enumerable, Func<T, TResult?> selector) where TResult : class
         {
-            foreach (var item in enumerable)
+            foreach (T item in enumerable)
             {
-                if (item is null)
+                if (item == null)
                     continue;
                 var item2 = selector(item);
                 if (item2 != null)
@@ -728,6 +728,34 @@ namespace Shared.CollectionNS
         }
 
         /// <summary>
+        /// Sorts the elements in a list using a delegate.
+        /// </summary>
+        public static void QuickSort<T>(IList<T> list, Func<T, T, int> comparer, int leftBound, int rightBound)
+        {
+            int i = leftBound;
+            int j = rightBound;
+            T pivot = list[leftBound];
+            while (i <= j)
+            {
+                while (comparer(list[i], pivot) < 0)
+                    i++;
+                while (comparer(list[j], pivot) > 0)
+                    j--;
+                if (i <= j)
+                {
+                    T value = list[i];
+                    list[i++] = list[j];
+                    list[j--] = value;
+                }
+            }
+
+            if (leftBound < j)
+                QuickSort(list, comparer, leftBound, j);
+            if (i < rightBound)
+                QuickSort(list, comparer, i, rightBound);
+        }
+
+        /// <summary>
         /// Sorts the elements in a list using the IComparable&lt;<typeparamref name="T"/>&gt; implementation.
         /// </summary>
         public static void Sort<T>(this IList<T> collection) where T : IComparable<T>
@@ -744,6 +772,14 @@ namespace Shared.CollectionNS
         public static void Sort<T1, T2>(this IList<T1> collection, Func<T1, T2> keySelector) where T2 : IComparable<T2>
         {
             QuickSort(collection, keySelector, 0, collection.Count - 1);
+        }
+
+        /// <summary>
+        /// Sorts the elements in a list using a delegate.
+        /// </summary>
+        public static void Sort<T>(this IList<T> collection, Func<T, T, int> comparer)
+        {
+            QuickSort(collection, comparer, 0, collection.Count - 1);
         }
 
         /// <summary>
