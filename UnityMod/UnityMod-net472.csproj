@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>1.1.1.2</Version>
+		<Version>1.1.2.2</Version>
 		<TargetFramework>net472</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<Authors>Truinto</Authors>
@@ -22,7 +22,7 @@
 
 	<!-- Project References -->
 	<ItemGroup>
-		<PackageReference PrivateAssets="all" Include="Lib.Harmony.Thin" Version="2.3.6" />
+		<PackageReference PrivateAssets="all" Include="Lib.Harmony" Version="2.0.4" />
 		<Reference Private="false" Include="Newtonsoft.Json" HintPath="$(Lib)/Newtonsoft.Json.dll" />
 		<Reference Private="false" Include="UnityModManager" HintPath="$(Lib)/UnityModManager/UnityModManager.dll" />
 		<Reference Private="false" Include="UnityEngine" HintPath="$(Lib)/UnityEngine.dll" />
@@ -44,7 +44,7 @@
 			<_VersioningIn Include="changelog.md" />
 			<_VersioningOut Include="$(MSBuildThisFileFullPath)" />
 		</ItemGroup>
-		<VersioningTask InputFiles="@(_VersioningIn)" UpdateFiles="@(_VersioningOut)" MaxMatch="1" TouchFiles="false" AutoIncrease="true" />
+		<VersioningTask InputFiles="@(_VersioningIn)" UpdateFiles="@(_VersioningOut)" MaxMatch="1" TouchFiles="false" AutoIncrease="false" />
 	</Target>
 
 	<!-- Copy to solution folder -->
