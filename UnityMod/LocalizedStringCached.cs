@@ -12,11 +12,11 @@ namespace Shared
     /// </summary>
     public struct LocalizedStringCached
     {
-        private string cache;
+        private string? cache;
         /// <summary>Original string value.</summary>
         public readonly string Default;
         /// <summary>Function to resolve key to localized string.</summary>
-        public static Func<LocalizedStringCached, string> Resolver;
+        public static Func<LocalizedStringCached, string>? Resolver;
 
         /// <inheritdoc cref="LocalizedStringCached"/>
         public LocalizedStringCached(string value)

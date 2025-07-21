@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.1.1]
+- downgraded Harmony reference to Harmony.Thin
+
 ## [1.1.0]
 - updated references (Harmony v2.3.6; Newtonsoft.Json v8.0.0)
 

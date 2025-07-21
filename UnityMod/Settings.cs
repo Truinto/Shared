@@ -22,7 +22,7 @@ namespace Shared
         /// <summary>Collection of features explicitly turned on.</summary>
         [JsonProperty] public HashSet<string> Whitelist { get; protected set; } = [];
         /// <summary>File path to load from / save to.</summary>
-        [JsonIgnore] public string FilePath;
+        [JsonIgnore] public string? FilePath;
         /// <summary>Serialization settings.</summary>
         [JsonIgnore]
         public JsonSerializerSettings JSettings = new()

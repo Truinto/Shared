@@ -402,7 +402,7 @@ namespace Shared
         /// Checks if current line calls or gets given member.
         /// </summary>
         /// <seealso cref="GetMemberInfo(Type, string, Type[], Type[])"/>
-        public bool Calls(Type type, string name, Type[] parameters = null, Type[] generics = null)
+        public bool Calls(Type type, string name, Type[]? parameters = null, Type[]? generics = null)
         {
             return OpCode_Member.Contains(Current.opcode) && _memberCache.Get(type, name, parameters, generics).Equals(Current.operand);
         }
@@ -453,7 +453,7 @@ namespace Shared
         /// <summary>
         /// Overwrites Current.
         /// </summary>
-        public void Set(OpCode opCode, object operand = null)
+        public void Set(OpCode opCode, object? operand = null)
         {
             Current.opcode = opCode;
             Current.operand = operand;
@@ -574,7 +574,7 @@ namespace Shared
         /// <summary>
         /// Injects IL code. Increments index (still pointing to the same code).
         /// </summary>
-        public void InsertBefore(OpCode opcode, object operand = null)
+        public void InsertBefore(OpCode opcode, object? operand = null)
         {
             if (operand is LabelInfo label)
                 operand = (Label)label;
@@ -584,7 +584,7 @@ namespace Shared
         /// <summary>
         /// Injects IL code. Increments index (pointing to the new code).
         /// </summary>
-        public void InsertAfter(OpCode opcode, object operand = null)
+        public void InsertAfter(OpCode opcode, object? operand = null)
         {
             if (operand is LabelInfo label)
                 operand = (Label)label;
@@ -633,7 +633,7 @@ namespace Shared
         /// <param name="func">Delegate to run after target.</param>
         /// <param name="parameters">Optional parameter definition, if target method is overloaded.</param>
         /// <param name="generics">Optional generics definition, if target method has generics.</param>
-        public int InsertAfterAll(Type type, string name, Delegate func, Type[] parameters = null, Type[] generics = null)
+        public int InsertAfterAll(Type type, string name, Delegate func, Type[]? parameters = null, Type[]? generics = null)
         {
             var original = _memberCache.Get(type, name, parameters, generics);
             return InsertAfterAll(original, func);
@@ -738,7 +738,7 @@ namespace Shared
             Code.Insert(before ? Index++ : ++Index, new CodeInstruction(OpCodes.Ret, null));
 
             if (hasCondition)
-                (before ? Current : Next).labels.Add(label1);
+                (before ? Current : Next ?? throw new Exception("Cannot insert condition here")).labels.Add(label1);
         }
 
         /// <summary>
@@ -892,8 +892,8 @@ namespace Shared
 
                 if (i == 0 && !isReplaceStatic)
                 {
-                    if (!parameterFunc.ParameterType.IsTypeCompatible(replace.DeclaringType))
-                        throw new InvalidCastException($"Delegate parameter {parameterFunc.Name} mismatch type '{parameterFunc.ParameterType}' - '{replace.DeclaringType}'!");
+                    if (!parameterFunc.ParameterType.IsTypeCompatible(replace?.DeclaringType))
+                        throw new InvalidCastException($"Delegate parameter {parameterFunc.Name} mismatch type '{parameterFunc.ParameterType}' - '{replace?.DeclaringType}'!");
                     j--;
                     continue;
                 }
@@ -929,7 +929,7 @@ namespace Shared
         /// <param name="func">Delegate the member should be replaced with.</param>
         /// <param name="parameters">Optional parameter definition, if target method is overloaded.</param>
         /// <param name="generics">Optional generics definition, if target method has generics.</param>
-        public int ReplaceAllCalls(Type type, string name, Delegate func, Type[] parameters = null, Type[] generics = null)
+        public int ReplaceAllCalls(Type type, string name, Delegate func, Type[]? parameters = null, Type[]? generics = null)
         {
             var original = _memberCache.Get(type, name, parameters, generics);
             return ReplaceAllCalls(original, func);
@@ -1149,7 +1149,7 @@ namespace Shared
 
                 Logger.PrintDebug($"Transpiler NextJumpNever @{Index} {line.opcode}");
 
-                line.operand = (Label)GetLabel(Next);
+                line.operand = (Label)GetLabel(Next ?? throw new Exception("Cannot get label to end of code"));
 
                 //if (line.opcode.StackBehaviourPush != StackBehaviour.Push0)
                 //    throw new Exception($"Cond_Branch should not push onto stack {line.opcode}");
@@ -1567,7 +1567,7 @@ namespace Shared
         /// <summary>
         /// Cache of MemberInfo.
         /// </summary>
-        protected static readonly CacheData<MemberInfo> _memberCache = new(a => GetMemberInfo((Type)a[0], (string)a[1], (Type[])a[2], (Type[])a[3]));
+        protected static readonly CacheData<MemberInfo> _memberCache = new(a => GetMemberInfo((Type)a[0]!, (string)a[1]!, (Type[]?)a[2], (Type[]?)a[3]));
 
         /// <summary>
         /// Get MemberInfo for a specific method, field, or get-property.
@@ -1576,7 +1576,7 @@ namespace Shared
         /// <param name="name">Method or field name.</param>
         /// <param name="parameters">Only for methods.</param>
         /// <param name="generics">Only for methods.</param>
-        public static MemberInfo GetMemberInfo(Type type, string name, Type[] parameters = null, Type[] generics = null)
+        public static MemberInfo GetMemberInfo(Type type, string name, Type[]? parameters = null, Type[]? generics = null)
         {
             return (MemberInfo)AccessTools.Method(type, name, parameters, generics)
                 ?? (MemberInfo)AccessTools.PropertyGetter(type, name)
@@ -1635,13 +1635,13 @@ namespace Shared
         /// Throws if type cannot be assigned to parameter. Handles by-ref resolution.<br/>
         /// Returns true, if operation must use dereference.
         /// </summary>
-        public static bool ThrowParameterIncompatible(ParameterInfo parameter, Type right) => ThrowParameterIncompatible(parameter?.ParameterType, right);
+        public static bool ThrowParameterIncompatible(ParameterInfo? parameter, Type? right) => ThrowParameterIncompatible(parameter?.ParameterType, right);
 
         /// <summary>
         /// Throws if type cannot be assigned to parameter. Handles by-ref resolution.<br/>
         /// Returns true, if operation must use dereference.
         /// </summary>
-        public static bool ThrowParameterIncompatible(Type left, Type right)
+        public static bool ThrowParameterIncompatible(Type? left, Type? right)
         {
             if (left == null)
                 throw new ArgumentNullException("left is null");
@@ -1687,7 +1687,7 @@ namespace Shared
         /// <summary>
         /// Untested. Returns all methods in all assemblies calling a particular method.
         /// </summary>
-        public static IEnumerable<MethodInfo> GetCallers(MethodInfo lookingforMethod, string[] includeAssemblies = null, string[] excludeAssemblies = null)
+        public static IEnumerable<MethodInfo> GetCallers(MethodInfo lookingforMethod, string[]? includeAssemblies = null, string[]? excludeAssemblies = null)
         {
             //var patches = Harmony.GetPatchInfo(info);
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())

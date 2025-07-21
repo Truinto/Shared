@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>1.1.0.2</Version>
+		<Version>1.1.1.0</Version>
 		<TargetFramework>net48</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<Authors>Truinto</Authors>
@@ -22,7 +22,7 @@
 
 	<!-- Project References -->
 	<ItemGroup>
-		<Reference Private="false" Include="0Harmony" HintPath="$(Lib)/UnityModManager/0Harmony.dll" Publicize="true" />
+		<PackageReference PrivateAssets="all" Include="Lib.Harmony.Thin" Version="2.3.6" />
 		<Reference Private="false" Include="Newtonsoft.Json" HintPath="$(Lib)/Newtonsoft.Json.dll" />
 		<Reference Private="false" Include="UnityEngine" HintPath="$(Lib)/UnityEngine.dll" />
 		<Reference Private="false" Include="UnityEngine.CoreModule" HintPath="$(Lib)/UnityEngine.CoreModule.dll" />

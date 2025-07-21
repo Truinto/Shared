@@ -66,7 +66,7 @@ namespace Shared
             return objectType == typeof(StringHash);
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             var jt = JToken.Load(reader);
             switch (jt.Type)

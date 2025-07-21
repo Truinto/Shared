@@ -163,7 +163,7 @@ namespace Shared
 
         public void Update()
         {
-            string category = null;
+            string? category = null;
             bool disableAll = false;
 
             foreach (var info in list)
