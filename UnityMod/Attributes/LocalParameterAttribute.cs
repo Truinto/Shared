@@ -16,9 +16,9 @@ namespace Shared
     public class LocalParameterAttribute : Attribute
     {
         /// <summary>Name of local.</summary>
-        public string Name;
+        public string? Name;
         /// <summary>Type of local. If missing, will assume by type of parameter.</summary>
-        public Type Type;
+        public Type? Type;
         /// <summary>Index of local.</summary>
         public int Index = -1;
         /// <summary>Index of local, filtered by exactly matching type.</summary>
@@ -31,7 +31,7 @@ namespace Shared
         /// If <b>indexByType</b> is 0 or greater, the index in a collection of exact matching type will be chosen. <br/>
         /// If both indices are below zero, the current CodeInstruction will determine the local. 
         /// </summary>
-        public LocalParameterAttribute(string name = null, Type type = null, int index = -1, int indexByType = 0)
+        public LocalParameterAttribute(string? name = null, Type? type = null, int index = -1, int indexByType = 0)
         {
             this.Name = name;
             this.Type = type;

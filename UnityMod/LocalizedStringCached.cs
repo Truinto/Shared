@@ -19,9 +19,9 @@ namespace Shared
         public static Func<LocalizedStringCached, string>? Resolver;
 
         /// <inheritdoc cref="LocalizedStringCached"/>
-        public LocalizedStringCached(string value)
+        public LocalizedStringCached(string? value)
         {
-            Default = value;
+            Default = value ?? "";
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace Shared
         }
 
         /// <inheritdoc cref="LocalizedStringCached"/>
-        public static implicit operator LocalizedStringCached(string str)
+        public static implicit operator LocalizedStringCached(string? str)
         {
             return new LocalizedStringCached(str);
         }

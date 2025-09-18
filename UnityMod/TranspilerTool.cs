@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using HarmonyLib;
-using JetBrains.Annotations;
+﻿using HarmonyLib;
 using Shared.CollectionNS;
 using Shared.LoggerNS;
-
-#pragma warning disable IDE0009 // ignore missing 'this.'
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 
 namespace Shared
 {
@@ -650,7 +643,7 @@ namespace Shared
             int index = Index;
 
             First();
-            while (!IsLast)
+            while (Index < Code.Count)
             {
                 if (Calls(original))
                 {
@@ -792,7 +785,7 @@ namespace Shared
         /// </summary>
         /// <param name="func"><b>object Function(object object_instance, object parameter0, object parameter1..., [object __instance], [object arg0], [object arg1...])</b></param>
         /// <remarks>
-        /// The current line may contain a method call or field access.<br/>
+        /// The current line may contain a method call, field access, or load constant.<br/>
         /// The delegate may define any of the original parameters, locals, and __instance (if non-static), but only after the replacement parameters.<br/>
         /// These optional parameters are matched by name, with <see cref="LocalParameterAttribute"/>, or with <see cref="OriginalParameterAttribute"/>.<br/>
         /// If <see cref="LocalParameterAttribute"/> doesn't match any existing locals, then a new one is generated. Non matching parameters will throw.<br/>
@@ -827,7 +820,7 @@ namespace Shared
             {
                 Logger.PrintDebug($"ReplaceCall \n\t{mi.FullDescription()} -> \n\t{replace}");
                 parametersReplace = [];
-                isReplaceStatic = Current.opcode != OpCodes.Ldfld;
+                isReplaceStatic = Current.opcode.StackBehaviourPop is StackBehaviour.Pop0;
 
                 if (!replaceField.FieldType.IsTypeCompatible(mi.ReturnType))
                     throw new ExceptionMissingReturn("Delegate must return identical type!");
@@ -946,7 +939,7 @@ namespace Shared
             int index = Index;
 
             First();
-            while (!IsLast)
+            while (Index < Code.Count)
             {
                 if (Calls(original))
                 {
@@ -1009,7 +1002,7 @@ namespace Shared
         }
 
         /// <summary>
-        /// Change load to a new value. Can be any integer type. Throws if current isn't OpCode.Ldc_i.<br/>
+        /// Change load to a new value. Can be any integer type.<br/>
         /// Optionally define start and end index.<br/>
         /// <b>0 and 1 may change boolean values too.</b>
         /// </summary>
@@ -1036,7 +1029,7 @@ namespace Shared
         }
 
         /// <summary>
-        /// Change load to a new value. Can be any integer type. Throws if current isn't OpCode.Ldc_i.<br/>
+        /// Change load to a new value. Can be any integer type.<br/>
         /// Optionally define start and end index.<br/>
         /// <b>0 and 1 may change boolean values too.</b>
         /// </summary>
@@ -1063,7 +1056,7 @@ namespace Shared
         }
 
         /// <summary>
-        /// Change load to a new value. Can be any float-point type. Throws if current isn't OpCode.Ldc_r.<br/>
+        /// Change load to a new value. Can be any float-point type.<br/>
         /// Optionally define start and end index.
         /// </summary>
         public int ReplaceAllConstant(double oldValue, double newValue, int start = 0, int end = -1)
@@ -1079,6 +1072,80 @@ namespace Shared
                 if (Current.LoadsConstant(oldValue))
                 {
                     ReplaceConstant(newValue);
+                    counter++;
+                }
+                Index++;
+            }
+
+            Index = startedAt;
+            return counter;
+        }
+
+        /// <summary>
+        /// Change load to a new value. Can be any integer type.<br/>
+        /// Replaced by call.<br/>
+        /// <b>0 and 1 may change boolean values too.</b>
+        /// </summary>
+        public int ReplaceAllConstant(Enum oldValue, Delegate func)
+        {
+            int counter = 0;
+            int startedAt = Index;
+
+            First();
+            while (Index < Code.Count)
+            {
+                if (Current.LoadsConstant(oldValue))
+                {
+                    ReplaceCall(func);
+                    counter++;
+                }
+                Index++;
+            }
+
+            Index = startedAt;
+            return counter;
+        }
+
+        /// <summary>
+        /// Change load to a new value. Can be any integer type.<br/>
+        /// Replaced by call.<br/>
+        /// <b>0 and 1 may change boolean values too.</b>
+        /// </summary>
+        public int ReplaceAllConstant(long oldValue, Delegate func)
+        {
+            int counter = 0;
+            int startedAt = Index;
+
+            First();
+            while (Index < Code.Count)
+            {
+                if (Current.LoadsConstant(oldValue))
+                {
+                    ReplaceCall(func);
+                    counter++;
+                }
+                Index++;
+            }
+
+            Index = startedAt;
+            return counter;
+        }
+
+        /// <summary>
+        /// Change load to a new value. Can be any float-point type.<br/>
+        /// Replaced by call.
+        /// </summary>
+        public int ReplaceAllConstant(double oldValue, Delegate func)
+        {
+            int counter = 0;
+            int startedAt = Index;
+
+            First();
+            while (Index < Code.Count)
+            {
+                if (Current.LoadsConstant(oldValue))
+                {
+                    ReplaceCall(func);
                     counter++;
                 }
                 Index++;
@@ -1535,7 +1602,7 @@ namespace Shared
             OpCodes.Ldc_R8,
         ];
 
-        /// <summary>Collection of member opcodes.</summary>
+        /// <summary>Collection of member opcodes, which are allowed on <see cref="ReplaceCall(Delegate)"/>.</summary>
         public static OpCode[] OpCode_Member =
         [
             OpCodes.Call,
@@ -1578,57 +1645,82 @@ namespace Shared
         /// <param name="generics">Only for methods.</param>
         public static MemberInfo GetMemberInfo(Type type, string name, Type[]? parameters = null, Type[]? generics = null)
         {
-            return (MemberInfo)AccessTools.Method(type, name, parameters, generics)
-                ?? (MemberInfo)AccessTools.PropertyGetter(type, name)
-                ?? (MemberInfo)AccessTools.Field(type, name)
-                ?? throw new ArgumentException($"could not find anything for type={type} name={name} parameters={parameters.Join()} generics={generics.Join()}");
+            MemberInfo? result;
+            do
+            {
+                if (parameters != null)
+                    result = type.GetMethod(name, AccessTools.all, null, parameters, null);
+                else
+                    result = type.GetMethod(name, AccessTools.all);
+                result ??= type.GetProperty(name, AccessTools.all)?.GetGetMethod(true);
+                result ??= type.GetField(name, AccessTools.all);
+
+                if (result != null)
+                {
+                    if (generics != null && result is MethodInfo mi)
+                        result = mi.MakeGenericMethod(generics);
+                    return result;
+                }
+
+                type = type.BaseType;
+            }
+            while (type != null);
+
+            throw new ArgumentException($"could not find anything for type={type} name={name} parameters={parameters?.Join()} generics={generics?.Join()}");
         }
 
         /// <summary>
         /// Returns value of stack change. Zero has no change. Negative values pop from stack. Positive values push to stack.
         /// </summary>
-        public static int GetStackChange(StackBehaviour stack)
+        public static int GetStackChange(StackBehaviour stack) => GetStackChange(stack, null);
+
+        /// <summary>
+        /// Returns value of stack change. Zero has no change. Negative values pop from stack. Positive values push to stack.
+        /// </summary>
+        public static int GetStackChange(StackBehaviour stack, object? operand)
         {
-            switch (stack)
+            int num = 0;
+            if (operand is MethodInfo methodInfo)
             {
-                case StackBehaviour.Pop0:
-                case StackBehaviour.Push0:
-                    return 0;
-                case StackBehaviour.Pop1:
-                case StackBehaviour.Popi:
-                case StackBehaviour.Popref:
-                case StackBehaviour.Varpop:
-                    return -1;
-                case StackBehaviour.Push1:
-                case StackBehaviour.Pushi:
-                case StackBehaviour.Pushi8:
-                case StackBehaviour.Pushr4:
-                case StackBehaviour.Pushr8:
-                case StackBehaviour.Pushref:
-                case StackBehaviour.Varpush:
-                    return 1;
-                case StackBehaviour.Pop1_pop1:
-                case StackBehaviour.Popi_pop1:
-                case StackBehaviour.Popi_popi:
-                case StackBehaviour.Popi_popi8:
-                case StackBehaviour.Popi_popr4:
-                case StackBehaviour.Popi_popr8:
-                case StackBehaviour.Popref_pop1:
-                case StackBehaviour.Popref_popi:
-                    return -2;
-                case StackBehaviour.Push1_push1:
-                    return 2;
-                case StackBehaviour.Popref_popi_pop1:
-                case StackBehaviour.Popref_popi_popi:
-                case StackBehaviour.Popref_popi_popi8:
-                case StackBehaviour.Popref_popi_popr4:
-                case StackBehaviour.Popref_popi_popr8:
-                case StackBehaviour.Popref_popi_popref:
-                case StackBehaviour.Popi_popi_popi:
-                    return -3;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                num = -methodInfo.GetParameters().Length;
+                if (!methodInfo.IsStatic)
+                    num--;
+                if (methodInfo.ReturnParameter.ParameterType != typeof(void))
+                    num++;
             }
+            return stack switch
+            {
+                StackBehaviour.Varpop => num,
+                StackBehaviour.Varpush => num,
+                StackBehaviour.Pop0 => 0,
+                StackBehaviour.Push0 => 0,
+                StackBehaviour.Pop1 => -1,
+                StackBehaviour.Popi => -1,
+                StackBehaviour.Popref => -1,
+                StackBehaviour.Push1 => 1,
+                StackBehaviour.Pushi => 1,
+                StackBehaviour.Pushi8 => 1,
+                StackBehaviour.Pushr4 => 1,
+                StackBehaviour.Pushr8 => 1,
+                StackBehaviour.Pushref => 1,
+                StackBehaviour.Pop1_pop1 => -2,
+                StackBehaviour.Popi_pop1 => -2,
+                StackBehaviour.Popi_popi => -2,
+                StackBehaviour.Popi_popi8 => -2,
+                StackBehaviour.Popi_popr4 => -2,
+                StackBehaviour.Popi_popr8 => -2,
+                StackBehaviour.Popref_pop1 => -2,
+                StackBehaviour.Popref_popi => -2,
+                StackBehaviour.Push1_push1 => 2,
+                StackBehaviour.Popref_popi_pop1 => -3,
+                StackBehaviour.Popref_popi_popi => -3,
+                StackBehaviour.Popref_popi_popi8 => -3,
+                StackBehaviour.Popref_popi_popr4 => -3,
+                StackBehaviour.Popref_popi_popr8 => -3,
+                StackBehaviour.Popref_popi_popref => -3,
+                StackBehaviour.Popi_popi_popi => -3,
+                _ => throw new Exception("Unkown StackBehaviour"),
+            };
         }
 
         /// <summary>
@@ -1747,7 +1839,6 @@ namespace Shared
         {
             returnType ??= typeof(void);
             parameters ??= [];
-
             var instructions = PatchProcessor.GetOriginalInstructions(parentMethod);
             foreach (var line in instructions)
             {
@@ -1760,7 +1851,6 @@ namespace Shared
                     return mi;
                 }
             }
-
             return null;
         }
 
@@ -1780,7 +1870,6 @@ namespace Shared
                     results.Add(mi);
                 }
             }
-
             return results;
         }
 

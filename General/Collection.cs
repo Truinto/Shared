@@ -70,7 +70,7 @@ namespace Shared.CollectionNS
 
         /// <summary>
         /// Checks if right type can be assigned to left type. <br/>
-        /// Works similiar to IsAssignableFrom, but will returns false for ValueTypes (which need boxing) and void (which overflows the stack).     
+        /// Works similiar to IsAssignableFrom, but will returns false for non-identical ValueTypes (which need boxing) and void (which overflows the stack).     
         /// </summary>
         public static bool IsTypeCompatible(this Type? left, Type? right)
         {

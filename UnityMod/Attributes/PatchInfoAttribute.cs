@@ -10,7 +10,7 @@ namespace Shared
     {
         public PatchInfoAttribute() { }
 
-        public PatchInfoAttribute(Severity PatchType, string DisplayName = null, string Description = null, bool Homebrew = true, int Priority = 400, Type Requirement = null)
+        public PatchInfoAttribute(Severity PatchType, string? DisplayName = null, string? Description = null, bool Homebrew = true, int Priority = 400, Type? Requirement = null)
         {
             this.PatchType = PatchType;
             this.DisplayName = DisplayName;
@@ -25,10 +25,10 @@ namespace Shared
         public LocalizedStringCached DisplayName;
         public LocalizedStringCached Description;
         public bool Homebrew;
-        public Type Requirement;
+        public Type? Requirement;
         public int Priority;    // 400 = normal, 300 = late, 500 = early, 200 = after other mods; currently only informative
-        public string Class;
-        public string Method;
+        public string? Class;
+        public string? Method;
         public int Hash;
         public bool Disabled;
         public bool DisabledAll;
@@ -56,11 +56,11 @@ namespace Shared
 
             // sort by class name, then patch severity, then method name
             if (i == 0)
-                i = this.Class.CompareTo(other.Class);
+                i = this.Class?.CompareTo(other.Class) ?? 0;
             if (i == 0)
                 i = ((int)other.PatchType & 0xFF) - ((int)this.PatchType & 0xFF);
             if (i == 0)
-                i = this.Method.CompareTo(other.Method);
+                i = this.Method?.CompareTo(other.Method) ?? 0;
             return i;
         }
 
@@ -257,7 +257,7 @@ namespace Shared
             return source;
         }
 
-        private static string TrySubstring(string str, char c, int start = 0, bool tail = false)
+        private static string? TrySubstring(string str, char c, int start = 0, bool tail = false)
         {
             try
             {
