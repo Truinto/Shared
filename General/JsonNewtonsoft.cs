@@ -1,9 +1,9 @@
-global using JsonInclude = Newtonsoft.Json.JsonPropertyAttribute;
 global using Newtonsoft.Json;
+global using JsonInclude = Newtonsoft.Json.JsonPropertyAttribute;
+global using JsonSerializerOptions = Newtonsoft.Json.JsonSerializerSettings;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using System.Diagnostics.CodeAnalysis;
-using JsonSerializerOptions = Newtonsoft.Json.JsonSerializerSettings;
 
 namespace Shared.JsonNS
 {

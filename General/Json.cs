@@ -1,9 +1,7 @@
 global using System.Text.Json;
-using System;
-using System.IO;
+global using System.Text.Json.Serialization;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Encodings.Web;
-using System.Text.Json.Serialization;
 
 namespace Shared.JsonNS
 {
@@ -112,13 +110,20 @@ namespace Shared.JsonNS
             }
         }
 
-        public static T? Deserialize<T>(string json, JsonSerializerOptions? options = null)
+        public static T? Deserialize<T>(string? json, JsonSerializerOptions? options = null)
         {
+            if (json == null)
+                return default;
             return JsonSerializer.Deserialize<T>(json, options ?? JsonOptions);
         }
 
-        public static bool Deserialize<T>(string json, [NotNullWhen(true)] out T? result, JsonSerializerOptions? options = null)
+        public static bool Deserialize<T>(string? json, [NotNullWhen(true)] out T? result, JsonSerializerOptions? options = null)
         {
+            if (json == null)
+            {
+                result = default;
+                return false;
+            }
             try
             {
                 return (result = JsonSerializer.Deserialize<T>(json, options)) != null;
@@ -129,10 +134,12 @@ namespace Shared.JsonNS
             }
         }
 
-        public static bool SerializeFile<T>(string path, T value, JsonSerializerOptions? options = null)
+        public static bool SerializeFile<T>(string? path, T value, JsonSerializerOptions? options = null)
         {
             try
             {
+                if (path is null or "")
+                    return false;
                 if (Path.GetDirectoryName(path) is string directory)
                     Directory.CreateDirectory(directory);
 
@@ -145,7 +152,7 @@ namespace Shared.JsonNS
             }
         }
 
-        public static T? DeserializeFile<T>(string path, JsonSerializerOptions? options = null)
+        public static T? DeserializeFile<T>(string? path, JsonSerializerOptions? options = null)
         {
             if (!File.Exists(path))
                 return default;
@@ -153,7 +160,7 @@ namespace Shared.JsonNS
             return JsonSerializer.Deserialize<T>(stream, options ?? JsonOptions);
         }
 
-        public static bool DeserializeFile<T>(string path, [NotNullWhen(true)] out T? result, JsonSerializerOptions? options = null)
+        public static bool DeserializeFile<T>(string? path, [NotNullWhen(true)] out T? result, JsonSerializerOptions? options = null)
         {
             try
             {
