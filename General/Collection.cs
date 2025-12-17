@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -27,6 +28,32 @@ namespace Shared.CollectionNS
             foreach (var item in enumerable)
                 count++;
             return count;
+        }
+
+        public static bool TryGet<T>(this IEnumerable enumerable, Func<T, bool> pred, [NotNullWhen(true)] out T? result)
+        {
+            if (enumerable is IList list)
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    var item = (T)list[i];
+                    if (pred(item))
+                    {
+                        result = item;
+                        return true;
+                    }
+                }
+            }
+            foreach (T item in enumerable)
+            {
+                if (pred(item))
+                {
+                    result = item;
+                    return true;
+                }
+            }
+            result = default;
+            return false;
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -216,6 +217,90 @@ namespace Shared.StringsNS
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Turns a string into <see cref="DateTime"/>. Much more forgiving than DateTime.Parse.
+        /// </summary>
+        public static DateTime ToDateTime(this string? input)
+        {
+            if (input is null)
+                return DateTime.MinValue;
+            int tlen = input.Length;
+            if (tlen < 4)
+                return DateTime.MinValue;
+
+            // parse year
+            int i = 4;
+            if (!int.TryParse(input.AsSpan(0, 4), out int year))
+            {
+                DateTime.TryParse(input, out var result);
+                return result;
+            }
+
+            try
+            {
+                // try parse all other two digit segments
+                if (!parseOneOrTwo(out int month) || month is < 1 or > 12)
+                    return new DateTime(year, 1, 1);
+                if (!parseOneOrTwo(out int day) || day is < 1 or > 31)
+                    return new DateTime(year, month, 1);
+                if (!parseOneOrTwo(out int hour) || hour is < 0 or > 23)
+                    return new DateTime(year, month, day);
+                if (!parseOneOrTwo(out int minute) || minute is < 0 or > 59)
+                    return new DateTime(year, month, day, hour, 0, 0);
+                if (!parseOneOrTwo(out int second) || second is < 0 or > 59)
+                    return new DateTime(year, month, day, hour, minute, 0);
+                
+                // handle potential time offsets
+                if (i >= tlen)
+                { }
+                else if (input[i] is 'Z')
+                    return new DateTime(year, month, day, hour, minute, second, DateTimeKind.Utc);
+                else if (input[i] is '+')
+                {
+                    if (parseOneOrTwo(out int offset_hours) && parseOneOrTwo(out int offset_minutes))
+                        return new DateTimeOffset(year, month, day, hour, minute, second, new TimeSpan(offset_hours, offset_minutes, 0)).LocalDateTime;
+                }
+                else if (input[i] is '-')
+                {
+                    if (parseOneOrTwo(out int offset_hours) && parseOneOrTwo(out int offset_minutes))
+                        return new DateTimeOffset(year, month, day, hour, minute, second, new TimeSpan(-offset_hours, -offset_minutes, 0)).LocalDateTime;
+                }
+
+                return new DateTime(year, month, day, hour, minute, second);
+
+            } catch (Exception)
+            {
+                Trace.WriteLine($"error while parsing datetime '{input}'");
+                DateTime.TryParse(input, out var result);
+                return result;
+            }
+
+            bool parseOneOrTwo(out int number)
+            {
+                number = 0;
+                for (; ; i++) // foward next number
+                {
+                    if (i >= tlen)
+                        return false;
+                    if (input[i] is >= '0' and <= '9')
+                        break;
+                }
+
+                // read two or one digit
+                if (i + 1 < tlen && input[i + 1] is >= '0' and <= '9')
+                {
+                    number = int.Parse(input.AsSpan(i, 2));
+                    i += 2;
+                    return true;
+                }
+                else
+                {
+                    number = input[i++] - 0x30; // turn char into digit
+                    return true;
+                }
+            }
+        }
+
         /// <summary>Joins an enumeration with a value converter and a delimiter to a string</summary>
         /// <param name="enumeration">The enumeration</param>
         /// <param name="converter">An optional value converter (from T to string)</param>
@@ -330,6 +415,18 @@ namespace Shared.StringsNS
         public static bool IsAlphanumeric(this char c)
         {
             return c is >= '0' and <= '9' or >= 'A' and <= 'Z' or >= 'a' and <= 'z';
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool EqualsI(this char c1, char c2)
+        {
+            if (c1 == c2)
+                return true;
+            if (c1 is >= 'a' and <= 'z')
+                return (c1 - 0x20) == c2;
+            if (c2 is >= 'a' and <= 'z')
+                return c1 == (c2 - 0x20);
+            return false;
         }
 
         public static bool IsNotSpaced(this StringBuilder sb)

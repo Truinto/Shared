@@ -572,7 +572,7 @@
             </summary>
             <param name="func"><b>object Function(object object_instance, object parameter0, object parameter1..., [object __instance], [object arg0], [object arg1...])</b></param>
             <remarks>
-            The current line may contain a method call or field access.<br/>
+            The current line may contain a method call, field access, or load constant.<br/>
             The delegate may define any of the original parameters, locals, and __instance (if non-static), but only after the replacement parameters.<br/>
             These optional parameters are matched by name, with <see cref="T:Shared.LocalParameterAttribute"/>, or with <see cref="T:Shared.OriginalParameterAttribute"/>.<br/>
             If <see cref="T:Shared.LocalParameterAttribute"/> doesn't match any existing locals, then a new one is generated. Non matching parameters will throw.<br/>
@@ -613,22 +613,42 @@
         </member>
         <member name="M:Shared.TranspilerTool.ReplaceAllConstant(System.Enum,System.Enum,System.Int32,System.Int32)">
             <summary>
-            Change load to a new value. Can be any integer type. Throws if current isn't OpCode.Ldc_i.<br/>
+            Change load to a new value. Can be any integer type.<br/>
             Optionally define start and end index.<br/>
             <b>0 and 1 may change boolean values too.</b>
             </summary>
         </member>
         <member name="M:Shared.TranspilerTool.ReplaceAllConstant(System.Int64,System.Int64,System.Int32,System.Int32)">
             <summary>
-            Change load to a new value. Can be any integer type. Throws if current isn't OpCode.Ldc_i.<br/>
+            Change load to a new value. Can be any integer type.<br/>
             Optionally define start and end index.<br/>
             <b>0 and 1 may change boolean values too.</b>
             </summary>
         </member>
         <member name="M:Shared.TranspilerTool.ReplaceAllConstant(System.Double,System.Double,System.Int32,System.Int32)">
             <summary>
-            Change load to a new value. Can be any float-point type. Throws if current isn't OpCode.Ldc_r.<br/>
+            Change load to a new value. Can be any float-point type.<br/>
             Optionally define start and end index.
+            </summary>
+        </member>
+        <member name="M:Shared.TranspilerTool.ReplaceAllConstant(System.Enum,System.Delegate)">
+            <summary>
+            Change load to a new value. Can be any integer type.<br/>
+            Replaced by call.<br/>
+            <b>0 and 1 may change boolean values too.</b>
+            </summary>
+        </member>
+        <member name="M:Shared.TranspilerTool.ReplaceAllConstant(System.Int64,System.Delegate)">
+            <summary>
+            Change load to a new value. Can be any integer type.<br/>
+            Replaced by call.<br/>
+            <b>0 and 1 may change boolean values too.</b>
+            </summary>
+        </member>
+        <member name="M:Shared.TranspilerTool.ReplaceAllConstant(System.Double,System.Delegate)">
+            <summary>
+            Change load to a new value. Can be any float-point type.<br/>
+            Replaced by call.
             </summary>
         </member>
         <member name="M:Shared.TranspilerTool.ReplaceNOP">
@@ -769,7 +789,7 @@
             <summary>Collection of Ldc_r opcodes.</summary>
         </member>
         <member name="F:Shared.TranspilerTool.OpCode_Member">
-            <summary>Collection of member opcodes.</summary>
+            <summary>Collection of member opcodes, which are allowed on <see cref="M:Shared.TranspilerTool.ReplaceCall(System.Delegate)"/>.</summary>
         </member>
         <member name="M:Shared.TranspilerTool.op_Increment(Shared.TranspilerTool)">
             <summary>
@@ -796,6 +816,11 @@
             <param name="generics">Only for methods.</param>
         </member>
         <member name="M:Shared.TranspilerTool.GetStackChange(System.Reflection.Emit.StackBehaviour)">
+            <summary>
+            Returns value of stack change. Zero has no change. Negative values pop from stack. Positive values push to stack.
+            </summary>
+        </member>
+        <member name="M:Shared.TranspilerTool.GetStackChange(System.Reflection.Emit.StackBehaviour,System.Object)">
             <summary>
             Returns value of stack change. Zero has no change. Negative values pop from stack. Positive values push to stack.
             </summary>
@@ -993,7 +1018,7 @@
         <member name="M:Shared.CollectionNS.CollectionTool.IsTypeCompatible(System.Type,System.Type)">
             <summary>
             Checks if right type can be assigned to left type. <br/>
-            Works similiar to IsAssignableFrom, but will returns false for ValueTypes (which need boxing) and void (which overflows the stack).     
+            Works similiar to IsAssignableFrom, but will returns false for non-identical ValueTypes (which need boxing) and void (which overflows the stack).     
             </summary>
         </member>
         <member name="M:Shared.CollectionNS.CollectionTool.GetIndex``1(System.Collections.IEnumerable,System.Func{``0,System.Boolean})">
