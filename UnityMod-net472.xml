@@ -1005,6 +1005,11 @@
             Returns collection count or iterates and counts through all elements.
             </summary>
         </member>
+        <member name="M:Shared.CollectionNS.CollectionTool.TryGet``1(System.Collections.Generic.IEnumerable{``0},System.Func{``0,System.Boolean},``0@)">
+            <summary>
+            Search collection for an element by predicate.
+            </summary>
+        </member>
         <member name="M:Shared.CollectionNS.CollectionTool.Get``1(System.Collections.IEnumerable)">
             <summary>
             Gets the first element that is of type <typeparamref name="T"/>.

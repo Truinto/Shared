@@ -30,7 +30,10 @@ namespace Shared.CollectionNS
             return count;
         }
 
-        public static bool TryGet<T>(this IEnumerable enumerable, Func<T, bool> pred, [NotNullWhen(true)] out T? result)
+        /// <summary>
+        /// Search collection for an element by predicate.
+        /// </summary>
+        public static bool TryGet<T>(this IEnumerable<T> enumerable, Func<T, bool> pred, [NotNullWhen(true)] out T? result)
         {
             if (enumerable is IList list)
             {
@@ -48,7 +51,7 @@ namespace Shared.CollectionNS
             {
                 if (pred(item))
                 {
-                    result = item;
+                    result = item!;
                     return true;
                 }
             }
