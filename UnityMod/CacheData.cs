@@ -14,15 +14,15 @@ namespace Shared
         private readonly int Size;
         private int Pointer;
         private readonly T[] Cache;
-        private readonly object[][] Arguments;
-        private readonly Func<object[], T> Getter;
+        private readonly object?[][] Arguments;
+        private readonly Func<object?[], T> Getter;
 
         /// <summary>
         /// Cache for slow operations. Will return known solution to specified arguments. Otherwise calls getter and remembers solution in cache.
         /// </summary>
         /// <param name="getter">Function to resolve unknown solution.</param>
         /// <param name="size">Cache size.</param>
-        public CacheData(Func<object[], T> getter, int size = 5)
+        public CacheData(Func<object?[], T> getter, int size = 5)
         {
             this.Size = size;
             this.Cache = new T[size];
@@ -33,7 +33,7 @@ namespace Shared
         /// <summary>
         /// Get solution for specific argument collection. Calls getter, if solution not in cache.
         /// </summary>
-        public T Get(params object[] args)
+        public T Get(params object?[] args)
         {
             for (int i = 0; i < Size; i++)
             {
