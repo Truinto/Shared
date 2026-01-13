@@ -7,6 +7,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+#pragma warning disable IDE0079 // ignore unnecessary supression
+#pragma warning disable CA1510 // ignore ArgumentNullException.ThrowIfNull
+
 namespace Shared.CollectionNS
 {
     /// <summary>
@@ -39,7 +42,7 @@ namespace Shared.CollectionNS
             {
                 for (int i = 0; i < list.Count; i++)
                 {
-                    var item = (T)list[i];
+                    var item = (T)list[i]!;
                     if (pred(item))
                     {
                         result = item;
@@ -817,7 +820,7 @@ namespace Shared.CollectionNS
         /// </summary>
         public static void Sort<T1, T2>(this T1[] array, Func<T1, T2> keySelector) where T2 : IComparable<T2>
         {
-            Array.Sort(array, (T1 t1, T1 t2) => keySelector(t1).CompareTo(keySelector(t2)));
+            Array.Sort(array, (t1, t2) => keySelector(t1).CompareTo(keySelector(t2)));
         }
 
         /// <summary>

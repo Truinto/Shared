@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Shared.StringsNS;
+using System.Diagnostics;
 
 namespace UnitTest
 {
@@ -92,6 +93,39 @@ namespace UnitTest
             Assert.AreEqual("Foo.Bar.Mee", str);
         }
 
+        [TestMethod]
+        public void Test_Strings_ToDateTime()
+        {
+            DateTime expected, actual;
+
+            // basic short hand versions
+            expected = DateTime.Parse("2020-01-01"); actual = Strings.ToDateTime("2020"); Assert.AreEqual(expected, actual);
+            expected = DateTime.Parse("2020-06-01"); actual = Strings.ToDateTime("2020-06"); Assert.AreEqual(expected, actual);
+            expected = DateTime.Parse("2020-06-15"); actual = Strings.ToDateTime("2020-06-15"); Assert.AreEqual(expected, actual);
+            expected = DateTime.Parse("2020-06-15T12:30:20"); actual = Strings.ToDateTime("2020-06-15-12:30:20"); Assert.AreEqual(expected, actual);
+            expected = DateTime.Parse("2020-06-15T12:30:20Z"); actual = Strings.ToDateTime("2020-06-15-12:30:20Z"); Assert.AreEqual(expected, actual);
+
+            // ticks
+            expected = DateTime.Parse("2020-06-15T12:30:20.1234567"); actual = Strings.ToDateTime("2020-06-15-12:30:20.1234567"); Assert.AreEqual(expected, actual);
+            expected = DateTime.Parse("2020-06-15T12:30:20.1234567Z"); actual = Strings.ToDateTime("2020-06-15-12:30:20.1234567Z"); Assert.AreEqual(expected, actual);
+
+            // time offset
+            expected = DateTime.Parse("2020-06-15T12:30:20+01:30"); actual = Strings.ToDateTime("2020-06-15-12:30:20+01:30"); Assert.AreEqual(expected, actual);
+            expected = DateTime.Parse("2020-06-15T12:30:20-01:30"); actual = Strings.ToDateTime("2020-06-15-12:30:20-01:30"); Assert.AreEqual(expected, actual);
+            expected = DateTime.Parse("2020-06-15T12:30:20.1234567+01:30"); actual = Strings.ToDateTime("2020-06-15-12:30:20.1234567+01:30"); Assert.AreEqual(expected, actual);
+            expected = DateTime.Parse("2020-06-15T12:30:20.1234567-01:30"); actual = Strings.ToDateTime("2020-06-15-12:30:20.1234567-01:30"); Assert.AreEqual(expected, actual);
+
+            // spacebars
+            expected = DateTime.Parse("2020-06-15T12:30:20"); actual = Strings.ToDateTime(" 2020-06-15T12:30:20 "); Assert.AreEqual(expected, actual);
+            expected = DateTime.Parse("2020-06-15T12:30:20Z"); actual = Strings.ToDateTime(" 2020-06-15T12:30:20 Z "); Assert.AreEqual(expected, actual);
+
+            // natural
+            expected = DateTime.Parse("12:30:20 01.02.2020"); actual = Strings.ToDateTime("12:30:20 01.02.2020"); Assert.AreEqual(expected, actual);
+            expected = DateTime.Parse("01.02.2020 12:30:20"); actual = Strings.ToDateTime("01.02.2020 12:30:20"); Assert.AreEqual(expected, actual);
+
+            // this isn't a valid format at the time
+            //expected = DateTime.Now.AddDays(-30); actual = Strings.ToDateTime("30d"); Assert.IsInRange(-TimeSpan.TicksPerSecond, TimeSpan.TicksPerSecond, expected.Ticks - actual.Ticks);
+        }
 
         [TestMethod]
         public void Test_Strings_CompareNatural()

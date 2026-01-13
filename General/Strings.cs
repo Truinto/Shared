@@ -218,86 +218,158 @@ namespace Shared.StringsNS
         }
 
         /// <summary>
-        /// Turns a string into <see cref="DateTime"/>. Much more forgiving than DateTime.Parse.
+        /// Turns a string into <see cref="DateTime"/>. Much more forgiving than DateTime.Parse.<br/>
+        /// If not specified, times are assumed to be local time. Use 'Z' to signal UTF time.
         /// </summary>
         public static DateTime ToDateTime(this string? input)
         {
             if (input is null)
                 return DateTime.MinValue;
-            int tlen = input.Length;
-            if (tlen < 4)
-                return DateTime.MinValue;
-
-            // parse year
-            int i = 4;
-            if (!int.TryParse(input.AsSpan(0, 4), out int year))
-            {
-                DateTime.TryParse(input, out var result);
-                return result;
-            }
 
             try
             {
+                int i = 0, num;
+                int tlen = input.Length;
+                int year = 1, month = 1, day = 1, hour = 0, minute = 0, second = 0;
+                long nticks = 0;
+                var kind = DateTimeKind.Local;
+                DateTime result;
+
+                // if the string does not start with 4 digits, we let DateTime handle it
+                if (!parseExact(4, ref year))
+                {
+                    DateTime.TryParse(input, out result);
+                    return result;
+                }
+
                 // try parse all other two digit segments
-                if (!parseOneOrTwo(out int month) || month is < 1 or > 12)
-                    return new DateTime(year, 1, 1);
-                if (!parseOneOrTwo(out int day) || day is < 1 or > 31)
-                    return new DateTime(year, month, 1);
-                if (!parseOneOrTwo(out int hour) || hour is < 0 or > 23)
-                    return new DateTime(year, month, day);
-                if (!parseOneOrTwo(out int minute) || minute is < 0 or > 59)
-                    return new DateTime(year, month, day, hour, 0, 0);
-                if (!parseOneOrTwo(out int second) || second is < 0 or > 59)
-                    return new DateTime(year, month, day, hour, minute, 0);
-                
-                // handle potential time offsets
-                if (i >= tlen)
-                { }
-                else if (input[i] is 'Z')
-                    return new DateTime(year, month, day, hour, minute, second, DateTimeKind.Utc);
-                else if (input[i] is '+')
+                if (parseOneOrTwo(ref month)
+                    && parseOneOrTwo(ref day)
+                    && parseOneOrTwo(ref hour)
+                    && parseOneOrTwo(ref minute)
+                    && checkTimeZone()
+                    && parseOneOrTwo(ref second))
                 {
-                    if (parseOneOrTwo(out int offset_hours) && parseOneOrTwo(out int offset_minutes))
-                        return new DateTimeOffset(year, month, day, hour, minute, second, new TimeSpan(offset_hours, offset_minutes, 0)).LocalDateTime;
+                    // parse ticks, if any
+                    if (i < tlen && input[i] == '.')
+                    {
+                        num = 0;
+                        parseExact(7, ref num);
+                        nticks = num;
+                    }
+                    checkTimeZone();
                 }
-                else if (input[i] is '-')
+                else // search for Z in reverse
                 {
-                    if (parseOneOrTwo(out int offset_hours) && parseOneOrTwo(out int offset_minutes))
-                        return new DateTimeOffset(year, month, day, hour, minute, second, new TimeSpan(-offset_hours, -offset_minutes, 0)).LocalDateTime;
+                    for (i = tlen - 1; i >= 0; i--)
+                    {
+                        if (input[i] is 'Z' or 'z')
+                        {
+                            kind = DateTimeKind.Utc;
+                            break;
+                        }
+                        if (input[i].IsNumber())
+                            break;
+                    }
                 }
 
-                return new DateTime(year, month, day, hour, minute, second);
+                result = new DateTime(year, month, day, hour, minute, second, kind).ToLocalTime();
+                if (nticks != 0)
+                    result = result.AddTicks(nticks);
+                return result;
 
+                bool checkTimeZone()
+                {
+                    // handle potential time offsets
+                    for (; i < tlen; i++)
+                    {
+                        if (input[i].IsNumber())
+                            return true;
+                        if (input[i] is 'Z' or 'z')
+                        {
+                            kind = DateTimeKind.Utc;
+                            return false;
+                        }
+                        if (input[i] is '+')
+                        {
+                            kind = DateTimeKind.Utc;
+                            num = 0;
+                            parseOneOrTwo(ref num);
+                            nticks -= num * TimeSpan.TicksPerHour;
+                            num = 0;
+                            parseOneOrTwo(ref num);
+                            nticks -= num * TimeSpan.TicksPerMinute;
+                            return false;
+                        }
+                        if (input[i] is '-')
+                        {
+                            kind = DateTimeKind.Utc;
+                            num = 0;
+                            parseOneOrTwo(ref num);
+                            nticks += num * TimeSpan.TicksPerHour;
+                            num = 0;
+                            parseOneOrTwo(ref num);
+                            nticks += num * TimeSpan.TicksPerMinute;
+                            return false;
+                        }
+                    }
+                    return false;
+                }
+
+                bool parseOneOrTwo(ref int number)
+                {
+                    const int max = 2;
+
+                    // foward to next number
+                    for (; ; i++)
+                    {
+                        if (i >= tlen)
+                            return false;
+                        if (input[i] is >= '0' and <= '9')
+                            break;
+                    }
+
+                    // find number of digits
+                    int j = 1; // this can never be less than 1
+                    for (; j < max && i + j < tlen && input[i + j] is >= '0' and <= '9'; j++) ;
+
+                    number = int.Parse(input.AsSpan(i, j));
+                    i += j;
+
+                    return true;
+                }
+
+                bool parseExact(int numDigits, ref int number)
+                {
+                    // foward to next number
+                    for (; ; i++)
+                    {
+                        if (i >= tlen)
+                            return false;
+                        if (input[i] is >= '0' and <= '9')
+                            break;
+                    }
+
+                    // find number of digits
+                    for (int j = 1; ; j++)
+                    {
+                        if (j == numDigits)
+                        {
+                            number = int.Parse(input.AsSpan(i, j));
+                            i += j;
+                            return true;
+                        }
+                        if (i + j >= tlen)
+                            return false;
+                        if (!input[i + j].IsNumber())
+                            return false;
+                    }
+                }
             } catch (Exception)
             {
                 Trace.WriteLine($"error while parsing datetime '{input}'");
                 DateTime.TryParse(input, out var result);
                 return result;
-            }
-
-            bool parseOneOrTwo(out int number)
-            {
-                number = 0;
-                for (; ; i++) // foward next number
-                {
-                    if (i >= tlen)
-                        return false;
-                    if (input[i] is >= '0' and <= '9')
-                        break;
-                }
-
-                // read two or one digit
-                if (i + 1 < tlen && input[i + 1] is >= '0' and <= '9')
-                {
-                    number = int.Parse(input.AsSpan(i, 2));
-                    i += 2;
-                    return true;
-                }
-                else
-                {
-                    number = input[i++] - 0x30; // turn char into digit
-                    return true;
-                }
             }
         }
 
@@ -415,6 +487,12 @@ namespace Shared.StringsNS
         public static bool IsAlphanumeric(this char c)
         {
             return c is >= '0' and <= '9' or >= 'A' and <= 'Z' or >= 'a' and <= 'z';
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsWhiteSpace(this char c)
+        {
+            return char.IsWhiteSpace(c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
