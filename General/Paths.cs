@@ -269,7 +269,7 @@ namespace Shared.PathsNS
                 path1, 0,
                 path2, 0,
                 length,
-                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal
+                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? StringComparison.CurrentCultureIgnoreCase : StringComparison.Ordinal
                 ) == 0;
         }
 
