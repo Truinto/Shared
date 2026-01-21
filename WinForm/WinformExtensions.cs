@@ -10,7 +10,6 @@ namespace Shared
 {
     public static class WinformExtensions
     {
-
         public const string EllipsisChars = "\u2026";
 
         public static string StringTruncateLeft(this string text, Font font, int width)

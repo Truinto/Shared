@@ -12,7 +12,7 @@ namespace UnitTest
     [TestClass]
     public class UnitTests_Collection
     {
-        private static object _lock = new();
+        private static object _Lock = new();
         private static string? _Shared;
         private static string Shared
         {
@@ -21,7 +21,7 @@ namespace UnitTest
                 if (_Shared is not null)
                     return _Shared;
 
-                lock (_lock)
+                lock (_Lock)
                 {
                     if (_Shared is not null)
                         return _Shared;

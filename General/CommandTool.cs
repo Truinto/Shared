@@ -25,14 +25,14 @@ namespace Shared
         public Process? Process = new();
         public bool EatCancel;
         public ProcessPriorityClass Priority = ProcessPriorityClass.Normal;
-        private volatile ProcessState _state;
+        private volatile ProcessState _State;
 
         public CommandTool()
         {
-            _state = ProcessState.Uninitialized;
+            _State = ProcessState.Uninitialized;
             this.FilePath ??= "";
 #if WINFORMS
-            if (!Application.MessageLoop) _handler = new EventHandler(Handler);
+            if (!Application.MessageLoop) _Handler = new EventHandler(Handler);
 #else
             _handler = new EventHandler(Handler);
 #endif
@@ -72,11 +72,11 @@ namespace Shared
             try
             {
                 Debug.WriteLine($"disposing {this.FilePath}");
-                SetConsoleCtrlHandlerCall(_handler, false);
+                SetConsoleCtrlHandlerCall(_Handler, false);
                 if (State is ProcessState.Running)
                     Process?.Kill(true);
                 Process = null;
-                _state = ProcessState.Exited;
+                _State = ProcessState.Exited;
             } catch (Exception) { }
         }
 
@@ -104,7 +104,7 @@ namespace Shared
             else
                 Debug.WriteLine($"run-command {this.FilePath} {this.ArgsList.JoinArgs()}");
 
-            SetConsoleCtrlHandlerCall(_handler, true);
+            SetConsoleCtrlHandlerCall(_Handler, true);
 
             Process.StartInfo = new()
             {
@@ -149,7 +149,7 @@ namespace Shared
             };
 
             Process.Start();
-            _state = ProcessState.Running;
+            _State = ProcessState.Running;
 
             Process.PriorityClass = Priority;
             Process.BeginOutputReadLine();
@@ -191,7 +191,7 @@ namespace Shared
             else
                 Debug.WriteLine($"run-command {this.FilePath} {this.ArgsList.JoinArgs()}");
 
-            SetConsoleCtrlHandlerCall(_handler, true);
+            SetConsoleCtrlHandlerCall(_Handler, true);
 
             Process.StartInfo = new()
             {
@@ -234,10 +234,10 @@ namespace Shared
                     Sb_Error.AppendLine(args.Data);
                 }
             };
-            Process.Exited += (sender, args) => { _state = ProcessState.Exited; };
+            Process.Exited += (sender, args) => { _State = ProcessState.Exited; };
 
             Process.Start();
-            _state = ProcessState.Running;
+            _State = ProcessState.Running;
 
             Process.PriorityClass = Priority;
             Process.BeginOutputReadLine();
@@ -251,9 +251,9 @@ namespace Shared
         {
             get
             {
-                if (_state == ProcessState.Exited && Process != null)
+                if (_State == ProcessState.Exited && Process != null)
                     WaitForExit();
-                return _state;
+                return _State;
             }
         }
 
@@ -265,9 +265,9 @@ namespace Shared
             Process?.WaitForExit();
             ExitCode = Process?.ExitCode ?? -1;
             Process = null;
-            _state = ProcessState.Exited;
+            _State = ProcessState.Exited;
 
-            SetConsoleCtrlHandlerCall(_handler, false);
+            SetConsoleCtrlHandlerCall(_Handler, false);
         }
 
         #region Kernel32
@@ -284,7 +284,7 @@ namespace Shared
         private static partial bool SetConsoleCtrlHandler(EventHandler handler, [MarshalAs(UnmanagedType.Bool)] bool add);
 
         private delegate bool EventHandler(CtrlType sig);
-        private EventHandler? _handler;
+        private EventHandler? _Handler;
 
         private enum CtrlType
         {

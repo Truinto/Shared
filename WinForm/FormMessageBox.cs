@@ -16,9 +16,9 @@ namespace Shared
     {
         public TimeSpan Timeout;
         public DialogResult[] ButtonResults;
-        private System.Windows.Forms.Timer? timer1;
-        private TimeSpan current_timeout;
-        private Button defaultButton;
+        private System.Windows.Forms.Timer? _Timer1;
+        private TimeSpan _CurrentTimeout;
+        private Button _DefaultButton;
 
         public FormMessageBox(string text, string caption, MessageBoxIcon icon, MessageBoxDefaultButton defaultButton, string[] buttonLabels, DialogResult[] buttonResults, TimeSpan timeout = default)
         {
@@ -76,7 +76,7 @@ namespace Shared
                     break;
             }
 
-            this.defaultButton = defaultButton switch
+            this._DefaultButton = defaultButton switch
             {
                 MessageBoxDefaultButton.Button2 => Button2,
                 MessageBoxDefaultButton.Button3 => Button3,
@@ -99,20 +99,20 @@ namespace Shared
         {
             base.OnShown(e);
 
-            defaultButton.Select();
+            _DefaultButton.Select();
 
             if (Timeout != default)
             {
-                current_timeout = Timeout;
+                _CurrentTimeout = Timeout;
                 LabelTime.Text = Timeout.ToString("mm\\:ss");
                 LabelTime.Visible = true;
-                if (timer1 == null)
+                if (_Timer1 == null)
                 {
-                    timer1 = new();
-                    timer1.Interval = 1000;
-                    timer1.Tick += Timer_Tick;
+                    _Timer1 = new();
+                    _Timer1.Interval = 1000;
+                    _Timer1.Tick += Timer_Tick;
                 }
-                timer1.Start();
+                _Timer1.Start();
             }
             else
             {
@@ -122,17 +122,17 @@ namespace Shared
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
-            timer1?.Stop();
+            _Timer1?.Stop();
             base.OnFormClosed(e);
         }
 
         private void Timer_Tick(object? sender, EventArgs e)
         {
-            current_timeout = current_timeout.Subtract(TimeSpan.FromSeconds(1));
-            if (current_timeout <= TimeSpan.Zero)
-                defaultButton.PerformClick();
+            _CurrentTimeout = _CurrentTimeout.Subtract(TimeSpan.FromSeconds(1));
+            if (_CurrentTimeout <= TimeSpan.Zero)
+                _DefaultButton.PerformClick();
             else
-                LabelTime.Text = current_timeout.ToString("mm\\:ss");
+                LabelTime.Text = _CurrentTimeout.ToString("mm\\:ss");
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -145,12 +145,12 @@ namespace Shared
             }
         }
 
-        private Brush BackgroundBrush = new SolidBrush(SystemColors.Control);
+        private Brush _BackgroundBrush = new SolidBrush(SystemColors.Control);
         protected override void OnPaintBackground(PaintEventArgs e)
         {
             base.OnPaintBackground(e);
 
-            e.Graphics.FillRectangle(BackgroundBrush, 0, this.TableLayoutPanel1.Top - 10, this.Width, 50);
+            e.Graphics.FillRectangle(_BackgroundBrush, 0, this.TableLayoutPanel1.Top - 10, this.Width, 50);
         }
 
         public new string Text

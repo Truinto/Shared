@@ -911,7 +911,7 @@ namespace Shared.CollectionNS
 
         public static readonly byte[] Buffer = new byte[2048];
 
-        private static readonly List<object> _list = [];
+        private static readonly List<object> _List = [];
 
         /// <summary>
         /// Gets a static list object. Do not save reference.
@@ -919,9 +919,9 @@ namespace Shared.CollectionNS
         /// </summary>
         public static List<object> GetList()
         {
-            System.Threading.Monitor.Enter(_list);
-            _list.Clear();
-            return _list;
+            System.Threading.Monitor.Enter(_List);
+            _List.Clear();
+            return _List;
         }
 
         /// <summary>
@@ -929,10 +929,10 @@ namespace Shared.CollectionNS
         /// </summary>
         public static T[] Flush<T>() where T : class
         {
-            var result = new T[_list.Count];
-            _list.CopyTo(result);
-            _list.Clear();
-            System.Threading.Monitor.Exit(_list);
+            var result = new T[_List.Count];
+            _List.CopyTo(result);
+            _List.Clear();
+            System.Threading.Monitor.Exit(_List);
             return result;
         }
     }

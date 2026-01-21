@@ -12,8 +12,8 @@ namespace Shared
     [DefaultEvent("ClipboardChanged")]
     public partial class ClipboardMonitor : Control
     {
-        private IntPtr nextClipboardViewer;
-        private DateTime lastChange;
+        private IntPtr _NextClipboardViewer;
+        private DateTime _LastChange;
 
         /// <summary>Clipboard contents changed.</summary>
         public event EventHandler<ClipboardChangedEventArgs>? ClipboardChanged;
@@ -23,12 +23,12 @@ namespace Shared
             this.BackColor = Color.Red;
             this.Visible = false;
 
-            nextClipboardViewer = (IntPtr)SetClipboardViewer((int)this.Handle);
+            _NextClipboardViewer = (IntPtr)SetClipboardViewer((int)this.Handle);
         }
 
         protected override void Dispose(bool disposing)
         {
-            ChangeClipboardChain(this.Handle, nextClipboardViewer);
+            ChangeClipboardChain(this.Handle, _NextClipboardViewer);
             base.Dispose(disposing);
         }
 
@@ -48,21 +48,21 @@ namespace Shared
         protected override void WndProc(ref System.Windows.Forms.Message m)
         {
             // defined in winuser.h
-            const int WM_DRAWCLIPBOARD = 0x308;
-            const int WM_CHANGECBCHAIN = 0x30D;
+            const int wm_drawclipboard = 0x308;
+            const int wm_changecbchain = 0x30D;
 
             switch (m.Msg)
             {
-                case WM_DRAWCLIPBOARD:
+                case wm_drawclipboard:
                     OnClipboardChanged();
-                    _ = SendMessage(nextClipboardViewer, m.Msg, m.WParam, m.LParam);
+                    _ = SendMessage(_NextClipboardViewer, m.Msg, m.WParam, m.LParam);
                     break;
 
-                case WM_CHANGECBCHAIN:
-                    if (m.WParam == nextClipboardViewer)
-                        nextClipboardViewer = m.LParam;
+                case wm_changecbchain:
+                    if (m.WParam == _NextClipboardViewer)
+                        _NextClipboardViewer = m.LParam;
                     else
-                        _ = SendMessage(nextClipboardViewer, m.Msg, m.WParam, m.LParam);
+                        _ = SendMessage(_NextClipboardViewer, m.Msg, m.WParam, m.LParam);
                     break;
 
                 default:
@@ -76,9 +76,9 @@ namespace Shared
             try
             {
                 var now = DateTime.Now;
-                if (now < lastChange.AddMilliseconds(200))
+                if (now < _LastChange.AddMilliseconds(200))
                     return;
-                lastChange = now;
+                _LastChange = now;
                 var iData = Clipboard.GetDataObject();
                 if (iData is not null)
                     ClipboardChanged?.Invoke(this, new ClipboardChangedEventArgs(iData, GetClipboardOwner()));

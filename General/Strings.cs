@@ -672,18 +672,18 @@ namespace Shared.StringsNS
 
         #region Buffer
 
-        private static readonly StringBuilder _sb = new();
+        private static readonly StringBuilder _Sb = new();
         private static StringBuilder GetSb()
         {
-            System.Threading.Monitor.Enter(_sb);
-            _sb.Clear();
-            return _sb;
+            System.Threading.Monitor.Enter(_Sb);
+            _Sb.Clear();
+            return _Sb;
         }
         private static string FlushSb()
         {
-            string text = _sb.ToString();
-            _sb.Clear();
-            System.Threading.Monitor.Exit(_sb);
+            string text = _Sb.ToString();
+            _Sb.Clear();
+            System.Threading.Monitor.Exit(_Sb);
             return text;
         }
 

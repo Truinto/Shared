@@ -16,9 +16,9 @@ namespace Shared
         /// <summary>
         /// Message identifier 0x312 means that the mesage is a WM_HOTKEY message.
         /// </summary>
-        const int WM_HOTKEY = 786;
+        public const int WM_HOTKEY = 786;
 
-        private bool disposed = false;
+        private bool _Disposed = false;
         /// <summary>
         /// A normal application can use any value between 0x0000 and 0xBFFF as the ID
         /// but if you are writing a DLL, then you must use GlobalAddAtom to get a
@@ -86,7 +86,7 @@ namespace Shared
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposed)
+            if (_Disposed)
                 return;
 
             if (disposing)
@@ -96,7 +96,7 @@ namespace Shared
                 IsRegistered = false;
             }
 
-            disposed = true;
+            _Disposed = true;
         }
 
         /// <summary>
