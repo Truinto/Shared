@@ -5,6 +5,10 @@
 		<Compile Include="$(SharedDir)WinForm/FormMessageBox.Designer.cs" Link="Shared/FormMessageBox.Designer.cs" DependentUpon="FormMessageBox.cs" />
 		<EmbeddedResource Include="$(SharedDir)WinForm/FormMessageBox.resx" Link="Shared/FormMessageBox.resx" DependentUpon="FormMessageBox.cs" />
 		
+		<Compile Include="$(SharedDir)WinForm/FormInputBox.cs" Link="Shared/FormInputBox.cs" SubType="UserControl" />
+		<Compile Include="$(SharedDir)WinForm/FormInputBox.Designer.cs" Link="Shared/FormInputBox.Designer.cs" DependentUpon="FormInputBox.cs" />
+		<EmbeddedResource Include="$(SharedDir)WinForm/FormInputBox.resx" Link="Shared/FormInputBox.resx" DependentUpon="FormInputBox.cs" />
+		
 		<Compile Include="$(SharedDir)WinForm/WinformExtensions.cs" Link="Shared/WinformExtensions.cs" />
 	</ItemGroup>
 </Project>
