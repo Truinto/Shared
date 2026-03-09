@@ -62,6 +62,7 @@
 		<TargetCopyDelete Include="$(ModFolder)/$(TargetName)/$(TargetName).pdb" Condition="$(Configuration.Contains('Release'))" />
 		<TargetCopyDelete Include="$(ModFolder)/$(TargetName)/$(TargetName).xml" Condition="$(Configuration.Contains('Release'))" />
 		
+		<TargetZipWorkDir Include="$(ModFolder)" />
 		<TargetZipItems Include="$(ModFolder)/$(TargetName)/$(TargetName).dll" />
 		<TargetZipTarget Include="$(SolutionDir)/publish/$(TargetName).zip" />
 	</ItemGroup>
