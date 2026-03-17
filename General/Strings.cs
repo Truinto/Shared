@@ -544,6 +544,78 @@ namespace Shared.StringsNS
 
         #region Substring
 
+        /// <summary>
+        /// Controls length of a string. If the string is too long, the left characters are truncated. <br/>
+        /// Optional argument '<paramref name="min"/>' can pad the string (positive = right aligned; negative = left aligned).
+        /// </summary>
+        /// <param name="text">The string to shorten/lengthen.</param>
+        /// <param name="max">Maximum length of the output. Must be 0 or greater.</param>
+        /// <param name="min">Minimum length of the output. '<paramref name="max"/>' takes priority. Positive = right aligned; Negative = left aligned</param>
+        /// <param name="ellipsisChars">Prefix, if the string is shortend.</param>
+        /// <param name="paddingChar">Padding character, if the string is lengthen.</param>
+        public static string TruncateLeft(this string text, int max, int min = 0, string ellipsisChars = "\u2026", char paddingChar = ' ')
+        {
+            if (max < 0)
+                throw new ArgumentException(null, nameof(max));
+            min = Math.Clamp(min, -max, max);
+            if (text.Length < min)
+                return new string(paddingChar, min - text.Length) + text;
+            if (text.Length < -min)
+                return text + new string(paddingChar, -min - text.Length);
+            if (text.Length <= max)
+                return text;
+            if (ellipsisChars.Length > max)
+                return ellipsisChars.Substring(0, max);
+
+#if NET5_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+            return string.Concat(ellipsisChars, text.AsSpan(ellipsisChars.Length + text.Length - max));
+#else
+            return string.Concat(ellipsisChars, text.Substring(ellipsisChars.Length + text.Length - max));
+#endif
+        }
+
+        /// <summary>
+        /// Controls length of a string. If the string is too long, the right characters are truncated. <br/>
+        /// Optional argument '<paramref name="min"/>' can pad the string (positive = right aligned; negative = left aligned).
+        /// </summary>
+        /// <param name="text">The string to shorten/lengthen.</param>
+        /// <param name="max">Maximum length of the output. Must be 0 or greater.</param>
+        /// <param name="min">Minimum length of the output. '<paramref name="max"/>' takes priority. Positive = right aligned; Negative = left aligned</param>
+        /// <param name="ellipsisChars">Prefix, if the string is shortend.</param>
+        /// <param name="paddingChar">Padding character, if the string is lengthen.</param>
+        public static string TruncateRight(this string text, int max, int min = 0, string ellipsisChars = "\u2026", char paddingChar = ' ')
+        {
+            if (max < 0)
+                throw new ArgumentException(null, nameof(max));
+            min = Math.Clamp(min, -max, max);
+            if (text.Length < min)
+                return new string(paddingChar, min - text.Length) + text;
+            if (text.Length < -min)
+                return text + new string(paddingChar, -min - text.Length);
+            if (text.Length <= max)
+                return text;
+            if (ellipsisChars.Length > max)
+                return ellipsisChars.Substring(0, max);
+
+#if NET5_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+            return string.Concat(text.AsSpan(0, max - ellipsisChars.Length), ellipsisChars);
+#else
+            return string.Concat(text.Substring(0, max -ellipsisChars.Length, ellipsisChars));
+#endif
+        }
+
+        /// <summary>
+        /// Splits a string into two pieces. <paramref name="c"/> is omitted.
+        /// If <paramref name="str"/> does not contain <paramref name="c"/>, then left contains the full string and right is empty (not null).
+        /// </summary>
+        public static (string left, string right) Split2(this string str, char c)
+        {
+            int i = str.IndexOf(c);
+            if (i < 0)
+                return (str, "");
+            return (str.Substring(0, i), str.Substring(i + 1));
+        }
+
         /// <summary>Returns substring. Always excludes char 'c'. Returns null, if index is out of range or char not found.</summary>
         /// <param name="str">source string</param>
         /// <param name="c">char to search for</param>
@@ -562,7 +634,7 @@ namespace Shared.StringsNS
 
                 if (start < 0)
                     return str.Substring(0, str.LastIndexOf(c));
-                return str.Substring(start, str.IndexOf(c, start));
+                return str.Substring(start, str.IndexOf(c, start) - start);
             } catch (Exception)
             {
                 return null;
@@ -576,7 +648,7 @@ namespace Shared.StringsNS
             return str != null;
         }
 
-#if NET7_0_OR_GREATER
+#if NET8_0_OR_GREATER
         /// <summary>
         /// Returns substring. Always excludes char 'c'. Returns false, if index out of bounds.<br/>
         /// Example with c='.'<br/>

@@ -155,5 +155,73 @@ namespace UnitTest
                 i++;
             }
         }
+
+        [TestMethod]
+        public void Test_Strings_TruncateLeft()
+        {
+            // exceptions
+            Assert.Throws<ArgumentException>(() => "aaa".TruncateLeft(-1));
+
+            // no change
+            Assert.AreEqual("aaa", "aaa".TruncateLeft(4));
+            Assert.AreEqual("aaa", "aaa".TruncateLeft(4, 2));
+            Assert.AreEqual("aaa", "aaa".TruncateLeft(4, -2));
+            Assert.AreEqual("aaa", "aaa".TruncateLeft(3, 3));
+            Assert.AreEqual("aaa", "aaa".TruncateLeft(3, -3));
+
+            // reduce
+            Assert.AreEqual("\u2026a", "aaa".TruncateLeft(2));
+            Assert.AreEqual("\u2026", "aaa".TruncateLeft(1));
+            Assert.AreEqual("", "aaa".TruncateLeft(0));
+            Assert.AreEqual("...a", "aaaaa".TruncateLeft(4, 0, "..."));
+            Assert.AreEqual("\u2026a", "aaa".TruncateLeft(2, 1));
+            Assert.AreEqual("\u2026", "aaa".TruncateLeft(1, 1));
+            Assert.AreEqual("", "aaa".TruncateLeft(0, 1));
+            Assert.AreEqual("...a", "aaaaa".TruncateLeft(4, 1, "..."));
+            Assert.AreEqual("\u2026a", "aaa".TruncateLeft(2, -1));
+            Assert.AreEqual("\u2026", "aaa".TruncateLeft(1, -1));
+            Assert.AreEqual("", "aaa".TruncateLeft(0, -1));
+            Assert.AreEqual("...a", "aaaaa".TruncateLeft(4, -1, "..."));
+
+            // increase
+            Assert.AreEqual(" aaa", "aaa".TruncateLeft(max: 4, min: 4));
+            Assert.AreEqual("aaa ", "aaa".TruncateLeft(max: 4, min: -4));
+            Assert.AreEqual(" aaa", "aaa".TruncateLeft(max: 99, min: 4));
+            Assert.AreEqual("aaa ", "aaa".TruncateLeft(max: 99, min: -4));
+        }
+
+        [TestMethod]
+        public void Test_Strings_TruncateRight()
+        {
+            // exceptions
+            Assert.Throws<ArgumentException>(() => "aaa".TruncateRight(-1));
+
+            // no change
+            Assert.AreEqual("aaa", "aaa".TruncateRight(4));
+            Assert.AreEqual("aaa", "aaa".TruncateRight(4, 2));
+            Assert.AreEqual("aaa", "aaa".TruncateRight(4, -2));
+            Assert.AreEqual("aaa", "aaa".TruncateRight(3, 3));
+            Assert.AreEqual("aaa", "aaa".TruncateRight(3, -3));
+
+            // reduce
+            Assert.AreEqual("a\u2026", "aaa".TruncateRight(2));
+            Assert.AreEqual("\u2026", "aaa".TruncateRight(1));
+            Assert.AreEqual("", "aaa".TruncateRight(0));
+            Assert.AreEqual("a...", "aaaaa".TruncateRight(4, 0, "..."));
+            Assert.AreEqual("a\u2026", "aaa".TruncateRight(2, 1));
+            Assert.AreEqual("\u2026", "aaa".TruncateRight(1, 1));
+            Assert.AreEqual("", "aaa".TruncateRight(0, 1));
+            Assert.AreEqual("a...", "aaaaa".TruncateRight(4, 1, "..."));
+            Assert.AreEqual("a\u2026", "aaa".TruncateRight(2, -1));
+            Assert.AreEqual("\u2026", "aaa".TruncateRight(1, -1));
+            Assert.AreEqual("", "aaa".TruncateRight(0, -1));
+            Assert.AreEqual("a...", "aaaaa".TruncateRight(4, -1, "..."));
+
+            // increase
+            Assert.AreEqual(" aaa", "aaa".TruncateRight(max: 4, min: 4));
+            Assert.AreEqual("aaa ", "aaa".TruncateRight(max: 4, min: -4));
+            Assert.AreEqual(" aaa", "aaa".TruncateRight(max: 99, min: 4));
+            Assert.AreEqual("aaa ", "aaa".TruncateRight(max: 99, min: -4));
+        }
     }
 }
