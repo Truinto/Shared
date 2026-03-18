@@ -549,14 +549,14 @@ namespace Shared.StringsNS
         /// Optional argument '<paramref name="min"/>' can pad the string (positive = right aligned; negative = left aligned).
         /// </summary>
         /// <param name="text">The string to shorten/lengthen.</param>
-        /// <param name="max">Maximum length of the output. Must be 0 or greater.</param>
+        /// <param name="max">Maximum length of the output. Values less than 0 will read as 0.</param>
         /// <param name="min">Minimum length of the output. '<paramref name="max"/>' takes priority. Positive = right aligned; Negative = left aligned</param>
         /// <param name="ellipsisChars">Prefix, if the string is shortend.</param>
         /// <param name="paddingChar">Padding character, if the string is lengthen.</param>
         public static string TruncateLeft(this string text, int max, int min = 0, string ellipsisChars = "\u2026", char paddingChar = ' ')
         {
             if (max < 0)
-                throw new ArgumentException(null, nameof(max));
+                return "";
             min = Math.Clamp(min, -max, max);
             if (text.Length < min)
                 return new string(paddingChar, min - text.Length) + text;
@@ -579,14 +579,14 @@ namespace Shared.StringsNS
         /// Optional argument '<paramref name="min"/>' can pad the string (positive = right aligned; negative = left aligned).
         /// </summary>
         /// <param name="text">The string to shorten/lengthen.</param>
-        /// <param name="max">Maximum length of the output. Must be 0 or greater.</param>
+        /// <param name="max">Maximum length of the output. Values less than 0 will read as 0.</param>
         /// <param name="min">Minimum length of the output. '<paramref name="max"/>' takes priority. Positive = right aligned; Negative = left aligned</param>
         /// <param name="ellipsisChars">Prefix, if the string is shortend.</param>
         /// <param name="paddingChar">Padding character, if the string is lengthen.</param>
         public static string TruncateRight(this string text, int max, int min = 0, string ellipsisChars = "\u2026", char paddingChar = ' ')
         {
             if (max < 0)
-                throw new ArgumentException(null, nameof(max));
+                return "";
             min = Math.Clamp(min, -max, max);
             if (text.Length < min)
                 return new string(paddingChar, min - text.Length) + text;

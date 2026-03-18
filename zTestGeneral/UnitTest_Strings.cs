@@ -159,9 +159,6 @@ namespace UnitTest
         [TestMethod]
         public void Test_Strings_TruncateLeft()
         {
-            // exceptions
-            Assert.Throws<ArgumentException>(() => "aaa".TruncateLeft(-1));
-
             // no change
             Assert.AreEqual("aaa", "aaa".TruncateLeft(4));
             Assert.AreEqual("aaa", "aaa".TruncateLeft(4, 2));
@@ -170,6 +167,7 @@ namespace UnitTest
             Assert.AreEqual("aaa", "aaa".TruncateLeft(3, -3));
 
             // reduce
+            Assert.AreEqual("", "aaa".TruncateLeft(-1));
             Assert.AreEqual("\u2026a", "aaa".TruncateLeft(2));
             Assert.AreEqual("\u2026", "aaa".TruncateLeft(1));
             Assert.AreEqual("", "aaa".TruncateLeft(0));
@@ -193,9 +191,6 @@ namespace UnitTest
         [TestMethod]
         public void Test_Strings_TruncateRight()
         {
-            // exceptions
-            Assert.Throws<ArgumentException>(() => "aaa".TruncateRight(-1));
-
             // no change
             Assert.AreEqual("aaa", "aaa".TruncateRight(4));
             Assert.AreEqual("aaa", "aaa".TruncateRight(4, 2));
@@ -204,6 +199,7 @@ namespace UnitTest
             Assert.AreEqual("aaa", "aaa".TruncateRight(3, -3));
 
             // reduce
+            Assert.AreEqual("", "aaa".TruncateRight(-1));
             Assert.AreEqual("a\u2026", "aaa".TruncateRight(2));
             Assert.AreEqual("\u2026", "aaa".TruncateRight(1));
             Assert.AreEqual("", "aaa".TruncateRight(0));
