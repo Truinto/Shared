@@ -30,9 +30,6 @@ dotnet_diagnostic.IDE0057.severity = none
 # IDE0060: Nicht verwendete Parameter entfernen
 dotnet_diagnostic.IDE0060.severity = suggestion
 
-# IDE0062: Lokale Funktion als "static" festlegen
-dotnet_diagnostic.IDE0062.severity = none
-
 # IDE0305: Initialisierung der Sammlung vereinfachen
 dotnet_diagnostic.IDE0305.severity = none
 dotnet_diagnostic.IDE0306.severity = none
@@ -43,13 +40,16 @@ dotnet_diagnostic.CA1041.severity = none
 # CA1069: Enumerationswerte dürfen nicht dupliziert werden
 dotnet_diagnostic.CA1069.severity = none
 
+# CA1822: Member ohne Instanzdaten als "static" festlegen
+dotnet_diagnostic.CA1822.severity = none
+
 # CA1866: Char-Überladung verwenden
 dotnet_diagnostic.CA1866.severity = none
 
 # CS0164: Auf diese Bezeichnung wurde nicht verwiesen.
 dotnet_diagnostic.CS0164.severity = none
 
-# CS1591: Fehledes XML-Kommentar für öffentlich sichtbaren Typ oder Element
+# CS1591: Fehlendes XML-Kommentar für öffentlich sichtbaren Typ oder Element
 dotnet_diagnostic.CS1591.severity = suggestion
 
 # CA1806: Methodenergebnisse nicht ignorieren
@@ -158,7 +158,7 @@ csharp_style_prefer_switch_expression = true
 csharp_style_conditional_delegate_call = true
 
 # Einstellungen für Modifizierer
-csharp_prefer_static_local_function = true
+csharp_prefer_static_local_function = false
 csharp_preferred_modifier_order = public,private,protected,internal,extern,file,static,new,virtual,abstract,sealed,readonly,override,unsafe,required,volatile,async:warning
 csharp_style_prefer_readonly_struct = true
 csharp_style_prefer_readonly_struct_member = true

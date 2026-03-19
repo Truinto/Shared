@@ -706,9 +706,8 @@ namespace Shared.CollectionNS
         /// </summary>
         public static void QuickSort<T>(IList<T> list, int leftBound, int rightBound) where T : IComparable<T>
         {
-            if (rightBound <= leftBound)
+            if (leftBound > rightBound)
                 return;
-
             int i = leftBound;
             int j = rightBound;
             T pivot = list[leftBound];
@@ -737,6 +736,8 @@ namespace Shared.CollectionNS
         /// </summary>
         public static void QuickSort<T1, T2>(IList<T1> list, Func<T1, T2> keySelector, int leftBound, int rightBound) where T2 : IComparable<T2>
         {
+            if (leftBound > rightBound)
+                return;
             int i = leftBound;
             int j = rightBound;
             T2 pivot = keySelector(list[leftBound]);
@@ -765,6 +766,8 @@ namespace Shared.CollectionNS
         /// </summary>
         public static void QuickSort<T>(IList<T> list, Func<T, T, int> comparer, int leftBound, int rightBound)
         {
+            if (leftBound > rightBound)
+                return;
             int i = leftBound;
             int j = rightBound;
             T pivot = list[leftBound];
