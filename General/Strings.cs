@@ -219,7 +219,7 @@ namespace Shared.StringsNS
 
         /// <summary>
         /// Turns a string into <see cref="DateTime"/>. Much more forgiving than DateTime.Parse.<br/>
-        /// If not specified, times are assumed to be local time. Use 'Z' to signal UTF time.
+        /// If not specified, times are assumed to be local time. Use 'Z' to signal UTC time.
         /// </summary>
         public static DateTime ToDateTime(this string? input)
         {
@@ -371,6 +371,26 @@ namespace Shared.StringsNS
                 DateTime.TryParse(input, out var result);
                 return result;
             }
+        }
+
+        /// <summary>
+        /// Turns <see cref="DateTime"/> back to a string.<br/>
+        /// If not specified, times are assumed to be local time.
+        /// </summary>
+        public static string ToUtcString(this DateTime date)
+        {
+            return date.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
+        }
+
+        /// <summary>
+        /// Turns <see cref="DateTime"/> back to a local date only string.<br/>
+        /// If not specified, times are assumed to be local time.
+        /// </summary>
+        public static string ToDateOnlyString(this DateTime date)
+        {
+            if (date.Kind == DateTimeKind.Utc)
+                date = date.ToLocalTime();
+            return date.ToString("yyyy-MM-dd");
         }
 
         /// <summary>Joins an enumeration with a value converter and a delimiter to a string</summary>
