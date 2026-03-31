@@ -143,6 +143,8 @@ namespace Shared.PathsNS
     /// </summary>
     public static partial class Paths
     {
+        #region Validation
+
         public static readonly char[] InvalidFileNameChars =
         [
             '"', '<', '>', '|', '\0', '\u0001', '\u0002', '\u0003', '\u0004', '\u0005',
@@ -158,40 +160,12 @@ namespace Shared.PathsNS
                 return null;
 
             var sb = new StringBuilder();
-            foreach (char c in filename.Trim())
+            foreach (char c in filename.Trim()) // todo: optimize (trim on the spot, recycle StringBuilder)
             {
                 if (!InvalidFileNameChars.Contains(c))
                     sb.Append(c);
             }
             return sb.ToString();
-        }
-
-        /// <summary>
-        /// Capture groups are<br/>
-        /// dir: directory full name<br/>
-        /// vol: volume (C:/ or /)<br/>
-        /// folder: all folder name captures (Value has last entry only)<br/>
-        /// file: filename including extension<br/>
-        /// name: filename excluding extension<br/>
-        /// ext: extension including period<br/>
-        /// </summary>
-#if NET7_0_OR_GREATER
-        [GeneratedRegex(@"^(?<dir>(?<vol>(?:[A-Za-z]:)?[\\/])?(?:(?<folder>[^\\/]+)[\\/])*)(?<file>(?<name>[^\\/]*?)?(?<ext>\.[^\\/\.]+)?)$")]
-        public static partial Regex Rx_Path();
-#else
-        /// <summary> Splits path into segments. </summary>
-        public static Regex Rx_Path() => _Rx_Path ??= new(@"^(?<dir>(?<vol>(?:[A-Za-z]:)?[\\/])?(?:(?<folder>[^\\/]+)[\\/])*)(?<file>(?<name>[^\\/]*?)?(?<ext>\.[^\\/\.]+)?)$");
-        private static Regex? _Rx_Path;
-#endif
-
-        /// <summary>True if paths are equal. Resolves relative paths. Ignores closing path separator.</summary>
-        public static bool AreEqual(this FileInfo? path1, FileInfo? path2)
-        {
-            if (path1 is null || path2 is null)
-                return false;
-            if (ReferenceEquals(path1, path2))
-                return true;
-            return AreEqual(path1.FullName, path2.FullName);
         }
 
         /// <summary>
@@ -231,47 +205,27 @@ namespace Shared.PathsNS
             return true;
         }
 
+        #endregion
+
+        #region Split Path
+
         /// <summary>
-        /// Checks for files or directories.
+        /// Capture groups are<br/>
+        /// dir: directory full name<br/>
+        /// vol: volume (C:/ or /)<br/>
+        /// folder: all folder name captures (Value has last entry only)<br/>
+        /// file: filename including extension<br/>
+        /// name: filename excluding extension<br/>
+        /// ext: extension including period<br/>
         /// </summary>
-        public static bool Exists(string path)
-        {
-            if (File.Exists(path))
-                return true;
-            if (Directory.Exists(path))
-                return true;
-            return false;
-        }
-
-        /// <summary>True if paths are equal. Resolves relative paths. Ignores closing path separator.</summary>
-        public static bool AreEqual(string path1, string path2)
-        {
-            if (path1 is null or "")
-                return path1 == path2;
-
-            path1 = Path.GetFullPath(path1);
-            path2 = Path.GetFullPath(path2);
-
-            int length1 = path1.Length;
-            int length2 = path2.Length;
-
-            int length;
-            if (length1 == length2)
-                length = length1;
-            else if (length1 - 1 == length2 && path1[length2] is '/' or '\\')
-                length = length2;
-            else if (length1 == length2 - 1 && path2[length1] is '/' or '\\')
-                length = length1;
-            else
-                return false;
-
-            return string.Compare(
-                path1, 0,
-                path2, 0,
-                length,
-                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? StringComparison.CurrentCultureIgnoreCase : StringComparison.Ordinal
-                ) == 0;
-        }
+#if NET7_0_OR_GREATER
+        [GeneratedRegex(@"^(?<dir>(?<vol>(?:[A-Za-z]:)?[\\/])?(?:(?<folder>[^\\/]+)[\\/])*)(?<file>(?<name>[^\\/]*?)?(?<ext>\.[^\\/\.]+)?)$")]
+        public static partial Regex Rx_Path();
+#else
+        /// <summary> Splits path into segments. </summary>
+        public static Regex Rx_Path() => _Rx_Path ??= new(@"^(?<dir>(?<vol>(?:[A-Za-z]:)?[\\/])?(?:(?<folder>[^\\/]+)[\\/])*)(?<file>(?<name>[^\\/]*?)?(?<ext>\.[^\\/\.]+)?)$");
+        private static Regex? _Rx_Path;
+#endif
 
         public static List<string> Split(string? paths)
         {
@@ -307,6 +261,98 @@ namespace Shared.PathsNS
             return list;
         }
 
+        #endregion
+
+        #region Equality
+
+        /// <summary>
+        /// True if paths are equal. Resolves relative paths. Ignores closing path separator.
+        /// </summary>
+        public static bool AreEqual(this FileInfo? path1, FileInfo? path2)
+        {
+            if (path1 is null || path2 is null)
+                return false;
+            if (ReferenceEquals(path1, path2))
+                return true;
+            return AreEqual(path1.FullName, path2.FullName);
+        }
+
+        /// <summary>
+        /// True if paths are equal. Resolves relative paths. Ignores closing path separator.
+        /// </summary>
+        public static bool AreEqual(string path1, string path2)
+        {
+            if (path1 is null or "")
+                return path1 == path2;
+
+            path1 = Path.GetFullPath(path1);
+            path2 = Path.GetFullPath(path2);
+
+            int length1 = path1.Length;
+            int length2 = path2.Length;
+
+            int length;
+            if (length1 == length2)
+                length = length1;
+            else if (length1 - 1 == length2 && path1[length2] is '/' or '\\')
+                length = length2;
+            else if (length1 == length2 - 1 && path2[length1] is '/' or '\\')
+                length = length1;
+            else
+                return false;
+
+            return string.Compare(
+                path1, 0,
+                path2, 0,
+                length,
+                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? StringComparison.CurrentCultureIgnoreCase : StringComparison.Ordinal
+                ) == 0;
+        }
+
+        #endregion
+
+        #region Exists
+
+        /// <summary>
+        /// Checks for files or directories.
+        /// </summary>
+        public static bool Exists(string path)
+        {
+            if (File.Exists(path))
+                return true;
+            if (Directory.Exists(path))
+                return true;
+            return false;
+        }
+
+        #endregion
+
+        #region Enumerate Path
+
+        /// <summary>
+        /// Returns list of all files and directories in a given directory.<br/>
+        /// Does not search recursively. Only names, not full path.<br/>
+        /// Returns empty list, if path does not exist.
+        /// </summary>
+        public static List<string> GetNameListing(string path)
+        {
+            var results = new List<string>();
+            if (!Directory.Exists(path))
+                return results;
+
+            foreach (var item in Directory.EnumerateFileSystemEntries(path))
+            {
+                int iLastSlash = item.LastIndexOfAny(_Slashes);
+                results.Add(iLastSlash < 0 ? item : item.Substring(iLastSlash + 1));
+            }
+            return results;
+        }
+        private static char[] _Slashes = ['/', '\\'];
+
+        #endregion
+
+        #region Unique Path
+
 #if NET7_0_OR_GREATER
         [GeneratedRegex(@"^(.*?)([^\\\/]+?)(?:\((\d+)\))?(\.\w+)?$")]
         private static partial Regex Rx_UniqueFilename();
@@ -339,6 +385,10 @@ namespace Shared.PathsNS
             }
             return $"{m1.Groups[1].Value}{m1.Groups[2].Value}({number + 1}){m1.Groups[4].Value}";
         }
+
+        #endregion
+
+        #region Environment Paths
 
         /// <summary>Folder path of the currently running executable. Same as <seealso cref="AppContext.BaseDirectory"/>.</summary>
         public static string AssemblyDirectory => AppContext.BaseDirectory;
@@ -393,5 +443,7 @@ namespace Shared.PathsNS
 
         /// <summary>C:\Users\%username%\Desktop<br/>Prefer DesktopDirectory instead.</summary>
         public static string Desktop => Environment.GetFolderPath(Environment.SpecialFolder.Desktop, Environment.SpecialFolderOption.DoNotVerify);
+
+        #endregion
     }
 }
