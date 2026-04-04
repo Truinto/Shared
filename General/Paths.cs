@@ -351,6 +351,33 @@ namespace Shared.PathsNS
 
         #endregion
 
+        #region Deletions
+
+        /// <summary>
+        /// Deletes all files from a directory. Does not remove directories. Does nothing if path does not exist.
+        /// </summary>
+        public static void ClearDirectory(string path, bool recursive, bool moveToTrash = false)
+        {
+            if (!Directory.Exists(path))
+                return;
+
+            foreach (var file in Directory.GetFiles(path, "*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+            {
+                if (!moveToTrash)
+                    File.Delete(file);
+                else
+                    MoveToTrash(file);
+            }
+        }
+
+        public static void MoveToTrash(string file) => Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(
+                        file,
+                        Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
+                        Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin,
+                        Microsoft.VisualBasic.FileIO.UICancelOption.DoNothing);
+
+        #endregion
+
         #region Unique Path
 
 #if NET7_0_OR_GREATER
