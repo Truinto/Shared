@@ -104,14 +104,18 @@ namespace Shared
                 if (File.Exists(filePath))
                 {
                     // get all text, using FileShare so we can open even busy files
-                    using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                    using var reader = new StreamReader(stream);
-                    string json = reader.ReadToEnd();
+                    string json;
+                    {
+                        using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                        using var reader = new StreamReader(stream);
+                        json = reader.ReadToEnd();
+                        stream.Close();
+                    }
 
                     // reading version from text and applying BeforeUpdate patch
                     var match = Regex.Match(json, @"\""[Vv]ersion\"":\s*(\d+)");
-                    if (match.Success)
-                        json = reference.BeforeUpdate(int.Parse(match.Groups[1].Value), json);
+                    int version = match.Success ? int.Parse(match.Groups[1].Value) : 0;
+                    json = reference.BeforeUpdate(version, json);
 
                     // actually deserializing, and applying OnUpdate patch
                     instance = JsonTool.Deserialize<T>(json);
@@ -131,11 +135,11 @@ namespace Shared
                 }
             } catch (Exception e)
             {
+                trySaveIfReset = reference.OnError(e);
                 Trace.WriteLine("Error loading settings:");
                 Trace.WriteLine(e);
                 if (instance != null)
                     return instance;
-                trySaveIfReset = reference.OnError(e);
             }
 
             Trace.WriteLine("Could not load setting, creating new.");
