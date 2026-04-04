@@ -1,5 +1,8 @@
 ﻿using Shared.JsonNS;
+using System;
 using System.Diagnostics;
+using System.IO;
+using System.Text.RegularExpressions;
 
 namespace Shared
 {
@@ -36,23 +39,35 @@ namespace Shared
         [JsonInclude] public abstract int Version { get; set; }
 
         /// <summary>
+        /// Called, if the file version is different from current version. The returned json is used for deserialization.
+        /// </summary>
+        /// <param name="oldVersion">Version of the file read.</param>
+        /// <param name="json">Raw json of the file.</param>
+        protected virtual string BeforeUpdate(int oldVersion, string json) => json;
+
+        /// <summary>
         /// Called, if file version is different from current version. Return true, if file should be (re-)saved.
         /// </summary>
         protected virtual bool OnUpdate() => true;
 
         /// <summary>
-        /// Try save file to <see cref="FilePath"/>.
+        /// Called, if reading the file throws an exception. Return true, if the file should be reset.
         /// </summary>
-        public virtual void TrySave() => JsonTool.SerializeFile(FilePath, (T)this, JsonTool.JsonOptions);
+        protected virtual bool OnError(Exception e) => true;
 
         /// <summary>
-        /// Get fields and properties by reflection.
+        /// Try save file to <see cref="FilePath"/>.
+        /// </summary>
+        public virtual void TrySave() => JsonTool.SerializeFile(FilePath ?? DefaultPath, (T)this, JsonTool.JsonOptions);
+
+        /// <summary>
+        /// Returns value of the requested field or property by reflection.
         /// </summary>
         /// <remarks>
+        /// Example call:<br/>
         /// Type.GetType("$Namespace.Settings, $AssemblyName")?.BaseType?.GetMethod("TryGetValue")?.Invoke(null, ["Version"])?.ToString();
         /// </remarks>
         /// <param name="name">Name of the field or property.</param>
-        /// <returns>Value of the requested member.</returns>
         public virtual object? GetValue(string name)
         {
             try
@@ -82,33 +97,51 @@ namespace Shared
             T? instance = null;
             T reference = new();
             filePath ??= reference.DefaultPath;
+            bool trySaveIfReset = true;
+
             try
             {
-                instance = JsonTool.DeserializeFile<T>(filePath);
-                if (instance != null)
+                if (File.Exists(filePath))
                 {
-                    instance.FilePath = filePath;
-                    if (instance.Version != reference.Version)
+                    // get all text, using FileShare so we can open even busy files
+                    using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    using var reader = new StreamReader(stream);
+                    string json = reader.ReadToEnd();
+
+                    // reading version from text and applying BeforeUpdate patch
+                    var match = Regex.Match(json, @"\""[Vv]ersion\"":\s*(\d+)");
+                    if (match.Success)
+                        json = reference.BeforeUpdate(int.Parse(match.Groups[1].Value), json);
+
+                    // actually deserializing, and applying OnUpdate patch
+                    instance = JsonTool.Deserialize<T>(json);
+                    if (instance != null)
                     {
-                        if (instance.OnUpdate())
+                        instance.FilePath = filePath;
+                        if (instance.Version != reference.Version)
                         {
-                            instance.Version = reference.Version;
-                            instance.TrySave();
+                            if (instance.OnUpdate())
+                            {
+                                instance.Version = reference.Version;
+                                instance.TrySave();
+                            }
                         }
+                        return instance;
                     }
-                    return instance;
                 }
-            } catch (Exception)
+            } catch (Exception e)
             {
+                Trace.WriteLine("Error loading settings:");
+                Trace.WriteLine(e);
                 if (instance != null)
-                {
-                    Trace.WriteLine("Settings update failed.");
                     return instance;
-                }
+                trySaveIfReset = reference.OnError(e);
             }
+
             Trace.WriteLine("Could not load setting, creating new.");
             reference.FilePath = filePath;
-            reference.TrySave();
+            if (trySaveIfReset)
+                reference.TrySave();
             return reference;
         }
 

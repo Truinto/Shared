@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.2.0]
+- breaking change: removed BaseSettings and PatchInfoAttribute
+
 ## [1.1.3]
 - changed GetMemberInfo to not print unnecessary debug messages
 - fixed ReplaceCall handling Ldflda like a static operation
