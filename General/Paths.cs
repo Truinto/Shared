@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -187,7 +187,7 @@ namespace Shared.PathsNS
                         return false;
                 }
 
-                if (path.Length > i + 1 && path[i + 1] == ':' && path[i] is (> 'A' and < 'Z' or > 'a' and < 'z'))
+                if (path.Length > i + 1 && path[i + 1] == ':' && path[i] is (>= 'A' and <= 'Z' or >= 'a' and <= 'z'))
                     i += 2;
             }
 
