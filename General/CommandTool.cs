@@ -1,4 +1,4 @@
-﻿using Shared.StringsNS;
+using Shared.StringsNS;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -34,7 +34,7 @@ namespace Shared
 #if WINFORMS
             if (!Application.MessageLoop) _Handler = new EventHandler(Handler);
 #else
-            _handler = new EventHandler(Handler);
+            _Handler = new EventHandler(Handler);
 #endif
         }
 
