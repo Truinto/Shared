@@ -63,6 +63,9 @@ dotnet_diagnostic.CA1866.severity = none
 # CS0164: Auf diese Bezeichnung wurde nicht verwiesen.
 dotnet_diagnostic.CS0164.severity = none
 
+# CA1510: ArgumentNullException-Throw-Hilfsprogramm verwenden
+dotnet_diagnostic.CA1510.severity = none
+
 # CS1591: Fehlendes XML-Kommentar für öffentlich sichtbaren Typ oder Element
 dotnet_diagnostic.CS1591.severity = suggestion
 

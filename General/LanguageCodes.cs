@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Cryptography;
+
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
@@ -47,16 +45,15 @@ namespace Shared
                         return m.Key;
                 }
             }
-            if (format is not "3")
+            else if (format is "3")
+                return ToString();
+            foreach (var m in Map)
             {
-                foreach (var m in Map)
-                {
-                    if (m.Value == this.Int && m.Key[0] is > 'A' and < 'Z')
-                        if (format is "n")
-                            return m.Key.Replace('_', ' ');
-                        else
-                            return m.Key;
-                }
+                if (m.Value == this.Int && m.Key[0] is > 'A' and < 'Z')
+                    if (format is "n")
+                        return m.Key.Replace('_', ' ');
+                    else
+                        return m.Key;
             }
             return ToString();
         }
@@ -169,7 +166,7 @@ namespace Shared
         {
             // copy table from https://www.loc.gov/standards/iso639-2/php/code_list.php
 
-            var text = System.IO.File.ReadAllText(@"E:\Github\AutoCompress\AutoCompress\Resources\iso639-2 from 2017-12-21.txt");
+            var text = System.IO.File.ReadAllText(@"C:\Github\AutoCompress\AutoCompress\Resources\iso639-2 from 2017-12-21.txt");
             text = Regex.Replace(text, @"(^.*?\t.*?\t[\w ,-]*(?<! )).*", "$1", RegexOptions.Multiline);
             text = Regex.Replace(text, @" ?\t ?", "\t", RegexOptions.Multiline);
             text = Regex.Replace(text, @" \(\w\)", "", RegexOptions.Multiline);
@@ -230,6 +227,8 @@ namespace Shared
         }
 
         #region constants
+
+#pragma warning disable IDE1006 // ignore lower case
 
         public const int und = 0, Undetermined = 0;
         public const int mul = 1, Multiple_languages = 1;

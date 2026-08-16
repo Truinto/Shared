@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 
 namespace Shared.JsonNS
 {
@@ -34,15 +36,14 @@ namespace Shared.JsonNS
             TypeNameHandling = TypeNameHandling.None,
             MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            ContractResolver = new WritablePropertiesOnlyResolver(),
+            ContractResolver = new WritableMembersOnlyResolver(),
         };
 
         /// <summary>
-        /// Serialization settings with $ref.
+        /// Serialization settings, no fields.
         /// </summary>
-        public static JsonSerializerOptions JsonOptionsRef = new()
+        public static JsonSerializerOptions JsonOptionsNoFields = new()
         {
-            PreserveReferencesHandling = PreserveReferencesHandling.All,
             Formatting = Formatting.Indented,
             NullValueHandling = NullValueHandling.Ignore,
             StringEscapeHandling = StringEscapeHandling.Default,
@@ -56,7 +57,25 @@ namespace Shared.JsonNS
         };
 
         /// <summary>
-        /// Serialization settings with no indenting.
+        /// Serialization settings with $ref (with fields).
+        /// </summary>
+        public static JsonSerializerOptions JsonOptionsRef = new()
+        {
+            PreserveReferencesHandling = PreserveReferencesHandling.All,
+            Formatting = Formatting.Indented,
+            NullValueHandling = NullValueHandling.Ignore,
+            StringEscapeHandling = StringEscapeHandling.Default,
+            Converters = DefaultConverters,
+            ObjectCreationHandling = ObjectCreationHandling.Replace,
+            DefaultValueHandling = DefaultValueHandling.Include,
+            TypeNameHandling = TypeNameHandling.None,
+            MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            ContractResolver = new WritableMembersOnlyResolver(),
+        };
+
+        /// <summary>
+        /// Serialization settings with no indenting (with fields).
         /// </summary>
         public static JsonSerializerOptions JsonOptionsCompact = new()
         {
@@ -69,13 +88,13 @@ namespace Shared.JsonNS
             TypeNameHandling = TypeNameHandling.None,
             MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            ContractResolver = new WritablePropertiesOnlyResolver(),
+            ContractResolver = new WritableMembersOnlyResolver(),
         };
 
         /// <summary>
-        /// Serialization settings with $ref and no indenting.
+        /// Serialization settings with $ref and no indenting (with fields).
         /// </summary>
-        public static JsonSerializerOptions JsonOptionsCompactRef = new()
+        public static JsonSerializerOptions JsonOptionsRefCompact = new()
         {
             PreserveReferencesHandling = PreserveReferencesHandling.All,
             Formatting = Formatting.None,
@@ -87,7 +106,7 @@ namespace Shared.JsonNS
             TypeNameHandling = TypeNameHandling.None,
             MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            ContractResolver = new WritablePropertiesOnlyResolver(),
+            ContractResolver = new WritableMembersOnlyResolver(),
         };
 
         public static string Serialize<T>(T value, JsonSerializerOptions? options = null)
@@ -100,34 +119,37 @@ namespace Shared.JsonNS
             try
             {
                 return (result = JsonConvert.SerializeObject(value, typeof(T), options ?? JsonOptions)) != null;
-            } catch (Exception)
-            {
-                result = null;
-                return false;
             }
+            catch (Exception) { }
+            result = default;
+            return false;
         }
 
-        public static T? Deserialize<T>(string json, JsonSerializerOptions? options = null)
+        public static T Deserialize<T>(string json, JsonSerializerOptions? options = null)
         {
-            return (T?)JsonConvert.DeserializeObject(json, typeof(T), options ?? JsonOptions);
+            if (json == null)
+                throw new ArgumentNullException(nameof(json));
+            return (T)JsonConvert.DeserializeObject(json, typeof(T), options ?? JsonOptions);
         }
 
-        public static bool Deserialize<T>(string json, [NotNullWhen(true)] out T? result, JsonSerializerOptions? options = null)
+        public static bool Deserialize<T>(string? json, [NotNullWhen(true)] out T? result, JsonSerializerOptions? options = null)
         {
             try
             {
-                return (result = (T?)JsonConvert.DeserializeObject(json, typeof(T), options ?? JsonOptions)) != null;
-            } catch (Exception)
-            {
-                result = default;
-                return false;
+                if (json != null)
+                    return (result = (T)JsonConvert.DeserializeObject(json, typeof(T), options ?? JsonOptions)) != null;
             }
+            catch (Exception) { }
+            result = default;
+            return false;
         }
 
-        public static bool SerializeFile<T>(string path, T value, JsonSerializerOptions? options = null)
+        public static bool SerializeFile<T>(string? path, T value, JsonSerializerOptions? options = null)
         {
             try
             {
+                if (path is null or "")
+                    return false;
                 if (Path.GetDirectoryName(path) is string directory)
                     Directory.CreateDirectory(directory);
 
@@ -135,30 +157,37 @@ namespace Shared.JsonNS
                 using var writer = new StreamWriter(stream);
                 JsonSerializer.Create(options ?? JsonOptions).Serialize(writer, value, typeof(T));
                 return true;
-            } catch (Exception)
+            }
+            catch (Exception)
             {
                 return false;
             }
         }
 
-        public static T? DeserializeFile<T>(string path, JsonSerializerOptions? options = null)
+        public static T DeserializeFile<T>(string path, JsonSerializerOptions? options = null)
         {
-            if (!File.Exists(path))
-                return default;
             using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using var reader = new StreamReader(stream);
-            return (T?)JsonSerializer.Create(options ?? JsonOptions).Deserialize(reader, typeof(T));
+            return (T)JsonSerializer.Create(options ?? JsonOptions).Deserialize(reader, typeof(T));
         }
 
-        public static bool DeserializeFile<T>(string path, [NotNullWhen(true)] out T? result, JsonSerializerOptions? options = null)
+        public static bool DeserializeFile<T>(string? path, [NotNullWhen(true)] out T? result, JsonSerializerOptions? options = null)
         {
             try
             {
-                return (result = DeserializeFile<T>(path, options)) != null;
-            } catch (Exception)
+                if (path != null)
+                    return (result = DeserializeFile<T>(path, options)) != null;
+            }
+            catch (Exception) { }
+            result = default;
+            return false;
+        }
+
+        public class WritableMembersOnlyResolver : DefaultContractResolver
+        {
+            protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
             {
-                result = default;
-                return false;
+                return base.CreateProperties(type, memberSerialization).Where(w => w.Writable).ToList();
             }
         }
 
@@ -166,13 +195,7 @@ namespace Shared.JsonNS
         {
             protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
             {
-                var props = base.CreateProperties(type, memberSerialization);
-                for (int i = props.Count - 1; i >= 0; i--)
-                {
-                    if (!props[i].Writable)
-                        props.RemoveAt(i);
-                }
-                return props;
+                return base.CreateProperties(type, memberSerialization).Where(w => w.Writable && w.PropertyType.MemberType != MemberTypes.Field).ToList();
             }
         }
     }

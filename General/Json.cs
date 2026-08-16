@@ -1,6 +1,7 @@
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.Encodings.Web;
@@ -48,7 +49,7 @@ namespace Shared.JsonNS
         };
 
         /// <summary>
-        /// Serialization settings with $ref.
+        /// Serialization settings with $ref (with fields).
         /// </summary>
         public static JsonSerializerOptions JsonOptionsRef = new()
         {
@@ -65,7 +66,7 @@ namespace Shared.JsonNS
         };
 
         /// <summary>
-        /// Serialization settings with no indenting.
+        /// Serialization settings with no indenting (with fields).
         /// </summary>
         public static JsonSerializerOptions JsonOptionsCompact = new()
         {
@@ -80,7 +81,7 @@ namespace Shared.JsonNS
         };
 
         /// <summary>
-        /// Serialization settings with $ref and no indenting.
+        /// Serialization settings with $ref and no indenting (with fields).
         /// </summary>
         public static JsonSerializerOptions JsonOptionsRefCompact = new()
         {
@@ -105,35 +106,29 @@ namespace Shared.JsonNS
             try
             {
                 return (result = JsonSerializer.Serialize<T>(value, options ?? JsonOptions)) != null;
-            } catch (Exception)
-            {
-                result = null;
-                return false;
             }
+            catch (Exception) { }
+            result = default;
+            return false;
         }
 
-        public static T? Deserialize<T>(string? json, JsonSerializerOptions? options = null)
+        public static T Deserialize<T>(string json, JsonSerializerOptions? options = null)
         {
             if (json == null)
-                return default;
-            return JsonSerializer.Deserialize<T>(json, options ?? JsonOptions);
+                throw new ArgumentNullException(nameof(json));
+            return JsonSerializer.Deserialize<T>(json, options ?? JsonOptions)!;
         }
 
         public static bool Deserialize<T>(string? json, [NotNullWhen(true)] out T? result, JsonSerializerOptions? options = null)
         {
-            if (json == null)
-            {
-                result = default;
-                return false;
-            }
             try
             {
-                return (result = JsonSerializer.Deserialize<T>(json, options)) != null;
-            } catch (Exception)
-            {
-                result = default;
-                return false;
+                if (json != null)
+                    return (result = JsonSerializer.Deserialize<T>(json, options)) != null;
             }
+            catch (Exception) { }
+            result = default;
+            return false;
         }
 
         public static bool SerializeFile<T>(string? path, T value, JsonSerializerOptions? options = null)
@@ -148,30 +143,29 @@ namespace Shared.JsonNS
                 using var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
                 JsonSerializer.Serialize<T>(stream, value, options ?? JsonOptions);
                 return true;
-            } catch (Exception)
+            }
+            catch (Exception)
             {
                 return false;
             }
         }
 
-        public static T? DeserializeFile<T>(string? path, JsonSerializerOptions? options = null)
+        public static T DeserializeFile<T>(string path, JsonSerializerOptions? options = null)
         {
-            if (!File.Exists(path))
-                return default;
             using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            return JsonSerializer.Deserialize<T>(stream, options ?? JsonOptions);
+            return JsonSerializer.Deserialize<T>(stream, options ?? JsonOptions)!;
         }
 
         public static bool DeserializeFile<T>(string? path, [NotNullWhen(true)] out T? result, JsonSerializerOptions? options = null)
         {
             try
             {
-                return (result = DeserializeFile<T>(path, options)) != null;
-            } catch (Exception)
-            {
-                result = default;
-                return false;
+                if (path != null)
+                    return (result = DeserializeFile<T>(path, options)) != null;
             }
+            catch (Exception) { }
+            result = default;
+            return false;
         }
     }
 }

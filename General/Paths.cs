@@ -145,7 +145,8 @@ namespace Shared.PathsNS
     {
         #region Validation
 
-        public static readonly char[] InvalidFileNameChars =
+        public static readonly char[] InvalidFileNameChars = Path.GetInvalidFileNameChars();
+        public static readonly char[] InvalidFileNameCharsWindows =
         [
             '"', '<', '>', '|', '\0', '\u0001', '\u0002', '\u0003', '\u0004', '\u0005',
             '\u0006', '\a', '\b', '\t', '\n', '\v', '\f', '\r', '\u000e', '\u000f',
@@ -154,7 +155,7 @@ namespace Shared.PathsNS
             '/'
         ];
 
-        public static string? FilterFilename(this string filename)
+        public static string? FilterFilename(this string? filename)
         {
             if (filename == null)
                 return null;
@@ -162,7 +163,7 @@ namespace Shared.PathsNS
             var sb = new StringBuilder();
             foreach (char c in filename.Trim()) // todo: optimize (trim on the spot, recycle StringBuilder)
             {
-                if (!InvalidFileNameChars.Contains(c))
+                if (!InvalidFileNameCharsWindows.Contains(c))
                     sb.Append(c);
             }
             return sb.ToString();
@@ -171,7 +172,7 @@ namespace Shared.PathsNS
         /// <summary>
         /// True if path is valid.
         /// </summary>
-        public static bool IsValidPath(string path)
+        public static bool IsValidPath(string? path)
         {
             if (path is null)
                 return false;
@@ -199,7 +200,7 @@ namespace Shared.PathsNS
                 char c = path[i];
                 if (c is '/' or '\\')
                 { }
-                else if (Path.GetInvalidFileNameChars().Contains(c))
+                else if (InvalidFileNameChars.Contains(c))
                     return false;
             }
             return true;
