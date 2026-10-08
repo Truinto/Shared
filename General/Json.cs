@@ -112,11 +112,11 @@ namespace Shared.JsonNS
             return false;
         }
 
-        public static T Deserialize<T>(string json, JsonSerializerOptions? options = null)
+        public static T? Deserialize<T>(string json, JsonSerializerOptions? options = null)
         {
             if (json == null)
                 throw new ArgumentNullException(nameof(json));
-            return JsonSerializer.Deserialize<T>(json, options ?? JsonOptions)!;
+            return JsonSerializer.Deserialize<T>(json, options ?? JsonOptions);
         }
 
         public static bool Deserialize<T>(string? json, [NotNullWhen(true)] out T? result, JsonSerializerOptions? options = null)
@@ -140,7 +140,8 @@ namespace Shared.JsonNS
                 if (Path.GetDirectoryName(path) is string directory)
                     Directory.CreateDirectory(directory);
 
-                using var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+                using var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
+                stream.SetLength(0); // truncate
                 JsonSerializer.Serialize<T>(stream, value, options ?? JsonOptions);
                 return true;
             }
@@ -150,10 +151,10 @@ namespace Shared.JsonNS
             }
         }
 
-        public static T DeserializeFile<T>(string path, JsonSerializerOptions? options = null)
+        public static T? DeserializeFile<T>(string path, JsonSerializerOptions? options = null)
         {
             using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            return JsonSerializer.Deserialize<T>(stream, options ?? JsonOptions)!;
+            return JsonSerializer.Deserialize<T>(stream, options ?? JsonOptions);
         }
 
         public static bool DeserializeFile<T>(string? path, [NotNullWhen(true)] out T? result, JsonSerializerOptions? options = null)

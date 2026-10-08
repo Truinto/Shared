@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Shared.CollectionNS;
 using Shared.LoggerNS;
 using System;
@@ -397,7 +397,7 @@ namespace Shared
         /// <seealso cref="GetMemberInfo(Type, string, Type[], Type[])"/>
         public bool Calls(Type type, string name, Type[]? parameters = null, Type[]? generics = null)
         {
-            return OpCode_Member.Contains(Current.opcode) && _memberCache.Get(type, name, parameters, generics).Equals(Current.operand);
+            return OpCode_Member.Contains(Current.opcode) && _MemberCache.Get(type, name, parameters, generics).Equals(Current.operand);
         }
 
         /// <summary>
@@ -628,7 +628,7 @@ namespace Shared
         /// <param name="generics">Optional generics definition, if target method has generics.</param>
         public int InsertAfterAll(Type type, string name, Delegate func, Type[]? parameters = null, Type[]? generics = null)
         {
-            var original = _memberCache.Get(type, name, parameters, generics);
+            var original = _MemberCache.Get(type, name, parameters, generics);
             return InsertAfterAll(original, func);
         }
 
@@ -834,7 +834,7 @@ namespace Shared
                 if (!typeof(long).IsTypeCompatible(mi.ReturnType))
                     throw new ExceptionMissingReturn("Delegate must return identical type!");
             }
-            else if (OpCode_Ldc_i.Contains(Current.opcode))
+            else if (OpCode_Ldc_I.Contains(Current.opcode))
             {
                 Logger.PrintDebug($"ReplaceCall \n\t{mi.FullDescription()} -> \n\t{Current.opcode}");
                 parametersReplace = [];
@@ -924,7 +924,7 @@ namespace Shared
         /// <param name="generics">Optional generics definition, if target method has generics.</param>
         public int ReplaceAllCalls(Type type, string name, Delegate func, Type[]? parameters = null, Type[]? generics = null)
         {
-            var original = _memberCache.Get(type, name, parameters, generics);
+            var original = _MemberCache.Get(type, name, parameters, generics);
             return ReplaceAllCalls(original, func);
         }
 
@@ -958,7 +958,7 @@ namespace Shared
         /// </summary>
         public void ReplaceConstant(Enum newValue)
         {
-            if (!OpCode_Ldc_i.Contains(Current.opcode))
+            if (!OpCode_Ldc_I.Contains(Current.opcode))
                 throw new InvalidOperationException("IL must load constant");
 
             if (Current.opcode.OperandType == OperandType.InlineNone)
@@ -975,7 +975,7 @@ namespace Shared
         /// </summary>
         public void ReplaceConstant(long newValue)
         {
-            if (!OpCode_Ldc_i.Contains(Current.opcode))
+            if (!OpCode_Ldc_I.Contains(Current.opcode))
                 throw new InvalidOperationException("IL must load constant");
 
             if (Current.opcode.OperandType == OperandType.InlineNone)
@@ -992,7 +992,7 @@ namespace Shared
         /// </summary>
         public void ReplaceConstant(double newValue)
         {
-            if (!OpCode_Ldc_r.Contains(Current.opcode))
+            if (!OpCode_Ldc_R.Contains(Current.opcode))
                 throw new InvalidOperationException("IL must load constant");
 
             if (Current.opcode.OperandType == OperandType.ShortInlineR)
@@ -1578,7 +1578,7 @@ namespace Shared
         #region Statics
 
         /// <summary>Collection of Ldc_i opcodes.</summary>
-        public static OpCode[] OpCode_Ldc_i =
+        public static OpCode[] OpCode_Ldc_I =
         [
             OpCodes.Ldc_I4_M1,
             OpCodes.Ldc_I4_0,
@@ -1596,7 +1596,7 @@ namespace Shared
         ];
 
         /// <summary>Collection of Ldc_r opcodes.</summary>
-        public static OpCode[] OpCode_Ldc_r =
+        public static OpCode[] OpCode_Ldc_R =
         [
             OpCodes.Ldc_R4,
             OpCodes.Ldc_R8,
@@ -1634,7 +1634,7 @@ namespace Shared
         /// <summary>
         /// Cache of MemberInfo.
         /// </summary>
-        protected static readonly CacheData<MemberInfo> _memberCache = new(a => GetMemberInfo((Type)a[0]!, (string)a[1]!, (Type[]?)a[2], (Type[]?)a[3]));
+        protected static readonly CacheData<MemberInfo> _MemberCache = new(a => GetMemberInfo((Type)a[0]!, (string)a[1]!, (Type[]?)a[2], (Type[]?)a[3]));
 
         /// <summary>
         /// Get MemberInfo for a specific method, field, or get-property.

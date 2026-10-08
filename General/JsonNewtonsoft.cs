@@ -9,6 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace Shared.JsonNS
 {
@@ -125,11 +126,11 @@ namespace Shared.JsonNS
             return false;
         }
 
-        public static T Deserialize<T>(string json, JsonSerializerOptions? options = null)
+        public static T? Deserialize<T>(string json, JsonSerializerOptions? options = null)
         {
             if (json == null)
                 throw new ArgumentNullException(nameof(json));
-            return (T)JsonConvert.DeserializeObject(json, typeof(T), options ?? JsonOptions);
+            return (T?)JsonConvert.DeserializeObject(json, typeof(T), options ?? JsonOptions);
         }
 
         public static bool Deserialize<T>(string? json, [NotNullWhen(true)] out T? result, JsonSerializerOptions? options = null)
@@ -137,7 +138,7 @@ namespace Shared.JsonNS
             try
             {
                 if (json != null)
-                    return (result = (T)JsonConvert.DeserializeObject(json, typeof(T), options ?? JsonOptions)) != null;
+                    return (result = (T?)JsonConvert.DeserializeObject(json, typeof(T), options ?? JsonOptions)) != null;
             }
             catch (Exception) { }
             result = default;
@@ -153,7 +154,8 @@ namespace Shared.JsonNS
                 if (Path.GetDirectoryName(path) is string directory)
                     Directory.CreateDirectory(directory);
 
-                using var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+                using var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
+                stream.SetLength(0); // truncate
                 using var writer = new StreamWriter(stream);
                 JsonSerializer.Create(options ?? JsonOptions).Serialize(writer, value, typeof(T));
                 return true;
@@ -164,11 +166,11 @@ namespace Shared.JsonNS
             }
         }
 
-        public static T DeserializeFile<T>(string path, JsonSerializerOptions? options = null)
+        public static T? DeserializeFile<T>(string path, JsonSerializerOptions? options = null)
         {
             using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using var reader = new StreamReader(stream);
-            return (T)JsonSerializer.Create(options ?? JsonOptions).Deserialize(reader, typeof(T));
+            return (T?)JsonSerializer.Create(options ?? JsonOptions).Deserialize(reader, typeof(T));
         }
 
         public static bool DeserializeFile<T>(string? path, [NotNullWhen(true)] out T? result, JsonSerializerOptions? options = null)
@@ -195,7 +197,7 @@ namespace Shared.JsonNS
         {
             protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
             {
-                return base.CreateProperties(type, memberSerialization).Where(w => w.Writable && w.PropertyType.MemberType != MemberTypes.Field).ToList();
+                return base.CreateProperties(type, memberSerialization).Where(w => w.Writable && w.PropertyType?.MemberType == MemberTypes.Property).ToList();
             }
         }
     }
