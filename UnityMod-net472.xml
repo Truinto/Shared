@@ -724,10 +724,10 @@
         <member name="M:Shared.TranspilerTool.System#Collections#IEnumerable#GetEnumerator">
             <summary></summary>
         </member>
-        <member name="F:Shared.TranspilerTool.OpCode_Ldc_i">
+        <member name="F:Shared.TranspilerTool.OpCode_Ldc_I">
             <summary>Collection of Ldc_i opcodes.</summary>
         </member>
-        <member name="F:Shared.TranspilerTool.OpCode_Ldc_r">
+        <member name="F:Shared.TranspilerTool.OpCode_Ldc_R">
             <summary>Collection of Ldc_r opcodes.</summary>
         </member>
         <member name="F:Shared.TranspilerTool.OpCode_Member">
@@ -743,7 +743,7 @@
             Decrement index by 1.
             </summary>
         </member>
-        <member name="F:Shared.TranspilerTool._memberCache">
+        <member name="F:Shared.TranspilerTool._MemberCache">
             <summary>
             Cache of MemberInfo.
             </summary>

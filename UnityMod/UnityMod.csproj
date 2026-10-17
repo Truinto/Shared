@@ -23,6 +23,7 @@
 	<!-- Project References -->
 	<ItemGroup>
 		<PackageReference PrivateAssets="all" Include="Lib.Harmony" Version="2.0.4" />
+		<PackageReference Include="BuildTaskVersionControl" Version="1.3.2" ExcludeAssets="runtime" />
 		<Reference Private="false" Include="Newtonsoft.Json" HintPath="$(Lib)/Newtonsoft.Json.dll" />
 		<Reference Private="false" Include="UnityEngine" HintPath="$(Lib)/UnityEngine.dll" />
 		<Reference Private="false" Include="UnityEngine.CoreModule" HintPath="$(Lib)/UnityEngine.CoreModule.dll" />

@@ -35,7 +35,7 @@ namespace Shared
         /// <summary>ILGenerator. Required for creating new labels or locals.</summary>
         public readonly ILGenerator Generator;
         /// <summary>MethodInfo of Original. 'Original' usually refers to the method being patched by the transpiler.</summary>
-        public readonly MethodInfo Original;
+        public readonly MethodBase Original;
         /// <summary>Collection of locals used by the original method.</summary>
         public readonly IList<LocalVariableInfo> Locals;
         /// <summary>Full collection of locals, original or created by this tool.</summary>
@@ -93,7 +93,7 @@ namespace Shared
             this.Code = code as IList<CodeInstruction> ?? code.ToList();
             this.Index = 0;
             this.Generator = generator ?? throw new ArgumentNullException();
-            this.Original = (MethodInfo)original ?? throw new ArgumentNullException();
+            this.Original = original ?? throw new ArgumentNullException();
             Locals = original.GetMethodBody().LocalVariables;
             LocalsExtended = [];
             LabelsExtended = [];
@@ -676,7 +676,7 @@ namespace Shared
             var parametersFunc = mi.GetParameters();
             bool hasCondition = false;
             LocalInfo returnLocal = default;
-            Type returnType = Original.ReturnType;
+            Type returnType = Original is MethodInfo originalMethod ? originalMethod.ReturnType : typeof(void);
             Label label1 = default;
 
             if (!mi.IsStatic)
