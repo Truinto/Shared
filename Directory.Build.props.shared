@@ -122,7 +122,7 @@
 		</PropertyGroup>
 		<Message Text="Copy @(TargetCopyItems) -> $(TargetCopyTarget)" Importance="High" />
 		<Copy SourceFiles="@(TargetCopyItems)" DestinationFolder="$(TargetCopyTarget)/%(RecursiveDir)" UseHardlinksIfPossible="true" />
-		<Delete Files="@(TargetCopyDelete)" TreatErrorsAsWarnings="true" />
+		<Delete Files="@(TargetCopyDelete)" TreatErrorsAsWarnings="false" />
 	</Target>
 
 	<!-- Zips files. Set either @TargetZipItems or @TargetZipTarget.
