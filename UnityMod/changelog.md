@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.2.1]
+- added TranspilerTool.GetAllMethods
+
 ## [1.2.0]
 - breaking change: removed BaseSettings and PatchInfoAttribute
 

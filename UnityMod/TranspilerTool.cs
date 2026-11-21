@@ -1855,7 +1855,7 @@ namespace Shared
         }
 
         /// <summary>
-        /// Searches method body all lambda expressions and returns their MethodInfo.
+        /// Searches method body for all lambda expressions and returns their MethodInfo.
         /// </summary>
         /// <param name="parentMethod">Method to search through.</param>
         public static List<MethodInfo> GetLambdas(MethodInfo parentMethod)
@@ -1865,10 +1865,28 @@ namespace Shared
             foreach (var line in instructions)
             {
                 if (line.opcode == OpCodes.Ldftn
-                    && line.operand is MethodInfo mi)
+                    && line.operand is MethodInfo mi
+                    && !results.Contains(mi))
                 {
                     results.Add(mi);
                 }
+            }
+            return results;
+        }
+
+        /// <summary>
+        /// Searches method body for all lambda expressions and method calls. Returns their MethodInfo.
+        /// </summary>
+        /// <param name="parentMethod">Method to search through.</param>
+        public static List<MethodInfo> GetAllMethods(MethodInfo parentMethod)
+        {
+            var results = new List<MethodInfo>();
+            var instructions = PatchProcessor.GetOriginalInstructions(parentMethod);
+            foreach (var line in instructions)
+            {
+                if (line.operand is MethodInfo mi
+                    && !results.Contains(mi))
+                    results.Add(mi);
             }
             return results;
         }

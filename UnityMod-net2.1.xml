@@ -807,7 +807,13 @@
         </member>
         <member name="M:Shared.TranspilerTool.GetLambdas(System.Reflection.MethodInfo)">
             <summary>
-            Searches method body all lambda expressions and returns their MethodInfo.
+            Searches method body for all lambda expressions and returns their MethodInfo.
+            </summary>
+            <param name="parentMethod">Method to search through.</param>
+        </member>
+        <member name="M:Shared.TranspilerTool.GetAllMethods(System.Reflection.MethodInfo)">
+            <summary>
+            Searches method body for all lambda expressions and method calls. Returns their MethodInfo.
             </summary>
             <param name="parentMethod">Method to search through.</param>
         </member>
